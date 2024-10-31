@@ -2,28 +2,35 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
-
-import { createBrowserRouter,RouterProvider} from 'react-router-dom'
-import Index from './pages/Index.tsx'
-import RootBoundary from './components/ErrorBoundary.tsx'
+import { createBrowserRouter,RouterProvider } from 'react-router-dom'
+import Page from './app/dashboard/page.tsx'
+import Home from './app/dashboard/Home/index.tsx'
+import Users from './app/dashboard/Users/index.tsx'
+import FormPage from './app/dashboard/Form/index.tsx'
 
 const routes = createBrowserRouter([
   {
     path:'/',
-    element:<App />,
-    errorElement:<RootBoundary />,
+    element: <App />,
     children:[
       {
-        path:'/home',
-        element:<Index />
+        path:'/',
+        element:<Home />,
+      },
+      {
+        path:'/users',
+        element:<Users />,
+      },
+      {
+        path:'/create-user',
+        element:<FormPage />,
       }
     ]
   }
 ])
 
-
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <RouterProvider router={routes} />
-  </StrictMode>
+  </StrictMode>,
 )

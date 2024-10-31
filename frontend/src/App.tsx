@@ -1,14 +1,12 @@
-import { Outlet } from "react-router-dom"
-import Sidebar from "./components/Sidebar"
+
+import Page from './app/dashboard/page'
 
 function App() {
- 
 
   return (
-    <>
-    <Sidebar  />
-    <Outlet />
-    </>
+   <div className='dark'>
+    <Page />
+   </div>
   )
 }
 

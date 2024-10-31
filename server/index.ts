@@ -3,6 +3,7 @@ import http from 'node:http';
 import dotenv from 'dotenv';
 import { Request, Response } from 'express';
 import ExpressSession from "express-session";
+import cors from 'cors';
 
 declare module 'express-session' {
     export interface SessionData {
@@ -24,11 +25,13 @@ app.use(ExpressSession({
     saveUninitialized: true,
     cookie: { secure: false }
 }));
+app.use(cors());
 
 app.get('/', (req: Request, res: Response) => {
     res.status(200).send('Hello World');
 });
 
+app.use("/user", require('./api/User'));
 
 http.createServer(app).listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
