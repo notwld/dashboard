@@ -40,28 +40,27 @@ export default function FormPage() {
         },
     })
 
-    // 2. Define a submit handler.
     async function onSubmit(values: z.infer<typeof formSchema>) {
         await fetch(baseurl + "/user/create-users", {
             method: "POST",
             body: JSON.stringify(values),
         }).then((res) => res.json())
-        .then((data) => {
-            toast({
-                title: "User Created",
-                description: `User ${values.username} has been created.`,
-                status: "success",
+            .then((data) => {
+                toast({
+                    title: "User Created",
+                    description: `User ${values.username} has been created.`,
+                    status: "success",
+                })
+                form.reset()
+                navigate("/dashboard/users")
+            }).catch((error) => {
+                toast({
+                    title: "User Creation Failed",
+                    description: `User ${values.username} could not be created.`,
+                    status: "error",
+                })
+                console.error(error)
             })
-            form.reset()
-            navigate("/dashboard/users")
-    }).catch((error) => {
-        toast({
-            title: "User Creation Failed",
-            description: `User ${values.username} could not be created.`,
-            status: "error",
-        })
-        console.error(error)
-    })
     }
 
     return (
