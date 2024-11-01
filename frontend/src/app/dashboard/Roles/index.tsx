@@ -184,11 +184,11 @@ export function Roles() {
 
                         <div className="flex justify-between items-center w-[81vw]">
                             <BreadcrumbItem>
-                                <BreadcrumbPage>Roles</BreadcrumbPage>
+                                <BreadcrumbPage className="text-lg">Roles</BreadcrumbPage>
                             </BreadcrumbItem>
                             <BreadcrumbItem >
 
-                                <Button variant="secondary" className='rounded-xl' onClick={() => {
+                                <Button variant="secondary" className='rounded-xl text-md' onClick={() => {
                                     navigate('/create-role')
                                 }}>Create a Role</Button>
                             </BreadcrumbItem>
@@ -205,24 +205,24 @@ export function Roles() {
                             <TableCaption>{roles.length} Roles found in the system.</TableCaption>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead className="w-[100px]">Id</TableHead>
-                                    <TableHead>Name</TableHead>
-                                    <TableHead className="text-left">Created At</TableHead>
-                                    <TableHead className="text-left">Updated At</TableHead>
-                                    <TableHead className="text-left">Actions At</TableHead>
+                                    <TableHead className="w-[100px] text-lg">Id</TableHead>
+                                    <TableHead className="text-lg">Name</TableHead>
+                                    <TableHead className="text-left text-lg">Created At</TableHead>
+                                    <TableHead className="text-left text-lg">Updated At</TableHead>
+                                    <TableHead className="text-left text-lg">Actions At</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
                                 {roles.map((role: Role) => (
                                     <TableRow key={role.id}>
-                                        <TableCell>{role.id}</TableCell>
-                                        <TableCell>{role.name}</TableCell>
-                                        <TableCell>{role.createdAt}</TableCell>
-                                        <TableCell>{role.updatedAt}</TableCell>
+                                        <TableCell className="text-lg">{role.id}</TableCell>
+                                        <TableCell className="text-lg">{role.name}</TableCell>
+                                        <TableCell className="text-lg">{role.createdAt}</TableCell>
+                                        <TableCell className="text-lg">{role.updatedAt}</TableCell>
                                         <TableCell>
                                             <Dialog open={isDialogOpen} onOpenChange={() => setIsDialogOpen(!isDialogOpen)}>
                                                 <DialogTrigger>
-                                                    <Button variant="default" className="mr-2 rounded-xl" onClick={() => {
+                                                    <Button variant="default" className="mr-2 rounded-xl text-lg" onClick={() => {
                                                         setRole(role)
                                                     }}>Edit</Button>
                                                 </DialogTrigger>
@@ -238,7 +238,7 @@ export function Roles() {
                                                 </DialogContent>
                                             </Dialog>
                                             <AlertDialog>
-                                                <AlertDialogTrigger>    <Button variant="destructive" className='rounded-xl'>Delete</Button> </AlertDialogTrigger>
+                                                <AlertDialogTrigger>    <Button variant="destructive" className='rounded-xl text-xl'>Delete</Button> </AlertDialogTrigger>
                                                 <AlertDialogContent>
                                                     <AlertDialogHeader>
                                                         <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>

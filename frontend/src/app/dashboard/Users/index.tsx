@@ -277,11 +277,11 @@ export default function Users() {
 
                         <div className="flex justify-between items-center w-[81vw]">
                             <BreadcrumbItem>
-                                <BreadcrumbPage>Users</BreadcrumbPage>
+                                <BreadcrumbPage className='text-lg'>Users</BreadcrumbPage>
                             </BreadcrumbItem>
                             <BreadcrumbItem >
 
-                                <Button variant="secondary" className='rounded-xl' onClick={() => {
+                                <Button variant="secondary" className='rounded-xl text-md' onClick={() => {
                                     navigate('/create-user')
                                 }}>Create a User</Button>
                             </BreadcrumbItem>
@@ -295,32 +295,32 @@ export default function Users() {
 
                     <div className="rounded-xl bg-muted/50 p-4 h-fit">
                         <Table>
-                            <TableCaption>{users.length} Users found in the system.</TableCaption>
+                            <TableCaption className='text-lg'>{users.length} Users found in the system.</TableCaption>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead className="w-[100px]">Id</TableHead>
-                                    <TableHead>Name</TableHead>
-                                    <TableHead>Email</TableHead>
-                                    <TableHead className="text-left">Role</TableHead>
-                                    <TableHead className="text-left">Created At</TableHead>
-                                    <TableHead className="text-left">Updated At</TableHead>
-                                    <TableHead className="text-left">Actions At</TableHead>
+                                    <TableHead className="w-[100px] text-lg">Id</TableHead>
+                                    <TableHead className='text-lg'>Name</TableHead>
+                                    <TableHead className='text-lg'>Email</TableHead>
+                                    <TableHead className="text-left text-lg">Role</TableHead>
+                                    <TableHead className="text-left text-lg">Created At</TableHead>
+                                    <TableHead className="text-left text-lg">Updated At</TableHead>
+                                    <TableHead className="text-left text-lg">Actions At</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
                                 {users.map((user: User) => (
                                     <TableRow key={user.id}>
-                                        <TableCell>{user.id}</TableCell>
-                                        <TableCell>{user.name}</TableCell>
-                                        <TableCell>{user.email}</TableCell>
-                                        <TableCell className="text-left">{user.role ? user?.role?.name : "No Role"}</TableCell>
-                                        <TableCell className="text-left">{user.createdAt}</TableCell>
-                                        <TableCell className="text-left">{user.updatedAt}</TableCell>
-                                        <TableCell className="text-left">
+                                        <TableCell className='text-lg'>{user.id}</TableCell>
+                                        <TableCell className='text-lg'>{user.name}</TableCell>
+                                        <TableCell className='text-lg'>{user.email}</TableCell>
+                                        <TableCell className="text-left text-lg">{user.role ? user?.role?.name : "No Role"}</TableCell>
+                                        <TableCell className="text-left text-lg">{user.createdAt}</TableCell>
+                                        <TableCell className="text-left text-lg">{user.updatedAt}</TableCell>
+                                        <TableCell className="text-left text-lg">
 
                                             <Dialog open={isDialogOpen} onOpenChange={() => setIsDialogOpen(!isDialogOpen)}>
                                                 <DialogTrigger>
-                                                    <Button variant="default" className="mr-2 rounded-xl" onClick={() => {
+                                                    <Button variant="default" className="mr-2 rounded-xl text-lg" onClick={() => {
                                                         setUser(user)
                                                     }}>Edit</Button>
                                                 </DialogTrigger>
@@ -337,11 +337,11 @@ export default function Users() {
                                             </Dialog>
 
                                             <AlertDialog>
-                                                <AlertDialogTrigger>    <Button variant="destructive" className='rounded-xl'>Delete</Button> </AlertDialogTrigger>
+                                                <AlertDialogTrigger>    <Button variant="destructive" className='rounded-xl text-lg'>Delete</Button> </AlertDialogTrigger>
                                                 <AlertDialogContent>
                                                     <AlertDialogHeader>
-                                                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                                                        <AlertDialogDescription>
+                                                        <AlertDialogTitle className='text-lg'>Are you absolutely sure?</AlertDialogTitle>
+                                                        <AlertDialogDescription className='text-md'>
                                                             This action cannot be undone. This will permanently delete your account
                                                             and remove your data from our servers.
                                                         </AlertDialogDescription>

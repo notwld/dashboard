@@ -35,7 +35,7 @@ export function VersionSwitcher({
                 <UsersRound className="size-4 rounded-3xl" />
               </div>
               <div className="flex flex-col gap-0.5 leading-none">
-                <span className="font-semibold">devmize.</span>
+                <span className="font-semibold text-xl ">devmize.</span>
                 {/* <span className="">v{selectedVersion}</span> */}
               </div>
               {/* <ChevronsUpDown className="ml-auto" /> */}

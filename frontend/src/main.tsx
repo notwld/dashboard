@@ -8,6 +8,7 @@ import Users from './app/dashboard/Users/index.tsx'
 import UserCreateForm from './app/dashboard/Users/create-form.tsx'
 import RoleCreateForm from './app/dashboard/Roles/create-form.tsx'
 import { Roles } from './app/dashboard/Roles/index.tsx'
+import Permissions from './app/dashboard/Perms/index.tsx'
 
 const routes = createBrowserRouter([
   {
@@ -33,6 +34,10 @@ const routes = createBrowserRouter([
       {
         path:'/create-role',
         element:<RoleCreateForm />,
+      },
+      {
+        path:'/permissions',
+        element:<Permissions />,
       }
     ]
   }
