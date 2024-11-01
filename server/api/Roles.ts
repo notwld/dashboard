@@ -6,7 +6,11 @@ const prisma = new PrismaClient();
 
 router.get('/get-roles', async (req: Request, res: Response) => {
     try {
-        const roles = await prisma.role.findMany();
+        const roles = await prisma.role.findMany({
+            include: {
+                permissions: true,
+            },
+        });
         res.json(roles);
         console.log(roles);
     } catch (error) {

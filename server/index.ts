@@ -6,6 +6,7 @@ import ExpressSession from "express-session";
 import cors from 'cors';
 import User from './api/User';
 import Role from './api/Roles';
+import Permission from './api/Permissions';
 
 declare module 'express-session' {
     export interface SessionData {
@@ -35,6 +36,7 @@ app.get('/', (req: Request, res: Response) => {
 
 app.use("/user", User);
 app.use('/role', Role);
+app.use('/perm', Permission);
 http.createServer(app).listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
