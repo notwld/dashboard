@@ -22,7 +22,7 @@ router.post('/create-user', async (req: Request, res: Response) => {
         const newUser = await prisma.user.create({
             data: {
                 email: req.body.email,
-                name: req.body.name,
+                name: req.body.username,
                 password: req.body.password,
             },
         });
@@ -37,6 +37,7 @@ router.post('/create-user', async (req: Request, res: Response) => {
 router.get('/get-users', async (req: Request, res: Response) => {
     try {
         const users = await prisma.user.findMany();
+        console.log(users);
         res.json(users);
     } catch (error) {
         console.error(error); // Log the error for debugging
@@ -44,4 +45,5 @@ router.get('/get-users', async (req: Request, res: Response) => {
     }
 });
 
-module.exports = router;
+// module.exports = router;
+export default router;

@@ -41,8 +41,20 @@ export default function FormPage() {
     })
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
-        await fetch(baseurl + "/user/create-users", {
+        if(!values.password || values.password !== values.confirmPassword){
+            toast({
+                title: "Password Mismatch",
+                description: `Passwords do not match.`,
+                status: "error",
+            })
+            return
+        }
+        alert(JSON.stringify(values, null, 2))
+        await fetch(baseurl + "/user/create-user", {
             method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
             body: JSON.stringify(values),
         }).then((res) => res.json())
             .then((data) => {
@@ -52,7 +64,7 @@ export default function FormPage() {
                     status: "success",
                 })
                 form.reset()
-                navigate("/dashboard/users")
+                navigate("/users")
             }).catch((error) => {
                 toast({
                     title: "User Creation Failed",

@@ -4,6 +4,8 @@ import dotenv from 'dotenv';
 import { Request, Response } from 'express';
 import ExpressSession from "express-session";
 import cors from 'cors';
+import User from './api/User';
+import Role from './api/Roles';
 
 declare module 'express-session' {
     export interface SessionData {
@@ -18,7 +20,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: false }));
 app.use(ExpressSession({
     secret: process.env.SESSION_SECRET || 'secret',
     resave: true,
@@ -31,8 +33,8 @@ app.get('/', (req: Request, res: Response) => {
     res.status(200).send('Hello World');
 });
 
-app.use("/user", require('./api/User'));
-
+app.use("/user", User);
+app.use('/role', Role);
 http.createServer(app).listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });

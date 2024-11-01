@@ -7,6 +7,7 @@ import Page from './app/dashboard/page.tsx'
 import Home from './app/dashboard/Home/index.tsx'
 import Users from './app/dashboard/Users/index.tsx'
 import FormPage from './app/dashboard/Form/index.tsx'
+import { Roles } from './app/dashboard/Roles/index.tsx'
 
 const routes = createBrowserRouter([
   {
@@ -23,6 +24,14 @@ const routes = createBrowserRouter([
       },
       {
         path:'/create-user',
+        element:<FormPage />,
+      },
+      {
+        path:'/roles',
+        element:<Roles />,
+      },
+      {
+        path:'/create-role',
         element:<FormPage />,
       }
     ]
