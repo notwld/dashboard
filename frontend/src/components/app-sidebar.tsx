@@ -1,6 +1,4 @@
 import * as React from "react"
-
-import { SearchForm } from "../components/search-form"
 import { VersionSwitcher } from "../components/version-switcher"
 import {
   Sidebar,
@@ -32,6 +30,21 @@ const data = {
           title: "Roles",
           url: "/roles",
         },
+        {
+          title: "Permissions",
+          url: "/permissions",
+        },
+      ],
+    },
+    {
+      title: "Leads",
+      url: "#",
+      items: [
+        {
+          title: "Payment Links",
+          url: "/users",
+        },
+       
       ],
     },
     
@@ -59,7 +72,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <SidebarMenu>
                 {item.items.map((item) => (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild isActive={item.isActive}>
+                    <SidebarMenuButton asChild>
                       <Link to={item.url}>{item.title}</Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>

@@ -11,6 +11,10 @@ import { Input } from '../../../components/ui/Sidebar/input'
 import { useToast } from '../../../hooks/use-toaster'
 import { baseurl } from '../../../config/baseurl'
 import { useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { DropdownMenu } from '@radix-ui/react-dropdown-menu'
+import { DropdownMenuTrigger } from '../../../components/ui/Sidebar/dropdown-menu'
+import { DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from '../../../components/ui/Dropdown/dropdown'
 const formSchema = z.object({
     username: z.string().min(2, {
         message: "Username must be at least 2 characters.",
@@ -25,11 +29,30 @@ const formSchema = z.object({
 
 })
 
+type Role = {
+    id: string;
+    name: string;
+};
 
 
-export default function FormPage() {
+export default function UserCreateFormPage() {
     const { toast } = useToast()
     const navigate = useNavigate()
+    const [roles, setRoles] = useState<Role[]>([])
+    const [role,setRole] = useState<Role>()
+    useEffect(() => {
+        const fetchRoles = async () => {
+            const res = await fetch(baseurl + "/role/get-roles", {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            const data = await res.json()
+            setRoles(data)
+        }
+        fetchRoles()
+    }, [])
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -41,35 +64,42 @@ export default function FormPage() {
     })
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
-        if(!values.password || values.password !== values.confirmPassword){
+        if (!values.password || values.password !== values.confirmPassword) {
             toast({
                 title: "Password Mismatch",
                 description: `Passwords do not match.`,
-                status: "error",
+
             })
             return
         }
-        alert(JSON.stringify(values, null, 2))
         await fetch(baseurl + "/user/create-user", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify(values),
+            body: JSON.stringify({...values,roleId:role?.id})
         }).then((res) => res.json())
-            .then((data) => {
+            .then((res) => {
+                if(res.status){
+                    toast({
+                        title: "User Creation Failed",
+                        description: `User ${values.username} could not be created. Reason: ${res.message}`,
+    
+                    })
+                    return
+                }
                 toast({
                     title: "User Created",
                     description: `User ${values.username} has been created.`,
-                    status: "success",
+
                 })
                 form.reset()
-                navigate("/users")
+                // navigate("/users")
             }).catch((error) => {
                 toast({
                     title: "User Creation Failed",
-                    description: `User ${values.username} could not be created.`,
-                    status: "error",
+                    description: `User ${values.username} could not be created. Reason: ${error.message}`,
+
                 })
                 console.error(error)
             })
@@ -126,6 +156,25 @@ export default function FormPage() {
                                         </FormItem>
                                     )}
                                 />
+                                <span className="text-sm font-semibold">Role</span>
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger className='ml-4'>
+                                        <Button variant="secondary" className='rounded-xl'>{role?role.name:"Select a Role"}</Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent>
+                                        
+                                       {roles.map((role: Role) => (
+                                            <DropdownMenuItem key={role.id} onClick={
+                                                () => {
+                                                    setRole(role)
+                                                }
+                                            }>
+                                                    <DropdownMenuLabel>{role.name}</DropdownMenuLabel>
+                                            </DropdownMenuItem>
+                                        ))}
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                                        {!role && <FormMessage>Role is required</FormMessage>}
                                 <FormField
                                     control={form.control}
                                     name="password"

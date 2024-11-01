@@ -1,9 +1,9 @@
-import React from 'react'
 import { SidebarTrigger } from '../../../components/ui/Sidebar/sidebar'
 import { Separator } from '@radix-ui/react-separator'
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '../../../components/ui/Sidebar/breadcrumb'
+import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage } from '../../../components/ui/Sidebar/breadcrumb'
 
 export default function Home() {
+    
     return (
         <div>
             <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">

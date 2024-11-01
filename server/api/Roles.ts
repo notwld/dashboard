@@ -4,13 +4,14 @@ import { PrismaClient } from "@prisma/client";
 const router = Router();
 const prisma = new PrismaClient();
 
-router.get('/roles', async (req: Request, res: Response) => {
+router.get('/get-roles', async (req: Request, res: Response) => {
     try {
         const roles = await prisma.role.findMany();
         res.json(roles);
+        console.log(roles);
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'Internal server error' });
+        res.status(500).json({ message: 'Internal server error',status:500 });
     }
 }
 );
@@ -24,7 +25,7 @@ router.post('/create-role', async (req: Request, res: Response) => {
         });
 
         if (role !== null) {
-            res.status(400).json({ message: 'Role already exists' });
+            res.status(400).json({ message: 'Role already exists',status:400 });
             return;
         }
 
@@ -37,9 +38,66 @@ router.post('/create-role', async (req: Request, res: Response) => {
         res.status(201).json(newRole);
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'Internal server error' });
+        res.status(500).json({ message: 'Internal server error',status:500 });
     }
 }
 );
+router.put('/update-role/:id', async (req: Request, res: Response) => {
+    try {
+        const role = await prisma.role.findUnique({
+            where: {
+                id: Number(req.params.id),
+            },
+        });
 
+        if (role === null) {
+            res.status(400).json({ message: 'Role does not exist',status:400 });
+            return;
+        }
+
+        const updatedRole = await prisma.role.update({
+            where: {
+                id: Number(req.params.id),
+            },
+            data: {
+                name: req.body.name,
+            },
+        });
+
+        res.json(updatedRole);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error',status:500 });
+    }
+}
+);
+router.delete('/delete-role/:id', async (req: Request, res: Response) => {
+    try {
+        const role = await prisma.role.findUnique({
+            where: {
+                id: Number(req.params.id),
+            },
+        });
+        if(req.params.id==null){
+            res.status(400).json({ message: 'Role ID is required',status:400 });
+            return
+        }
+        if (role === null) {
+            res.status(400).json({ message: 'Role does not exist',status:400 });
+            return;
+        }
+
+        await prisma.role.delete({
+            where: {
+                id: Number(req.params.id),
+            },
+        });
+
+        res.status(204).json({ message: 'Role deleted successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error',status:500 });
+    }
+}
+);
 export default router;

@@ -3,10 +3,10 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
 import { createBrowserRouter,RouterProvider } from 'react-router-dom'
-import Page from './app/dashboard/page.tsx'
 import Home from './app/dashboard/Home/index.tsx'
 import Users from './app/dashboard/Users/index.tsx'
-import FormPage from './app/dashboard/Form/index.tsx'
+import UserCreateForm from './app/dashboard/Users/create-form.tsx'
+import RoleCreateForm from './app/dashboard/Roles/create-form.tsx'
 import { Roles } from './app/dashboard/Roles/index.tsx'
 
 const routes = createBrowserRouter([
@@ -24,7 +24,7 @@ const routes = createBrowserRouter([
       },
       {
         path:'/create-user',
-        element:<FormPage />,
+        element:<UserCreateForm />,
       },
       {
         path:'/roles',
@@ -32,7 +32,7 @@ const routes = createBrowserRouter([
       },
       {
         path:'/create-role',
-        element:<FormPage />,
+        element:<RoleCreateForm />,
       }
     ]
   }
