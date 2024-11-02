@@ -47,5 +47,26 @@ router.put('/role/:id', async (req: Request, res: Response) => {
     }
 })
 
+router.get('/role/:id', async (req: Request, res: Response) => {
+    try {
+        const role = await prisma.role.findUnique({
+            where: {
+                id: Number(req.params.id),
+            },
+            include: {
+                permissions: true,
+            },
+        });
+        if (!role) {
+            res.status(400).json({ message: 'Role does not exist',status:400 });
+            return;
+        }
+        res.json(role.permissions);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error',status:500 });
+    }
+})
+
 
 export default router;
