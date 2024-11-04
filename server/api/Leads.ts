@@ -35,22 +35,14 @@ router.post('/create-lead', async (req: Request, res: Response) => {
                 name: body.name,
                 email: body.email,
                 number: body.number,
-                cost: body.cost,
+                cost:parseFloat(body.cost),
                 comments: body.comments,
-                credits: body.credits,
-                User: {
-                    connect: {
-                        id: id
-                    }
-                },
-                assignee: {
-                    connect: {
-                        name: body.userId
-                    }
-
-                }
-
-            }
+                credits: Number(body.credits),
+                address: body.address,
+            },
+            include: {
+                assignee: true,
+            },
         });
         res.status(201).json(newLead);
 
