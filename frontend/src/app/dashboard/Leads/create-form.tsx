@@ -13,9 +13,6 @@ import { useToast } from '../../../hooks/use-toaster'
 import { baseurl } from '../../../config/baseurl'
 import { useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
-import { DropdownMenu } from '@radix-ui/react-dropdown-menu'
-import { DropdownMenuTrigger } from '../../../components/ui/Sidebar/dropdown-menu'
-import { DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from '../../../components/ui/Dropdown/dropdown'
 import { Spinner } from '../../../components/ui/spinner'
 import { Popover, PopoverContent, PopoverTrigger } from '../../../components/ui/popover'
 import { CalendarIcon } from 'lucide-react'
@@ -51,7 +48,10 @@ const services = [
     "Hosting",
     "PPC",
 ]
-
+type User = {
+    id: string;
+    name: string;
+}
 export default function LeadCreateFormPage() {
     const { toast } = useToast()
     const navigate = useNavigate()
@@ -234,23 +234,24 @@ export default function LeadCreateFormPage() {
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel>Assigned</FormLabel>
-                                            <Select onValueChange={(value) => {
-                                                form.setValue("userId", users.find((user) => user.id === value).name)
-                                            }}
-                                                {...field}
+                                            <Select
+                                                onValueChange={(value) => {
+                                                    form.setValue("userId", value);  
+                                                }}
+                                                value={field.value}  
                                             >
                                                 <SelectTrigger className="w-[180px]">
-                                                    <SelectValue placeholder={"Select User"} />
-                                                    <SelectValue>{form.getValues("userId")}</SelectValue>
+                                                    <SelectValue placeholder="Select User">
+                                                        {form.getValues("userId") ? form.getValues("userId") : "Select User"}
+                                                    </SelectValue>
                                                 </SelectTrigger>
                                                 <SelectContent>
                                                     <SelectGroup>
-                                                        {users.map((user) => (
-                                                            <SelectItem key={user.id} value={user.id}>
+                                                        {users.map((user: User) => (
+                                                            <SelectItem key={user.id} value={user.name}>
                                                                 {user.name}
                                                             </SelectItem>
                                                         ))}
-
                                                     </SelectGroup>
                                                 </SelectContent>
                                             </Select>

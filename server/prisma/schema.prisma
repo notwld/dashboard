@@ -8,12 +8,15 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  name      String
-  email     String   @unique
-  password  String
-  role      Role?    @relation(fields: [roleId], references: [id])
-  roleId    Int?
+  id       Int    @id @default(autoincrement())
+  name     String
+  email    String @unique
+  password String
+  role     Role?  @relation(fields: [roleId], references: [id])
+  roleId   Int?
+  lead     Lead[]
+  assignee Lead[] @relation("LeadAssignee")
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -33,4 +36,26 @@ model Permission {
   roles     Role[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Lead {
+  id         Int      @id @default(autoincrement())
+  date       DateTime
+  time       String
+  platform   String
+  firstCall  String
+  comments   String?
+  service    String
+  name       String
+  email      String
+  number     String
+  address    String?
+  credits    Int      @default(0)
+  cost       Float
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  User       User?    @relation(fields: [userId], references: [id])
+  userId     Int?
+  assigneeId Int?
+  assignee   User?    @relation("LeadAssignee", fields: [assigneeId], references: [id])
 }
