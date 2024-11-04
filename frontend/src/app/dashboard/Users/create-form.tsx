@@ -15,6 +15,7 @@ import { useEffect, useState } from 'react'
 import { DropdownMenu } from '@radix-ui/react-dropdown-menu'
 import { DropdownMenuTrigger } from '../../../components/ui/Sidebar/dropdown-menu'
 import { DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from '../../../components/ui/Dropdown/dropdown'
+import { Spinner } from '../../../components/ui/spinner'
 const formSchema = z.object({
     username: z.string().min(2, {
         message: "Username must be at least 2 characters.",
@@ -38,6 +39,7 @@ type Role = {
 export default function UserCreateFormPage() {
     const { toast } = useToast()
     const navigate = useNavigate()
+    const [loading, setLoading] = useState(false)
     const [roles, setRoles] = useState<Role[]>([])
     const [role,setRole] = useState<Role>()
     useEffect(() => {
@@ -72,6 +74,7 @@ export default function UserCreateFormPage() {
             })
             return
         }
+        setLoading(true)
         await fetch(baseurl + "/user/create-user", {
             method: "POST",
             headers: {
@@ -94,7 +97,7 @@ export default function UserCreateFormPage() {
 
                 })
                 form.reset()
-                // navigate("/users")
+                navigate("/users")
             }).catch((error) => {
                 toast({
                     title: "User Creation Failed",
@@ -102,6 +105,8 @@ export default function UserCreateFormPage() {
 
                 })
                 console.error(error)
+            }).finally(() => {
+                setLoading(false)
             })
     }
 
@@ -203,7 +208,9 @@ export default function UserCreateFormPage() {
                                         </FormItem>
                                     )}
                                 />
-                                <Button type="submit" className='rounded-xl'>Create</Button>
+                                <Button type="submit" className='rounded-xl'>{loading ? <Spinner className='text-black'>
+                                    <span className="sr-only">Creating User...</span>
+                                </Spinner> : "Create User"}</Button>
                             </form>
                         </Form>
                     </div>

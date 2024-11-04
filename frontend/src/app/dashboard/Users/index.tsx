@@ -36,7 +36,7 @@ import {
 } from "../../../components/ui/Modal/dialog"
 import { DropdownMenu } from '@radix-ui/react-dropdown-menu'
 import { DropdownMenuTrigger } from '../../../components/ui/Sidebar/dropdown-menu'
-import { DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from '../../../components/ui/Dropdown/dropdown'
+import { DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel } from '../../../components/ui/Dropdown/dropdown'
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import {
@@ -49,6 +49,7 @@ import {
     FormMessage,
 } from "../../../components/ui/Form/form"
 import { Input } from '../../../components/ui/Sidebar/input'
+import { Spinner } from '../../../components/ui/spinner'
 
 
 
@@ -59,6 +60,7 @@ type Role = {
 
 export default function Users() {
     const navigate = useNavigate()
+    const [loading, setLoading] = React.useState(false)
     const [isDialogOpen, setIsDialogOpen] = React.useState(false)
     const [roles, setRoles] = React.useState([])
     const [role, setRole] = React.useState<Role>()
@@ -66,6 +68,7 @@ export default function Users() {
     const [user, setUser] = React.useState<User>()
     const { toast } = useToast()
     const fetchUsers = async () => {
+        setLoading(true)
         const res = await fetch(baseurl + "/user/get-users", {
             method: 'GET',
             headers: {
@@ -74,8 +77,10 @@ export default function Users() {
         })
         const data = await res.json()
         setUsers(data)
+        setLoading(false)
     }
     const fetchRoles = async () => {
+        setLoading(true)
         const res = await fetch(baseurl + "/role/get-roles", {
             method: 'GET',
             headers: {
@@ -84,12 +89,14 @@ export default function Users() {
         })
         const data = await res.json()
         setRoles(data)
+        setLoading(false)
     }
     useEffect(() => {
         fetchUsers()
         fetchRoles()
     }, [])
     const deleteUser = async (id: number) => {
+        setLoading(true)
         await fetch(baseurl + `/user/delete-user/${id}`, {
             method: 'DELETE',
             headers: {
@@ -102,6 +109,7 @@ export default function Users() {
                 description: `User has been deleted.`,
 
             })
+
         }).catch((error) => {
             console.error(error)
             toast({
@@ -109,6 +117,8 @@ export default function Users() {
                 description: error.message,
 
             })
+        }).finally(() => {
+            setLoading(false)
         })
     }
     function ProfileForm() {
@@ -276,15 +286,19 @@ export default function Users() {
                     <BreadcrumbList>
 
                         <div className="flex justify-between items-center w-[81vw]">
-                            <BreadcrumbItem>
-                                <BreadcrumbPage className='text-lg'>Users</BreadcrumbPage>
+                        <BreadcrumbItem className='flex w-full justify-between items-center'>
+                                <BreadcrumbPage className="flex justify-between items-center text-lg w-full">
+                                    <div>
+                                        Users
+                                    </div>
+                                    <div>
+                                        <Button className="ml-4 rounded-xl" onClick={()=>{
+                                            navigate('/create-user')
+                                        }}>Create a User</Button>
+                                    </div>
+                                </BreadcrumbPage>
                             </BreadcrumbItem>
-                            <BreadcrumbItem >
-
-                                <Button variant="secondary" className='rounded-xl text-md' onClick={() => {
-                                    navigate('/create-user')
-                                }}>Create a User</Button>
-                            </BreadcrumbItem>
+                            
                         </div>
                     </BreadcrumbList>
                 </Breadcrumb>
@@ -295,7 +309,7 @@ export default function Users() {
 
                     <div className="rounded-xl bg-muted/50 p-4 h-fit">
                         <Table>
-                            <TableCaption className='text-lg'>{users.length} Users found in the system.</TableCaption>
+                            <TableCaption className='text-lg'>{users.length} Users found in the system. {loading&&<Spinner/>}</TableCaption>
                             <TableHeader>
                                 <TableRow>
                                     <TableHead className="w-[100px] text-lg">Id</TableHead>

@@ -11,6 +11,7 @@ import { useToast } from "../../../hooks/use-toaster";
 import { SidebarTrigger } from "../../../components/ui/Sidebar/sidebar";
 import { Separator } from "../../../components/ui/Sidebar/separator";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage } from "../../../components/ui/Sidebar/breadcrumb";
+import { Spinner } from "../../../components/ui/spinner";
 
 const items = [
   { name: "dashboard", label: "Dashboard" },
@@ -36,6 +37,7 @@ const Permissions = () => {
   const { toast } = useToast();
   const [roles, setRoles] = React.useState<Role[]>([]);
   const [role, setRole] = React.useState<Role>();
+  const [loading, setLoading] = React.useState(false);
   const [rolePermissions, setRolePermissions] = React.useState<string[]>([]);
   const form = useForm({
     resolver: zodResolver(FormSchema),
@@ -56,6 +58,7 @@ const Permissions = () => {
   useEffect(() => {
     if (role?.id) {
       const fetchRolePermissions = async () => {
+        setLoading(true);
         const res = await fetch(`${baseurl}/perm/role/${role.id}`, {
           method: "GET",
           headers: { "Content-Type": "application/json" },
@@ -63,7 +66,8 @@ const Permissions = () => {
         const data = await res.json();
         const permissionNames = data.map((perm: { name: string }) => perm.name);
         setRolePermissions(permissionNames);
-        form.setValue("items", permissionNames); // Update form with fetched permissions
+        form.setValue("items", permissionNames); 
+        setLoading(false);
       };
       fetchRolePermissions();
     }
@@ -74,7 +78,7 @@ const Permissions = () => {
       toast({ title: "Role Required", description: "Please select a role." });
       return;
     }
-
+    setLoading(true);
     await fetch(`${baseurl}/perm/role/${role.id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -89,6 +93,8 @@ const Permissions = () => {
       })
       .catch((error) => {
         toast({ title: "Role Update Failed", description: `Error: ${error.message}` });
+      }).finally(() => {
+        setLoading(false);
       });
   }
 
@@ -150,7 +156,7 @@ const Permissions = () => {
               name="items"
               render={() => (
                 <FormItem>
-                  <FormLabel className="text-2xl">Permissions</FormLabel>
+                  <FormLabel className="text-2xl flex">Permissions {loading&&<Spinner className="ml-2"/>}</FormLabel>
                   <FormDescription>Select permissions for this role.</FormDescription>
 
                   {items.map((item) => (
@@ -176,7 +182,7 @@ const Permissions = () => {
                 </FormItem>
               )}
             />
-            <Button type="submit">Submit</Button>
+            <Button type="submit" className="rounded-xl">Submit</Button>
           </form>
         </Form>
           </div>

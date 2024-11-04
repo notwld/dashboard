@@ -44,6 +44,7 @@ import {
     FormMessage,
 } from "../../../components/ui/Form/form"
 import { Input } from '../../../components/ui/Sidebar/input'
+import { Spinner } from "../../../components/ui/spinner"
 type Role = {
     id: number;
     name: string;
@@ -55,9 +56,11 @@ export function Roles() {
     const navigate = useNavigate()
     const [roles, setRoles] = useState([])
     const [role, setRole] = useState<Role>()
+    const [loading, setLoading] = useState(false)
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const { toast } = useToast()
     const fetchRoles = async () => {
+        setLoading(true)
         const res = await fetch(baseurl + "/role/get-roles", {
             method: 'GET',
             headers: {
@@ -66,12 +69,14 @@ export function Roles() {
         })
         const data = await res.json()
         setRoles(data)
+        setLoading(false)
     }
     useEffect(() => {
 
         fetchRoles()
     }, [])
     const deleteRole = async (id: number) => {
+        setLoading(true)
         await fetch(baseurl + `/role/delete-role/${id}`, {
             method: 'DELETE',
             headers: {
@@ -93,6 +98,7 @@ export function Roles() {
 
             }).finally(() => {
                 fetchRoles()
+                setLoading(false)
             })
     }
     function ProfileForm() {
@@ -116,12 +122,13 @@ export function Roles() {
                 })
                 return
             }
+            setLoading(true)
             await fetch(baseurl + `/role/update-role/${role?.id}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({ ...values})
+                body: JSON.stringify({ ...values })
             }).then((res) => res.json())
                 .then((res) => {
                     if (res.status) {
@@ -144,6 +151,8 @@ export function Roles() {
                         description: `Role ${values.name} could not be updated.`,
                     })
                     console.error(error)
+                }).finally(() => {
+                    setLoading(false)
                 })
 
         }
@@ -161,7 +170,7 @@ export function Roles() {
                                     <Input placeholder="Enter a name" {...field} />
                                 </FormControl>
                                 <FormDescription>
-                                Note: Changing the name of the role will affect all users with this role.
+                                    Note: Changing the name of the role will affect all users with this role.
                                 </FormDescription>
                                 <FormMessage />
                             </FormItem>
@@ -183,14 +192,19 @@ export function Roles() {
                     <BreadcrumbList>
 
                         <div className="flex justify-between items-center w-[81vw]">
-                            <BreadcrumbItem>
-                                <BreadcrumbPage className="text-lg">Roles</BreadcrumbPage>
-                            </BreadcrumbItem>
-                            <BreadcrumbItem >
-
-                                <Button variant="secondary" className='rounded-xl text-md' onClick={() => {
-                                    navigate('/create-role')
-                                }}>Create a Role</Button>
+                            <BreadcrumbItem className='flex w-full justify-between items-center'>
+                                <BreadcrumbPage className="flex justify-between items-center text-lg w-full">
+                                    <div>
+                                        Roles
+                                    </div>
+                                    <div>
+                                        <Button className="ml-4 rounded-xl"
+                                            onClick={() => {
+                                                navigate('/create-role')
+                                            }}
+                                        >Create a Role</Button>
+                                    </div>
+                                </BreadcrumbPage>
                             </BreadcrumbItem>
                         </div>
                     </BreadcrumbList>
@@ -202,7 +216,7 @@ export function Roles() {
                 <div className="min-h-[100vh] flex-1 rounded-xl md:min-h-min" >
                     <div className="p-4 rounded-xl bg-muted/50">
                         <Table>
-                            <TableCaption>{roles.length} Roles found in the system.</TableCaption>
+                            <TableCaption className="text-lg">{roles.length} Roles found in the system. {loading && <Spinner />}</TableCaption>
                             <TableHeader>
                                 <TableRow>
                                     <TableHead className="w-[100px] text-lg">Id</TableHead>

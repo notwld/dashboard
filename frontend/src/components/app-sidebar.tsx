@@ -41,8 +41,8 @@ const data = {
       url: "#",
       items: [
         {
-          title: "Payment Links",
-          url: "/users",
+          title: "Manage Leads",
+          url: "/leads",
         },
        
       ],

@@ -11,6 +11,8 @@ import { Input } from '../../../components/ui/Sidebar/input'
 import { useToast } from '../../../hooks/use-toaster'
 import { baseurl } from '../../../config/baseurl'
 import { useNavigate } from 'react-router-dom'
+import { Spinner } from '../../../components/ui/spinner'
+import { useState } from 'react'
 const formSchema = z.object({
     name: z.string().min(4, {
         message: "Name must be at least 4 characters.",
@@ -24,6 +26,7 @@ const formSchema = z.object({
 export default function RoleCreateFormPage() {
     const { toast } = useToast()
     const navigate = useNavigate()
+    const[loading, setLoading] = useState(false)
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -41,6 +44,7 @@ export default function RoleCreateFormPage() {
             return
         }
         // alert(JSON.stringify(values, null, 2))
+        setLoading(true)
         await fetch(baseurl + "/role/create-role", {
             method: "POST",
             headers: {
@@ -71,6 +75,8 @@ export default function RoleCreateFormPage() {
                     
                 })
                 console.error(error)
+            }).finally(() => {
+                setLoading(false)
             })
     }
     
@@ -113,7 +119,9 @@ export default function RoleCreateFormPage() {
                                     )}
                                 />
                                
-                                <Button type="submit" className='rounded-xl'>Create</Button>
+                                <Button type="submit" className='rounded-xl'>
+                                    {loading ? <Spinner className='text-black'/> : "Create Role"}
+                                </Button>
                             </form>
                         </Form>
                     </div>
