@@ -11,6 +11,7 @@ import { Roles } from './app/dashboard/Roles/index.tsx'
 import Permissions from './app/dashboard/Perms/index.tsx'
 import ManageLeads from './app/dashboard/Leads/index.tsx'
 import LeadCreateFormPage from './app/dashboard/Leads/create-form.tsx'
+import LoginPage from './app/dashboard/Login/index.tsx'
 
 const routes = createBrowserRouter([
   {
@@ -48,6 +49,10 @@ const routes = createBrowserRouter([
       {
         path:'/create-lead',
         element:<LeadCreateFormPage />,
+      },
+      {
+        path:'/login',
+        element:<LoginPage />,
       }
     ]
   }

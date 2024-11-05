@@ -135,6 +135,14 @@ export default function LeadCreateFormPage() {
     useEffect(() => {
         fetchUsers()
     }, [])
+    const[name, setName] = useState("")
+    const findName = (id: string) => {
+        const user = users.find((user: User) => user.id === id)
+        if (user) {
+            setName(user?.name)
+        }
+    }
+
     return (
         <div>
             <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
@@ -236,19 +244,20 @@ export default function LeadCreateFormPage() {
                                             <FormLabel>Assigned</FormLabel>
                                             <Select
                                                 onValueChange={(value) => {
-                                                    form.setValue("userId", value);  
+                                                    form.setValue("userId", value);
+                                                    findName(value)  
                                                 }}
                                                 value={field.value}  
                                             >
                                                 <SelectTrigger className="w-[180px]">
-                                                    <SelectValue placeholder="Select User">
-                                                        {form.getValues("userId") ? form.getValues("userId") : "Select User"}
+                                                    <SelectValue placeholder={"Select User"}>
+                                                        {name}
                                                     </SelectValue>
                                                 </SelectTrigger>
                                                 <SelectContent>
                                                     <SelectGroup>
                                                         {users.map((user: User) => (
-                                                            <SelectItem key={user.id} value={user.name}>
+                                                            <SelectItem key={user.id} value={user.id}>
                                                                 {user.name}
                                                             </SelectItem>
                                                         ))}
@@ -420,7 +429,7 @@ export default function LeadCreateFormPage() {
                                         </FormItem>
                                     )}
                                 />
-                                <Button type="submit" className='rounded-xl grid-cols-2'>{loading ? <Spinner className="mr-2">
+                                <Button type="submit" className='rounded-xl grid-cols-2'>{loading ? <Spinner className="mr-2 text-black">
                                     <span className="sr-only">Creating Lead...</span>
                                 </Spinner> : "Create Lead"}</Button>
                             </form>

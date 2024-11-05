@@ -81,7 +81,10 @@ export type Lead = {
     date: string
     time: string
     platform: string
-    assigned: string
+    assigned: {
+        id: string
+        name: string
+    }
     firstCall: string
     comments: string
     service: string
@@ -124,7 +127,34 @@ export default function ManageLeads() {
         React.useState<VisibilityState>({})
     const [rowSelection, setRowSelection] = React.useState({})
 
-
+    const downloadLeads = async () => {
+        try {
+            const response = await fetch(baseurl + "/lead/download-leads", {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            })
+            const data = await response.blob()
+            const url = window.URL.createObjectURL(data)
+            const a = document.createElement("a")
+            a.href = url
+            a.download = "devmize_leads.csv"
+            a.click()
+            toast({
+                title: "Download Started",
+                description: "Your download has started.",
+                category: "success",
+            })
+        } catch (error) {
+            toast({
+                title: "Download Failed",
+                description: "Failed to download leads.",
+                category: "error",
+            })
+            console.error(error)
+        }
+    }
     const [leads, setLeads] = React.useState([])
     const [loading, setLoading] = React.useState(false)
     const navigate = useNavigate()
@@ -145,7 +175,7 @@ export default function ManageLeads() {
                 date: new Date(),
                 time: isDialogOpen.lead.time||"",
                 platform: isDialogOpen.lead.platform||"",
-                userId: isDialogOpen.lead.userId||"",
+                userId: isDialogOpen.lead?.assignee?.id||"",
                 firstCall: isDialogOpen.lead.firstCall||"",
                 comments: isDialogOpen.lead.comments||"",
                 service: isDialogOpen.lead.service||"",
@@ -153,8 +183,8 @@ export default function ManageLeads() {
                 email: isDialogOpen.lead.email||"",
                 number: isDialogOpen.lead.number||"",
                 address: isDialogOpen.lead.address||"",
-                credits: isDialogOpen.lead.credits||"",
-                cost: isDialogOpen.lead.cost||"",
+                credits: isDialogOpen.lead.credits?.toString()||"",
+                cost: isDialogOpen.lead.cost?.toString()||"",
             },
         })
     
@@ -208,6 +238,13 @@ export default function ManageLeads() {
         React.useEffect(() => {
             fetchUsers()
         }, [])
+        const[name, setName] = React.useState("")
+    const findName = (id: string) => {
+        const user = users.find((user: User) => user.id === id)
+        if (user) {
+            setName(user?.name)
+        }
+    }
         return (
             <div>
                 <Form {...form}>
@@ -289,33 +326,34 @@ export default function ManageLeads() {
                             name="userId"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Assigned</FormLabel>
-                                    <Select
-                                        onValueChange={(value) => {
-                                            form.setValue("userId", value);
-                                        }}
-                                        value={field.value}
-                                    >
-                                        <SelectTrigger className="w-[180px]">
-                                            <SelectValue placeholder="Select User">
-                                                {form.getValues("userId") ? form.getValues("userId") : "Select User"}
-                                            </SelectValue>
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectGroup>
-                                                {users.map((user: User) => (
-                                                    <SelectItem key={user.id} value={user.name}>
-                                                        {user.name}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectGroup>
-                                        </SelectContent>
-                                    </Select>
-                                    <FormDescription>
-                                        Select the user assigned to the lead.
-                                    </FormDescription>
-                                    <FormMessage />
-                                </FormItem>
+                                <FormLabel>Assigned</FormLabel>
+                                <Select
+                                    onValueChange={(value) => {
+                                        form.setValue("userId", value);
+                                        findName(value)  
+                                    }}
+                                    value={field.value}  
+                                >
+                                    <SelectTrigger className="w-[180px]">
+                                        <SelectValue placeholder={"Select User"}>
+                                            {name}
+                                        </SelectValue>
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectGroup>
+                                            {users.map((user: User) => (
+                                                <SelectItem key={user.id} value={user.id}>
+                                                    {user.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectGroup>
+                                    </SelectContent>
+                                </Select>
+                                <FormDescription>
+                                    Select the user assigned to the lead.
+                                </FormDescription>
+                                <FormMessage />
+                            </FormItem>
                             )}
                         />
                         <FormField
@@ -547,9 +585,12 @@ export default function ManageLeads() {
             cell: ({ row }) => <div>{row.getValue("platform")}</div>,
         },
         {
-            accessorKey: "assigned",
+            accessorKey: "assignee",
             header: "Assigned",
-            cell: ({ row }) => <div>{row.getValue("assigned")}</div>,
+            cell: ({ row }) => {
+                const assigned = row.getValue("assignee");
+                return <div>{assigned?.name}</div>;
+            },
         },
         {
             accessorKey: "firstCall",
@@ -755,7 +796,7 @@ export default function ManageLeads() {
                                             variant={"outline"}
 
                                             onClick={() => {
-                                                navigate('/create-lead')
+                                                downloadLeads()
                                             }}
                                         >Export to CSV</Button>
 
