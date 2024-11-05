@@ -28,6 +28,8 @@ import {
     PopoverTrigger,
 } from "../../../components/ui/popover"
 import { ChevronDownIcon } from "lucide-react"
+import { Switch } from '../../../components/ui/switch'
+import { useState } from 'react'
 const data = [
     {
       revenue: 10400,
@@ -63,20 +65,39 @@ const data = [
     },
   ]
 export default function Home() {
-
+    const [darkMode, setDarkMode] = useState(false)
+    const togggleDarkMode = () => {
+        if (darkMode) {
+            document.body.classList.remove("dark")
+        }
+        else {
+            document.body.classList.add("dark")
+        }
+    }
     return (
         <div>
             <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
                 <SidebarTrigger className="-ml-1" />
                 <Separator orientation="vertical" className="mr-2 h-4" />
                 <Breadcrumb>
-                    <BreadcrumbList>
-                        <BreadcrumbItem className="hidden md:block">
-
-                        </BreadcrumbItem>
-                        <BreadcrumbItem>
-                            <BreadcrumbPage>Dashboard</BreadcrumbPage>
-                        </BreadcrumbItem>
+                <BreadcrumbList>
+                        <div className="flex justify-between items-center w-[81vw]">
+                            <BreadcrumbItem className='flex w-full justify-between items-center'>
+                                <BreadcrumbPage className="flex justify-between items-center text-lg w-full">
+                                    <div>
+                                        Dashboard
+                                    </div>
+                                    <div className=''>
+                                        <Switch checked={darkMode} onCheckedChange={
+                                            () => {
+                                                setDarkMode(!darkMode)
+                                                togggleDarkMode()
+                                            }
+                                        }/>
+                                    </div>
+                                </BreadcrumbPage>
+                            </BreadcrumbItem>
+                        </div>
                     </BreadcrumbList>
                 </Breadcrumb>
             </header>

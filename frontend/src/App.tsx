@@ -4,7 +4,7 @@ import Page from './app/dashboard/page'
 function App() {
 
   return (
-   <div className='dark'>
+   <div>
     <Page />
    </div>
   )

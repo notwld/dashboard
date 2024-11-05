@@ -14,7 +14,7 @@ import {
 } from "../components/ui/Sidebar/sidebar"
 import { Separator } from "./ui/Sidebar/separator"
 import { Link } from "react-router-dom"
-
+import logo from "../assets/logo.png"
 export function VersionSwitcher({
   versions,
   defaultVersion,
@@ -31,10 +31,10 @@ export function VersionSwitcher({
           size="lg"
           className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
         >
-          <Link to={"/"} className="flex gap-2">
-            <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+          <Link to={"/"} className="flex gap-2 items-center justify-center">
+            <div className="flex aspect-square size-16 items-center justify-center rounded-lg text-sidebar-primary-foreground">
 
-              <UsersRound className="size-4 rounded-3xl" />
+              <img src={logo} alt="logo" className="w-16 h-8 object-contain" />
             </div>
             <div className="flex flex-col gap-0.5 leading-none">
               {/* <span className="">v{selectedVersion}</span> */}
