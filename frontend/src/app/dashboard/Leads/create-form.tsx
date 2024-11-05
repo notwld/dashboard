@@ -102,12 +102,12 @@ export default function LeadCreateFormPage() {
                 body: JSON.stringify(values),
             }).then(() => {
                 // navigate('/leads')
-                toast({ title: 'Lead created successfully', description: 'The lead has been created successfully.' })
+                toast({ title: 'Lead created successfully', description: 'The lead has been created successfully.', category: 'success' })
             }).catch((
                 error
             ) => {
                 console.error(error)
-                toast({ title: 'Internal server error', description: 'Please try again later.' })
+                toast({ title: 'Internal server error', description: 'Please try again later.', category: 'error' })
             }).finally(() => {
                 setLoading(false)
             }
@@ -115,7 +115,7 @@ export default function LeadCreateFormPage() {
         }
         catch (error) {
             console.error(error)
-            toast({ title: 'Internal server error', description: 'Please try again later.' })
+            toast({ title: 'Internal server error', description: 'Please try again later.', category: 'error' })
             setLoading(false)
         }
     }

@@ -70,7 +70,7 @@ export default function UserCreateFormPage() {
             toast({
                 title: "Password Mismatch",
                 description: `Passwords do not match.`,
-
+                category: 'error'
             })
             return
         }
@@ -87,6 +87,7 @@ export default function UserCreateFormPage() {
                     toast({
                         title: "User Creation Failed",
                         description: `User ${values.username} could not be created. Reason: ${res.message}`,
+                        category: 'error'
     
                     })
                     return
@@ -94,6 +95,7 @@ export default function UserCreateFormPage() {
                 toast({
                     title: "User Created",
                     description: `User ${values.username} has been created.`,
+                    category: 'success'
 
                 })
                 form.reset()
@@ -102,6 +104,7 @@ export default function UserCreateFormPage() {
                 toast({
                     title: "User Creation Failed",
                     description: `User ${values.username} could not be created. Reason: ${error.message}`,
+                    category: 'error'
 
                 })
                 console.error(error)

@@ -107,6 +107,7 @@ export default function Users() {
             toast({
                 title: "User Deleted",
                 description: `User has been deleted.`,
+                category: "success"
 
             })
 
@@ -115,6 +116,7 @@ export default function Users() {
             toast({
                 title: "Error",
                 description: error.message,
+                category: "error"
 
             })
         }).finally(() => {
@@ -172,12 +174,14 @@ export default function Users() {
                         toast({
                             title: "User Creation Failed",
                             description: `User ${values.username} could not be created. Reason: ${res.message}`,
+                            category: "error"
                         })
                         return
                     }
                     toast({
                         title: "User Updated",
                         description: `User ${values.username} has been updated.`,
+                        category: "success"
                     })
                     form.reset()
                     fetchUsers()
@@ -188,6 +192,7 @@ export default function Users() {
                     toast({
                         title: "User Creation Failed",
                         description: `User ${values.username} could not be created. Reason: ${error.message}`,
+                        category: "error"
                     })
                     console.error(error)
                 })

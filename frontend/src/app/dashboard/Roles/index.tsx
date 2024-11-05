@@ -87,12 +87,14 @@ export function Roles() {
                 toast({
                     title: "Role Deleted",
                     description: `Role has been deleted.`,
+                    category: "success"
 
                 })
             }).catch((error) => {
                 toast({
                     title: "Error",
                     description: error.message,
+                    category: "error"
 
                 })
 
@@ -119,6 +121,7 @@ export function Roles() {
                 toast({
                     title: "Name Required",
                     description: `Name is required.`,
+                    category: "error"
                 })
                 return
             }
@@ -135,12 +138,14 @@ export function Roles() {
                         toast({
                             title: "Role Update Failed",
                             description: `Role ${values.name} could not be updated. Reason: ${res.message}`,
+                            category: "error"
                         })
                         return
                     }
                     toast({
                         title: "Role Updated",
                         description: `Role ${values.name} has been updated.`,
+                        category: "success"
                     })
                     form.reset()
                     fetchRoles()
@@ -149,6 +154,7 @@ export function Roles() {
                     toast({
                         title: "Role Update Failed",
                         description: `Role ${values.name} could not be updated.`,
+                        category: "error"
                     })
                     console.error(error)
                 }).finally(() => {

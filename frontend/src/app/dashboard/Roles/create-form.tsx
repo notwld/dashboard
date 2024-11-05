@@ -57,6 +57,7 @@ export default function RoleCreateFormPage() {
                     toast({
                         title: "Role Creation Failed",
                         description: `Role ${values.name} could not be created. Reason: ${res.message}`,
+                        category: "error"
                         
                     })
                     return
@@ -64,6 +65,7 @@ export default function RoleCreateFormPage() {
                 toast({
                     title: "Role Created",
                     description: `Role ${values.name} has been created.`,
+                    category: "success"
                     
                 })
                 form.reset()
@@ -72,6 +74,7 @@ export default function RoleCreateFormPage() {
                 toast({
                     title: "Role Creation Failed",
                     description: `Role ${values.name} could not be created.`,
+                    category: "error"
                     
                 })
                 console.error(error)

@@ -75,7 +75,7 @@ const Permissions = () => {
 
   async function onSubmit(data) {
     if (!role) {
-      toast({ title: "Role Required", description: "Please select a role." });
+      toast({ title: "Role Required", description: "Please select a role.", category: "error" });
       return;
     }
     setLoading(true);
@@ -89,10 +89,11 @@ const Permissions = () => {
         toast({
           title: res.status ? "Role Update Failed" : "Role Updated",
           description: res.status ? `Failed: ${res.message}` : "Role has been successfully updated.",
+          category: res.status ? "error" : "success",
         });
       })
       .catch((error) => {
-        toast({ title: "Role Update Failed", description: `Error: ${error.message}` });
+        toast({ title: "Role Update Failed", description: `Error: ${error.message}`, category: "error" });
       }).finally(() => {
         setLoading(false);
       });
