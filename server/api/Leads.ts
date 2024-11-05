@@ -65,12 +65,25 @@ router.put('/update-lead/:id', async (req: Request, res: Response) => {
             res.status(400).json({ message: 'Lead does not exist', status: 400 });
             return;
         }
-
+        const body = req.body;
         const updatedLead = await prisma.lead.update({
             where: {
                 id: Number(req.params.id),
             },
-            data: req.body,
+            data: {
+                date: body.date,
+                time: body.time,
+                platform: body.platform,
+                firstCall: body.firstCall,
+                service: body.service,
+                name: body.name,
+                email: body.email,
+                number: body.number,
+                cost:parseFloat(body.cost),
+                comments: body.comments,
+                credits: Number(body.credits),
+                address: body.address,
+            }
         });
 
         res.json(updatedLead);

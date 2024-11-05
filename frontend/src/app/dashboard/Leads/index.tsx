@@ -162,15 +162,15 @@ export default function ManageLeads() {
             console.log(values)
             try {
                 setLoading(true)
-                await fetch(baseurl + "/lead/create-lead", {
-                    method: 'POST',
+                await fetch(baseurl + `/lead/update-lead/${isDialogOpen.lead.id}`, {
+                    method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify(values),
                 }).then(() => {
                     // navigate('/leads')
-                    toast({ title: 'Lead created successfully', description: 'The lead has been created successfully.', category: 'success' })
+                    toast({ title: 'Lead Updated successfully', description: 'The lead has been created successfully.', category: 'success' })
                 }).catch((
                     error
                 ) => {
@@ -178,6 +178,11 @@ export default function ManageLeads() {
                     toast({ title: 'Internal server error', description: 'Please try again later.', category: 'error' })
                 }).finally(() => {
                     setLoading(false)
+                    fetchLeads()
+                    setIsDialogOpen({
+                        open: false,
+                        lead: {}
+                    })
                 }
                 )
             }
@@ -206,7 +211,7 @@ export default function ManageLeads() {
         return (
             <div>
                 <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-2 gap-x-10 gap-y-4 justify-center items-center mt-4">
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-2 gap-x-10 gap-y-4 justify-center items-center mt-4 text-white">
                         <FormField
                             control={form.control}
                             name="date"
