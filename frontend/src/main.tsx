@@ -1,8 +1,8 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
-import App from './App.tsx'
-import { createBrowserRouter,RouterProvider } from 'react-router-dom'
+import {App,ProtectedRoute} from './App.tsx'
+import { createBrowserRouter,RouterProvider} from 'react-router-dom'
 import Home from './app/dashboard/Home/index.tsx'
 import Users from './app/dashboard/Users/index.tsx'
 import UserCreateForm from './app/dashboard/Users/create-form.tsx'
@@ -13,42 +13,44 @@ import ManageLeads from './app/dashboard/Leads/index.tsx'
 import LeadCreateFormPage from './app/dashboard/Leads/create-form.tsx'
 import LoginPage from './app/dashboard/Login/index.tsx'
 
+ 
+
 const routes = createBrowserRouter([
   {
     path:'/',
-    element: <App />,
+    element: <ProtectedRoute><App /></ProtectedRoute>,
     children:[
       {
         path:'/',
-        element:<Home />,
+        element:<ProtectedRoute><Home /></ProtectedRoute>,
       },
       {
         path:'/users',
-        element:<Users />,
+        element:<ProtectedRoute><Users /></ProtectedRoute>,
       },
       {
         path:'/create-user',
-        element:<UserCreateForm />,
+        element:<ProtectedRoute><UserCreateForm /></ProtectedRoute>,
       },
       {
         path:'/roles',
-        element:<Roles />,
+        element:<ProtectedRoute><Roles /></ProtectedRoute>,
       },
       {
         path:'/create-role',
-        element:<RoleCreateForm />,
+        element:<ProtectedRoute><RoleCreateForm /></ProtectedRoute>,
       },
       {
         path:'/permissions',
-        element:<Permissions />,
+        element:<ProtectedRoute><Permissions /></ProtectedRoute>,
       },
       {
         path:'/leads',
-        element:<ManageLeads />,
+        element:<ProtectedRoute><ManageLeads /></ProtectedRoute>,
       },
       {
         path:'/create-lead',
-        element:<LeadCreateFormPage />,
+        element:<ProtectedRoute><LeadCreateFormPage /></ProtectedRoute>,
       },
       {
         path:'/login',
