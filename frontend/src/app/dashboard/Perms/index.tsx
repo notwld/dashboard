@@ -14,12 +14,18 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage } from "../.
 import { Spinner } from "../../../components/ui/spinner";
 
 const items = [
-  { name: "dashboard", label: "Dashboard" },
-  { name: "leads", label: "Leads" },
-  { name: "contacts", label: "Contacts" },
-  { name: "tasks", label: "Tasks" },
-  { name: "reports", label: "Reports" },
-  { name: "settings", label: "Settings" },
+  { name: "Create Users", label: "Create Users" },
+  { name: "Edit Users", label: "Edit Users" },
+  { name: "Delete Users", label: "Delete Users" },
+  { name: "Create Roles", label: "Create Roles" },
+  { name: "Edit Roles", label: "Edit Roles" },
+  { name: "Delete Roles", label: "Delete Roles" },
+  {name:"Create Leads", label:"Create Leads"},
+  {name:"Edit Leads", label:"Edit Leads"},
+  {name:"Delete Leads", label:"Delete Leads"},
+  {name:"Create Permissions", label:"Create Permissions"},
+  {name:"Download Leads", label:"Download Leads"},
+
 ] as const;
 
 const FormSchema = z.object({

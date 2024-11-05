@@ -40,7 +40,7 @@ export default function LoginPage() {
                             Login
                         </h1>
                         <CardDescription>
-                            Login to your account
+                            Enter your credentials to sign in
                         </CardDescription>
                     </CardHeader>
                     <CardContent>

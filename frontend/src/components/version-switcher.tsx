@@ -38,7 +38,7 @@ export function VersionSwitcher({
             </div>
             <div className="flex flex-col gap-0.5 leading-none">
               {/* <span className="">v{selectedVersion}</span> */}
-              <span className="font-semibold text-xl ">devmize.</span>
+              <span className="font-semibold text-xl ">designtech360</span>
             </div>
           </Link>
           {/* <ChevronsUpDown className="ml-auto" /> */}
