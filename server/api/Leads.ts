@@ -6,7 +6,13 @@ const prisma = new PrismaClient();
 
 router.get('/get-leads', async (req: Request, res: Response) => {
     try {
-        const leads = await prisma.lead.findMany();
+        const leads = await prisma.lead.findMany(
+            {
+                include: {
+                    assignee: true,
+                },
+            }
+        );
         res.json(leads);
         console.log(leads);
     } catch (error) {
@@ -18,7 +24,7 @@ router.get('/get-leads', async (req: Request, res: Response) => {
 
 router.post('/create-lead', async (req: Request, res: Response) => {
     try {
-        const id = 4;
+        const _id = 4;
 
         const body = req.body;
         if (!body.date || !body.time || !body.platform || !body.firstCall || !body.service || !body.name || !body.email || !body.number || !body.cost || !body.credits) {
@@ -39,6 +45,12 @@ router.post('/create-lead', async (req: Request, res: Response) => {
                 comments: body.comments,
                 credits: Number(body.credits),
                 address: body.address,
+                assignee:{
+                    connect:{
+                        id:Number(body.userId)
+                    }
+                },
+                
             },
             include: {
                 assignee: true,
@@ -65,6 +77,18 @@ router.put('/update-lead/:id', async (req: Request, res: Response) => {
             res.status(400).json({ message: 'Lead does not exist', status: 400 });
             return;
         }
+        // remove asignee
+        await prisma.lead.update({
+            where: {
+                id: Number(req.params.id),
+            },
+            data: {
+                assignee: {
+                    disconnect: true,
+                },
+            },
+        });
+
         const body = req.body;
         const updatedLead = await prisma.lead.update({
             where: {
@@ -83,6 +107,12 @@ router.put('/update-lead/:id', async (req: Request, res: Response) => {
                 comments: body.comments,
                 credits: Number(body.credits),
                 address: body.address,
+                assignee:{
+                    connect:{
+                        id:Number(body.userId)
+                    }
+                },
+                
             }
         });
 
@@ -119,5 +149,18 @@ router.delete('/delete-lead/:id', async (req: Request, res: Response) => {
     }
 }
 );
+import { json2csv } from 'json-2-csv';
+router.get('/download-leads', async (req: Request, res: Response) => {
+    try {
+        const leads = await prisma.lead.findMany();
+        const csv = await json2csv(leads, { emptyFieldValue: '' });
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', 'attachment; filename=devmize_leads.csv');
+        res.send(csv);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error', status: 500 });
+    }
+});
 
 export default router;

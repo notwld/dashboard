@@ -12,7 +12,7 @@ router.get('/get-roles', async (req: Request, res: Response) => {
             },
         });
         res.json(roles);
-        console.log(roles);
+        // console.log(roles);
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Internal server error',status:500 });

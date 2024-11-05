@@ -43,7 +43,7 @@ router.post('/create-user', async (req: Request, res: Response) => {
                 role: true,
             },
         });
-        console.log(newUser);
+        // console.log(newUser);
         res.status(201).json(newUser); 
     } catch (error) {
         console.error(error); 
@@ -58,7 +58,7 @@ router.get('/get-users', async (req: Request, res: Response) => {
                 role: true,
             },
         });
-        console.log(users);
+        // console.log(users);
         res.json(users);
     } catch (error) {
         console.error(error); 
@@ -89,7 +89,7 @@ router.put('/update-user/:id', async (req: Request, res: Response) => {
             res.status(404).json({ message: 'User not found',status:404 });
             return;
         }
-        console.log(user);
+        // console.log(user);
         res.json(user);
     } catch (error) {
         console.error(error); 
@@ -107,7 +107,7 @@ router.delete('/delete-user/:id', async (req: Request, res: Response) => {
             res.status(404).json({ message: 'User not found',status:404 });
             return;
         }
-        console.log(user);
+        // console.log(user);
         res.json({
             message: 'User deleted successfully',
         });
