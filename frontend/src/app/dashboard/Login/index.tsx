@@ -9,9 +9,10 @@ import { useToast } from '../../../hooks/use-toaster'
 import { baseurl } from '../../../config/baseurl'
 import { Button } from '../../../components/ui/button'
 import logo from '../../../assets/logo.png'
+import { useNavigate } from 'react-router-dom'
 const formSchema = z.object({
-    username: z.string().min(4, {
-        message: "Username must be at least 4 characters.",
+    email: z.string().min(4, {
+        message: "email must be at least 4 characters.",
     }),
     password: z.string().min(8, {
         message: "Password must be at least 8 characters.",
@@ -21,13 +22,51 @@ const formSchema = z.object({
 
 export default function LoginPage() {
     const { toast } = useToast()
+    const navigate = useNavigate()
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            username: "",
+            email: "",
             password: ""
         },
     })
+
+    const onSubmit = async (data: z.infer<typeof formSchema>) => {
+        try {
+            const response = await fetch(`${baseurl}/auth/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            const json = await response.json()
+            if (response.ok) {
+                localStorage.setItem('token', json.token)
+                localStorage.setItem('user', JSON.stringify(json.user))
+                toast({
+                    title: 'Success',
+                    description: 'Logged in successfully',
+                    category: 'success'
+                })
+                window.location = '/dashboard'
+            } else {
+                toast({
+                    title: 'Error',
+                    description: json.message,
+                    category: 'error'
+                })
+            }
+        } catch (error) {
+            console.error(error)
+            toast({
+                title: 'Error',
+                description: 'An error occurred',
+                category: 'error'
+            })
+
+        }
+    }
 
 
     return (
@@ -45,14 +84,14 @@ export default function LoginPage() {
                     </CardHeader>
                     <CardContent>
                         <Form {...form}>
-                            <form className='flex flex-col space-y-4'>
+                            <form className='flex flex-col space-y-4' onSubmit={form.handleSubmit(onSubmit)}>
                                 <FormField
                                     control={form.control}
-                                    name="username"
+                                    name="email"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Username</FormLabel>
-                                            <Input {...field} placeholder='Enter Username' />
+                                            <FormLabel>Email</FormLabel>
+                                            <Input {...field} placeholder='Enter email' />
                                             
                                             <FormMessage />
                                         </FormItem>

@@ -49,7 +49,39 @@ const Permissions = () => {
     resolver: zodResolver(FormSchema),
     defaultValues: { items: [] },
   });
+  const [permissions, setPermissions] = React.useState({
+    create: false,
+   
+  });
+  const checkPermissions = async () => {
+    const userId = JSON.parse(localStorage.getItem('user') || '{}').id;
+    const res = await fetch(baseurl + `/user/get-user/${userId}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    let permissionObj = await res.json();
+    permissionObj = permissionObj.role.permissions;
+    console.log(permissionObj)
+    if (permissionObj) {
+        const permissionArray = ["Create Permissions"];
+        const updatedPermissions = { ...permissions }; // Create a copy of the initial permissions
 
+        permissionObj.forEach((permission) => {
+            const permissionKey = permission.name.split(" ")[0].toLowerCase();
+            if (permissionArray.includes(permission.name)) {
+                updatedPermissions[permissionKey] = true;
+            }
+        });
+
+        setPermissions(updatedPermissions); // Set the state once with the updated permissions
+    }
+    console.log(permissions)
+}
+React.useEffect(() => {
+    checkPermissions()
+}, [])
   // Fetch roles data
   useEffect(() => {
     const fetchRoles = async () => {
@@ -189,7 +221,8 @@ const Permissions = () => {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="rounded-xl">Submit</Button>
+            { permissions.create && <Button type="submit" className="rounded-xl">Submit</Button>}
+              {/* <Button type="submit" className="rounded-xl">Submit</Button>} */}
           </form>
         </Form>
           </div>

@@ -523,6 +523,42 @@ export default function ManageLeads() {
             </div>
         )
     }
+    const [permissions, setPermissions] = React.useState({
+        create: false,
+        read: false,
+        edit: false,
+        delete: false,
+        donwload: false
+    });
+    const checkPermissions = async () => {
+        const userId = JSON.parse(localStorage.getItem('user') || '{}').id;
+        const res = await fetch(baseurl + `/user/get-user/${userId}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        let permissionObj = await res.json();
+        permissionObj = permissionObj.role.permissions;
+        console.log(permissionObj)
+        if (permissionObj) {
+            const permissionArray = ["Create Leads", "Read Leads", "Edit Leads", "Delete Leads", "Download Leads"];
+            const updatedPermissions = { ...permissions }; // Create a copy of the initial permissions
+    
+            permissionObj.forEach((permission) => {
+                const permissionKey = permission.name.split(" ")[0].toLowerCase();
+                if (permissionArray.includes(permission.name)) {
+                    updatedPermissions[permissionKey] = true;
+                }
+            });
+    
+            setPermissions(updatedPermissions); // Set the state once with the updated permissions
+        }
+        console.log(permissions)
+    }
+    React.useEffect(() => {
+        checkPermissions()
+    }, [])
     const columns: ColumnDef<Lead>[] = [
         {
             id: "select",
@@ -659,6 +695,7 @@ export default function ManageLeads() {
                                 Copy Lead ID
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
+                           {    permissions.edit && 
                             <DropdownMenuItem
                                 onClick={() => {
                                     setIsDialogOpen({
@@ -666,15 +703,16 @@ export default function ManageLeads() {
                                         lead: lead
                                     })
                                 }}
-                            >Edit</DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => {
+                            >Edit</DropdownMenuItem>}
+                            {   permissions.delete &&
+                                <DropdownMenuItem onClick={() => {
                                 setOpen({
                                     open: true,
                                     id: lead.id
                                 })
                             }}>
                                 Delete
-                            </DropdownMenuItem>
+                            </DropdownMenuItem>}
                         </DropdownMenuContent>
                     </DropdownMenu>
                 );
@@ -792,19 +830,21 @@ export default function ManageLeads() {
                                         Leads
                                     </div>
                                     <div className='flex gap-2'>
-                                        <Button className="rounded-xl"
+                                        {   permissions.download &&
+                                            <Button className="rounded-xl"
                                             variant={"outline"}
 
                                             onClick={() => {
                                                 downloadLeads()
                                             }}
-                                        >Export to CSV</Button>
+                                        >Export to CSV</Button>}
 
-                                        <Button className="ml-4 rounded-xl"
+                                        {permissions.create && 
+                                            <Button className="ml-4 rounded-xl"
                                             onClick={() => {
                                                 navigate('/create-lead')
                                             }}
-                                        >Create a Lead</Button>
+                                        >Create a Lead</Button>}
                                     </div>
                                 </BreadcrumbPage>
                             </BreadcrumbItem>

@@ -58,6 +58,12 @@ export function Roles() {
     const [role, setRole] = useState<Role>()
     const [loading, setLoading] = useState(false)
     const [isDialogOpen, setIsDialogOpen] = useState(false)
+    const [permissions, setPermissions] = useState({
+        create: false,
+        read: false,
+        edit: false,
+        delete: false,
+    });
     const { toast } = useToast()
     const fetchRoles = async () => {
         setLoading(true)
@@ -74,6 +80,7 @@ export function Roles() {
     useEffect(() => {
 
         fetchRoles()
+        checkPermissions()
     }, [])
     const deleteRole = async (id: number) => {
         setLoading(true)
@@ -102,6 +109,32 @@ export function Roles() {
                 fetchRoles()
                 setLoading(false)
             })
+    }
+    const checkPermissions = async () => {
+        const userId = JSON.parse(localStorage.getItem('user') || '{}').id;
+        const res = await fetch(baseurl + `/user/get-user/${userId}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        let permissionObj = await res.json();
+        permissionObj = permissionObj.role.permissions;
+        console.log(permissionObj)
+        if (permissionObj) {
+            const permissionArray = ["Create Roles", "Read Roles", "Edit Roles", "Delete Roles"];
+            const updatedPermissions = { ...permissions }; // Create a copy of the initial permissions
+    
+            permissionObj.forEach((permission) => {
+                const permissionKey = permission.name.split(" ")[0].toLowerCase();
+                if (permissionArray.includes(permission.name)) {
+                    updatedPermissions[permissionKey] = true;
+                }
+            });
+    
+            setPermissions(updatedPermissions); // Set the state once with the updated permissions
+        }
+        console.log(permissions)
     }
     function ProfileForm() {
 
@@ -203,13 +236,14 @@ export function Roles() {
                                     <div>
                                         Roles
                                     </div>
-                                    <div>
+                                    {permissions.create && <div>
+                                        
                                         <Button className="ml-4 rounded-xl"
                                             onClick={() => {
                                                 navigate('/create-role')
                                             }}
                                         >Create a Role</Button>
-                                    </div>
+                                    </div>}
                                 </BreadcrumbPage>
                             </BreadcrumbItem>
                         </div>
@@ -229,7 +263,8 @@ export function Roles() {
                                     <TableHead className="text-lg">Name</TableHead>
                                     <TableHead className="text-left text-lg">Created At</TableHead>
                                     <TableHead className="text-left text-lg">Updated At</TableHead>
-                                    <TableHead className="text-left text-lg">Actions At</TableHead>
+                                    {permissions.edit || permissions.delete &&
+                                        <TableHead className="text-left text-lg">Actions At</TableHead>}
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -239,8 +274,10 @@ export function Roles() {
                                         <TableCell className="text-lg">{role.name}</TableCell>
                                         <TableCell className="text-lg">{role.createdAt}</TableCell>
                                         <TableCell className="text-lg">{role.updatedAt}</TableCell>
+                                      {  permissions.edit || permissions.delete &&
                                         <TableCell>
-                                            <Dialog open={isDialogOpen} onOpenChange={() => setIsDialogOpen(!isDialogOpen)}>
+                                            {   permissions.edit &&
+                                                <Dialog open={isDialogOpen} onOpenChange={() => setIsDialogOpen(!isDialogOpen)}>
                                                 <DialogTrigger>
                                                     <Button variant="default" className="mr-2 rounded-xl text-lg" onClick={() => {
                                                         setRole(role)
@@ -256,8 +293,9 @@ export function Roles() {
                                                     </DialogHeader>
 
                                                 </DialogContent>
-                                            </Dialog>
-                                            <AlertDialog>
+                                            </Dialog>}
+                                            {   permissions.delete &&
+                                                <AlertDialog>
                                                 <AlertDialogTrigger>    <Button variant="destructive" className='rounded-xl text-xl'>Delete</Button> </AlertDialogTrigger>
                                                 <AlertDialogContent>
                                                     <AlertDialogHeader>
@@ -274,8 +312,8 @@ export function Roles() {
                                                         }}>Continue</AlertDialogAction>
                                                     </AlertDialogFooter>
                                                 </AlertDialogContent>
-                                            </AlertDialog>
-                                        </TableCell>
+                                            </AlertDialog>}
+                                        </TableCell>}
                                     </TableRow>
                                 ))}
 

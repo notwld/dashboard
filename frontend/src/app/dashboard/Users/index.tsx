@@ -66,6 +66,12 @@ export default function Users() {
     const [role, setRole] = React.useState<Role>()
     const [users, setUsers] = React.useState([])
     const [user, setUser] = React.useState<User>()
+    const [permissions, setPermissions] = React.useState({
+        create: false,
+        read: false,
+        edit: false,
+        delete: false
+    })
     const { toast } = useToast()
     const fetchUsers = async () => {
         setLoading(true)
@@ -91,9 +97,38 @@ export default function Users() {
         setRoles(data)
         setLoading(false)
     }
+    const checkPermissions = async () => {
+        const userId = JSON.parse(localStorage.getItem('user') || '{}').id;
+        const res = await fetch(baseurl + `/user/get-user/${userId}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        let permissionObj = await res.json();
+        permissionObj = permissionObj.role.permissions;
+        console.log(permissionObj)
+        if (permissionObj) {
+            const permissionArray = ["Create Users", "Read Users", "Edit Users", "Delete Users"];
+            const updatedPermissions = { ...permissions }; // Create a copy of the initial permissions
+    
+            permissionObj.forEach((permission) => {
+                const permissionKey = permission.name.split(" ")[0].toLowerCase();
+                if (permissionArray.includes(permission.name)) {
+                    updatedPermissions[permissionKey] = true;
+                }
+            });
+    
+            setPermissions(updatedPermissions); // Set the state once with the updated permissions
+        }
+        console.log(permissions)
+    }
     useEffect(() => {
         fetchUsers()
         fetchRoles()
+        checkPermissions()
+        
+    
     }, [])
     const deleteUser = async (id: number) => {
         setLoading(true)
@@ -296,11 +331,13 @@ export default function Users() {
                                     <div>
                                         Users
                                     </div>
-                                    <div>
+                                   
+                                    {permissions.create &&  <div>
                                         <Button className="ml-4 rounded-xl" onClick={()=>{
                                             navigate('/create-user')
                                         }}>Create a User</Button>
                                     </div>
+                                    }
                                 </BreadcrumbPage>
                             </BreadcrumbItem>
                             
@@ -323,7 +360,8 @@ export default function Users() {
                                     <TableHead className="text-left text-lg">Role</TableHead>
                                     <TableHead className="text-left text-lg">Created At</TableHead>
                                     <TableHead className="text-left text-lg">Updated At</TableHead>
-                                    <TableHead className="text-left text-lg">Actions At</TableHead>
+                                    {   permissions.edit || permissions.delete &&
+                                        <TableHead className="text-left text-lg">Actions At</TableHead>}
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -335,9 +373,11 @@ export default function Users() {
                                         <TableCell className="text-left text-lg">{user.role ? user?.role?.name : "No Role"}</TableCell>
                                         <TableCell className="text-left text-lg">{user.createdAt}</TableCell>
                                         <TableCell className="text-left text-lg">{user.updatedAt}</TableCell>
+                                       {    permissions.edit || permissions.delete &&
                                         <TableCell className="text-left text-lg">
 
-                                            <Dialog open={isDialogOpen} onOpenChange={() => setIsDialogOpen(!isDialogOpen)}>
+                                            {permissions.edit &&
+                                                <Dialog open={isDialogOpen} onOpenChange={() => setIsDialogOpen(!isDialogOpen)}>
                                                 <DialogTrigger>
                                                     <Button variant="default" className="mr-2 rounded-xl text-lg" onClick={() => {
                                                         setUser(user)
@@ -353,9 +393,10 @@ export default function Users() {
                                                     </DialogHeader>
 
                                                 </DialogContent>
-                                            </Dialog>
+                                            </Dialog>}
 
-                                            <AlertDialog>
+                                            {   permissions.delete &&
+                                                <AlertDialog>
                                                 <AlertDialogTrigger>    <Button variant="destructive" className='rounded-xl text-lg'>Delete</Button> </AlertDialogTrigger>
                                                 <AlertDialogContent>
                                                     <AlertDialogHeader>
@@ -373,8 +414,8 @@ export default function Users() {
                                                         }}>Continue</AlertDialogAction>
                                                     </AlertDialogFooter>
                                                 </AlertDialogContent>
-                                            </AlertDialog>
-                                        </TableCell>
+                                            </AlertDialog>}
+                                        </TableCell>}
                                     </TableRow>
                                 ))}
                             </TableBody>

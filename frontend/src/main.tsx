@@ -25,6 +25,10 @@ const routes = createBrowserRouter([
         element:<ProtectedRoute><Home /></ProtectedRoute>,
       },
       {
+        path:'/dashboard',
+        element:<ProtectedRoute><Home /></ProtectedRoute>,
+      },
+      {
         path:'/users',
         element:<ProtectedRoute><Users /></ProtectedRoute>,
       },

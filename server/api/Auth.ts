@@ -17,6 +17,23 @@ router.post('/login', async (req: Request, res: Response) => {
         const user = await prisma.user.findUnique({
             where: {
                 email: email
+            },
+            select: {
+                id: true,
+                email: true,
+                name: true,
+                password: true,
+                role: {
+                    select: {
+                        id: true,
+                        name: true,
+                        permissions: {
+                            select: {
+                                name: true
+                            }
+                        }
+                    }
+                }
             }
         });
         if (!user) {
@@ -30,7 +47,7 @@ router.post('/login', async (req: Request, res: Response) => {
         }
         const token = jwt.sign({ user_id: user.id }, process.env.JWT_SECRET || "JWT_SECRET");
         req.session.token = token;
-        res.status(200).json({ token });
+        res.status(200).json({ token , user });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Internal server error', status: 500 });

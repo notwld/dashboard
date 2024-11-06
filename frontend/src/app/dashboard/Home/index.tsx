@@ -29,7 +29,7 @@ import {
 } from "../../../components/ui/popover"
 import { ChevronDownIcon } from "lucide-react"
 import { Switch } from '../../../components/ui/switch'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 const data = [
     {
       revenue: 10400,
@@ -65,7 +65,8 @@ const data = [
     },
   ]
 export default function Home() {
-    const [darkMode, setDarkMode] = useState(false)
+    const [darkMode, setDarkMode] = useState(true)
+    const [user, setUser] = useState({})
     const togggleDarkMode = () => {
         if (darkMode) {
             document.body.classList.remove("dark")
@@ -74,6 +75,10 @@ export default function Home() {
             document.body.classList.add("dark")
         }
     }
+    useEffect(() => {
+        const user = JSON.parse(localStorage.getItem('user') || '{}')
+        setUser(user)
+    }, [])
     return (
         <div>
             <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
@@ -85,15 +90,29 @@ export default function Home() {
                             <BreadcrumbItem className='flex w-full justify-between items-center'>
                                 <BreadcrumbPage className="flex justify-between items-center text-lg w-full">
                                     <div>
-                                        Dashboard
+                                    
+                                        Welcome {user?.name}
                                     </div>
-                                    <div className=''>
+                                    <div className='flex items-center space-x-4'>   
+                                        <span className='text-muted-foreground'>
+                                            Dark Mode
+                                        </span>
                                         <Switch checked={darkMode} onCheckedChange={
                                             () => {
                                                 setDarkMode(!darkMode)
                                                 togggleDarkMode()
                                             }
                                         }/>
+                                        <span
+                                            className="underline cursor-default hover:cursor-pointer"
+                                            onClick={() => {
+                                                localStorage.removeItem('token')
+                                                localStorage.removeItem('user')
+                                                window.location.href = '/'
+                                            }}
+                                        >
+                                            Logout
+                                        </span>
                                     </div>
                                 </BreadcrumbPage>
                             </BreadcrumbItem>

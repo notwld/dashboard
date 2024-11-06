@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { Request, Response } from 'express';
+import bycrpt from 'bcrypt';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -27,12 +28,13 @@ router.post('/create-user', async (req: Request, res: Response) => {
             res.status(400).json({ message: 'Passwords do not match',status:400 });
             return
         }
-
+        const salt = await bycrpt.genSalt(10);
+        const hashedPassword = await bycrpt.hash(req.body.password, salt);
         const newUser = await prisma.user.create({
             data: {
                 email: req.body.email,
                 name: req.body.username,
-                password: req.body.password,
+                password: hashedPassword,
                 role: {
                     connect: {
                         id: req.body.roleId,
@@ -67,6 +69,8 @@ router.get('/get-users', async (req: Request, res: Response) => {
 });
 router.put('/update-user/:id', async (req: Request, res: Response) => {
     try {
+        const salt = await bycrpt.genSalt(10);
+        const hashedPassword = await bycrpt.hash(req.body.password, salt);
         const user = await prisma.user.update({
             where: {
                 id: parseInt(req.params.id),
@@ -74,7 +78,7 @@ router.put('/update-user/:id', async (req: Request, res: Response) => {
             data: {
                 email: req.body.email,
                 name: req.body.username,
-                password: req.body.password,
+                password: hashedPassword,
                 role: {
                     connect: {
                         id: req.body.roleId,
@@ -116,6 +120,33 @@ router.delete('/delete-user/:id', async (req: Request, res: Response) => {
         res.status(500).json({ message: 'Internal server error',status:500 });
     }
 });
+
+router.get('/get-user/:id', async (req: Request, res: Response) => {
+    try {
+        const user = await prisma.user.findUnique({
+            where: {
+                id: parseInt(req.params.id),
+            },
+            include: {
+                role: {
+                    include: {
+                        permissions: true,
+                    }
+                }
+            },
+        });
+        if (!user) {
+            res.status(404).json({ message: 'User not found',status:404 });
+            return;
+        }
+        // console.log(user);
+        res.json(user);
+    } catch (error) {
+        console.error(error); 
+        res.status(500).json({ message: 'Internal server error',status:500 });
+    }
+}
+);
 
 // module.exports = router;
 export default router;
