@@ -57,5 +57,6 @@ model Lead {
   User       User?    @relation(fields: [userId], references: [id])
   userId     Int?
   assigneeId Int?
+  status     String?
   assignee   User?    @relation("LeadAssignee", fields: [assigneeId], references: [id])
 }

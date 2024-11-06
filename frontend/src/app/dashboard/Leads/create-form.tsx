@@ -34,6 +34,7 @@ const formSchema = z.object({
     number: z.string().min(10, "Enter a valid contact number."),
     address: z.string().nonempty("Address is required."),
     credits: z.string().min(0, "Credits must be non-negative."),
+    status: z.string().optional(),
     cost: z.string().min(0, "Cost must be non-negative."),
 });
 
@@ -86,6 +87,7 @@ export default function LeadCreateFormPage() {
             number: "",
             address: "",
             credits: "0",
+            status:"",
             cost: "0",
         },
     })
@@ -142,6 +144,12 @@ export default function LeadCreateFormPage() {
             setName(user?.name)
         }
     }
+    const STATUS = [
+        "Active",
+        "Inactive",
+        "Pending",
+        "Completed",
+    ]
 
     return (
         <div>
@@ -443,11 +451,11 @@ export default function LeadCreateFormPage() {
                                                 </SelectTrigger>
                                                 <SelectContent>
                                                     <SelectGroup>
-                                                        {/* {services.map((service) => (
-                                                            <SelectItem key={service} value={service}>
-                                                                {service}
+                                                        {STATUS.map((status) => (
+                                                            <SelectItem key={status} value={status}>
+                                                                {status}
                                                             </SelectItem>
-                                                        ))} */}
+                                                        ))}
 
                                                     </SelectGroup>
                                                 </SelectContent>

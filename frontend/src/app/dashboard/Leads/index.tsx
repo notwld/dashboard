@@ -168,26 +168,26 @@ export default function ManageLeads() {
         lead: {}
     })
     const ProfileForm = () => {
-       
+
         const form = useForm<z.infer<typeof formSchema>>({
             resolver: zodResolver(formSchema),
             defaultValues: {
                 date: new Date(),
-                time: isDialogOpen.lead.time||"",
-                platform: isDialogOpen.lead.platform||"",
-                userId: isDialogOpen.lead?.assignee?.id||"",
-                firstCall: isDialogOpen.lead.firstCall||"",
-                comments: isDialogOpen.lead.comments||"",
-                service: isDialogOpen.lead.service||"",
-                name: isDialogOpen.lead.name||"",
-                email: isDialogOpen.lead.email||"",
-                number: isDialogOpen.lead.number||"",
-                address: isDialogOpen.lead.address||"",
-                credits: isDialogOpen.lead.credits?.toString()||"",
-                cost: isDialogOpen.lead.cost?.toString()||"",
+                time: isDialogOpen.lead.time || "",
+                platform: isDialogOpen.lead.platform || "",
+                userId: isDialogOpen.lead?.assignee?.id || "",
+                firstCall: isDialogOpen.lead.firstCall || "",
+                comments: isDialogOpen.lead.comments || "",
+                service: isDialogOpen.lead.service || "",
+                name: isDialogOpen.lead.name || "",
+                email: isDialogOpen.lead.email || "",
+                number: isDialogOpen.lead.number || "",
+                address: isDialogOpen.lead.address || "",
+                credits: isDialogOpen.lead.credits?.toString() || "",
+                cost: isDialogOpen.lead.cost?.toString() || "",
             },
         })
-    
+
         async function onSubmit(values: z.infer<typeof formSchema>) {
             console.log(values)
             try {
@@ -238,13 +238,13 @@ export default function ManageLeads() {
         React.useEffect(() => {
             fetchUsers()
         }, [])
-        const[name, setName] = React.useState("")
-    const findName = (id: string) => {
-        const user = users.find((user: User) => user.id === id)
-        if (user) {
-            setName(user?.name)
+        const [name, setName] = React.useState("")
+        const findName = (id: string) => {
+            const user = users.find((user: User) => user.id === id)
+            if (user) {
+                setName(user?.name)
+            }
         }
-    }
         return (
             <div>
                 <Form {...form}>
@@ -326,34 +326,34 @@ export default function ManageLeads() {
                             name="userId"
                             render={({ field }) => (
                                 <FormItem>
-                                <FormLabel>Assigned</FormLabel>
-                                <Select
-                                    onValueChange={(value) => {
-                                        form.setValue("userId", value);
-                                        findName(value)  
-                                    }}
-                                    value={field.value}  
-                                >
-                                    <SelectTrigger className="w-[180px]">
-                                        <SelectValue placeholder={"Select User"}>
-                                            {name}
-                                        </SelectValue>
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectGroup>
-                                            {users.map((user: User) => (
-                                                <SelectItem key={user.id} value={user.id}>
-                                                    {user.name}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectGroup>
-                                    </SelectContent>
-                                </Select>
-                                <FormDescription>
-                                    Select the user assigned to the lead.
-                                </FormDescription>
-                                <FormMessage />
-                            </FormItem>
+                                    <FormLabel>Assigned</FormLabel>
+                                    <Select
+                                        onValueChange={(value) => {
+                                            form.setValue("userId", value);
+                                            findName(value)
+                                        }}
+                                        value={field.value}
+                                    >
+                                        <SelectTrigger className="w-[180px]">
+                                            <SelectValue placeholder={"Select User"}>
+                                                {name}
+                                            </SelectValue>
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectGroup>
+                                                {users.map((user: User) => (
+                                                    <SelectItem key={user.id} value={user.id}>
+                                                        {user.name}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectGroup>
+                                        </SelectContent>
+                                    </Select>
+                                    <FormDescription>
+                                        Select the user assigned to the lead.
+                                    </FormDescription>
+                                    <FormMessage />
+                                </FormItem>
                             )}
                         />
                         <FormField
@@ -367,7 +367,7 @@ export default function ManageLeads() {
                                     }
                                     }>
                                         <SelectTrigger className="w-[180px]">
-                                            <SelectValue placeholder={form?.getValues("firstCall") ? form?.getValues("firstCall") : "Select Call Status"}/>
+                                            <SelectValue placeholder={form?.getValues("firstCall") ? form?.getValues("firstCall") : "Select Call Status"} />
 
                                         </SelectTrigger>
                                         <SelectContent>
@@ -544,14 +544,14 @@ export default function ManageLeads() {
         if (permissionObj) {
             const permissionArray = ["Create Leads", "Read Leads", "Edit Leads", "Delete Leads", "Download Leads"];
             const updatedPermissions = { ...permissions }; // Create a copy of the initial permissions
-    
+
             permissionObj.forEach((permission) => {
                 const permissionKey = permission.name.split(" ")[0].toLowerCase();
                 if (permissionArray.includes(permission.name)) {
                     updatedPermissions[permissionKey] = true;
                 }
             });
-    
+
             setPermissions(updatedPermissions); // Set the state once with the updated permissions
         }
         console.log(permissions)
@@ -674,9 +674,9 @@ export default function ManageLeads() {
             cell: ({ row }) => <div>{row.getValue("cost")}</div>,
         },
         {
-            accessorKey:"status",
-            header:"Status",
-            cell:({row})=>(
+            accessorKey: "status",
+            header: "Status",
+            cell: ({ row }) => (
                 <div className="flex items-center">
                     <div className="w-3 h-3 rounded-full bg-green-500 mr-2"></div>
                     <div>Active</div>
@@ -705,31 +705,31 @@ export default function ManageLeads() {
                                 Copy Lead ID
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                           {    permissions.edit && 
-                            <DropdownMenuItem
-                                onClick={() => {
-                                    setIsDialogOpen({
-                                        open: true,
-                                        lead: lead
-                                    })
-                                }}
-                            >Edit</DropdownMenuItem>}
-                            {   permissions.delete &&
+                            {permissions.edit &&
+                                <DropdownMenuItem
+                                    onClick={() => {
+                                        setIsDialogOpen({
+                                            open: true,
+                                            lead: lead
+                                        })
+                                    }}
+                                >Edit</DropdownMenuItem>}
+                            {permissions.delete &&
                                 <DropdownMenuItem onClick={() => {
-                                setOpen({
-                                    open: true,
-                                    id: lead.id
-                                })
-                            }}>
-                                Delete
-                            </DropdownMenuItem>}
+                                    setOpen({
+                                        open: true,
+                                        id: lead.id
+                                    })
+                                }}>
+                                    Delete
+                                </DropdownMenuItem>}
                         </DropdownMenuContent>
                     </DropdownMenu>
                 );
 
             },
         },
-        
+
     ]
     const deleteLead = async (id: string) => {
         try {
@@ -841,21 +841,21 @@ export default function ManageLeads() {
                                         Leads
                                     </div>
                                     <div className='flex gap-2'>
-                                        {   permissions.download &&
+                                        {permissions.download &&
                                             <Button className="rounded-xl"
-                                            variant={"outline"}
+                                                variant={"outline"}
 
-                                            onClick={() => {
-                                                downloadLeads()
-                                            }}
-                                        >Export to CSV</Button>}
+                                                onClick={() => {
+                                                    downloadLeads()
+                                                }}
+                                            >Export to CSV</Button>}
 
-                                        {permissions.create && 
+                                        {permissions.create &&
                                             <Button className="ml-4 rounded-xl"
-                                            onClick={() => {
-                                                navigate('/create-lead')
-                                            }}
-                                        >Create a Lead</Button>}
+                                                onClick={() => {
+                                                    navigate('/create-lead')
+                                                }}
+                                            >Create a Lead</Button>}
                                     </div>
                                 </BreadcrumbPage>
                             </BreadcrumbItem>
