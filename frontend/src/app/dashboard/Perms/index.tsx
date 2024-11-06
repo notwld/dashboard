@@ -20,11 +20,11 @@ const items = [
   { name: "Create Roles", label: "Create Roles" },
   { name: "Edit Roles", label: "Edit Roles" },
   { name: "Delete Roles", label: "Delete Roles" },
-  {name:"Create Leads", label:"Create Leads"},
-  {name:"Edit Leads", label:"Edit Leads"},
-  {name:"Delete Leads", label:"Delete Leads"},
-  {name:"Create Permissions", label:"Create Permissions"},
-  {name:"Download Leads", label:"Download Leads"},
+  { name: "Create Leads", label: "Create Leads" },
+  { name: "Edit Leads", label: "Edit Leads" },
+  { name: "Delete Leads", label: "Delete Leads" },
+  { name: "Create Permissions", label: "Create Permissions" },
+  { name: "Download Leads", label: "Download Leads" },
 
 ] as const;
 
@@ -51,37 +51,37 @@ const Permissions = () => {
   });
   const [permissions, setPermissions] = React.useState({
     create: false,
-   
+
   });
   const checkPermissions = async () => {
     const userId = JSON.parse(localStorage.getItem('user') || '{}').id;
     const res = await fetch(baseurl + `/user/get-user/${userId}`, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-        }
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      }
     })
     let permissionObj = await res.json();
     permissionObj = permissionObj.role.permissions;
     console.log(permissionObj)
     if (permissionObj) {
-        const permissionArray = ["Create Permissions"];
-        const updatedPermissions = { ...permissions }; // Create a copy of the initial permissions
+      const permissionArray = ["Create Permissions"];
+      const updatedPermissions = { ...permissions }; // Create a copy of the initial permissions
 
-        permissionObj.forEach((permission) => {
-            const permissionKey = permission.name.split(" ")[0].toLowerCase();
-            if (permissionArray.includes(permission.name)) {
-                updatedPermissions[permissionKey] = true;
-            }
-        });
+      permissionObj.forEach((permission) => {
+        const permissionKey = permission.name.split(" ")[0].toLowerCase();
+        if (permissionArray.includes(permission.name)) {
+          updatedPermissions[permissionKey] = true;
+        }
+      });
 
-        setPermissions(updatedPermissions); // Set the state once with the updated permissions
+      setPermissions(updatedPermissions); // Set the state once with the updated permissions
     }
     console.log(permissions)
-}
-React.useEffect(() => {
+  }
+  React.useEffect(() => {
     checkPermissions()
-}, [])
+  }, [])
   // Fetch roles data
   useEffect(() => {
     const fetchRoles = async () => {
@@ -104,7 +104,7 @@ React.useEffect(() => {
         const data = await res.json();
         const permissionNames = data.map((perm: { name: string }) => perm.name);
         setRolePermissions(permissionNames);
-        form.setValue("items", permissionNames); 
+        form.setValue("items", permissionNames);
         setLoading(false);
       };
       fetchRolePermissions();
@@ -139,7 +139,7 @@ React.useEffect(() => {
 
   return (
     <>
-     <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+      <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
         <SidebarTrigger className="-ml-1" />
         <Separator orientation="vertical" className="mr-2 h-4" />
         <Breadcrumb>
@@ -186,45 +186,44 @@ React.useEffect(() => {
             </div>
           </div>
           <div className="p-4 rounded-xl bg-muted/50 mt-5">
-          
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <FormField
-              control={form.control}
-              name="items"
-              render={() => (
-                <FormItem>
-                  <FormLabel className="text-2xl flex">Permissions {loading&&<Spinner className="ml-2"/>}</FormLabel>
-                  <FormDescription>Select permissions for this role.</FormDescription>
 
-                  {items.map((item) => (
-                    <FormField key={item.name} control={form.control} name="items" render={() => (
-                      <FormItem className="flex items-center space-x-3">
-                        <FormControl>
-                          <Checkbox
-                            checked={form.watch("items").includes(item.name)}
-                            onCheckedChange={(checked) => {
-                              const values = form.getValues("items");
-                              form.setValue(
-                                "items",
-                                checked ? [...values, item.name] : values.filter((v) => v !== item.name)
-                              );
-                            }}
-                          />
-                        </FormControl>
-                        <FormLabel>{item.label}</FormLabel>
-                      </FormItem>
-                    )} />
-                  ))}
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            { permissions.create && <Button type="submit" className="rounded-xl">Submit</Button>}
-              {/* <Button type="submit" className="rounded-xl">Submit</Button>} */}
-          </form>
-        </Form>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                <FormField
+                  control={form.control}
+                  name="items"
+                  render={() => (
+                    <FormItem>
+                      <FormLabel className="text-2xl flex">Permissions {loading && <Spinner className="ml-2" />}</FormLabel>
+                      <FormDescription>Select permissions for this role.</FormDescription>
+
+                      {items.map((item) => (
+                        <FormField key={item.name} control={form.control} name="items" render={() => (
+                          <FormItem className="flex items-center space-x-3">
+                            <FormControl>
+                              <Checkbox
+                                checked={form.watch("items").includes(item.name)}
+                                onCheckedChange={(checked) => {
+                                  const values = form.getValues("items");
+                                  form.setValue(
+                                    "items",
+                                    checked ? [...values, item.name] : values.filter((v) => v !== item.name)
+                                  );
+                                }}
+                              />
+                            </FormControl>
+                            <FormLabel>{item.label}</FormLabel>
+                          </FormItem>
+                        )} />
+                      ))}
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {permissions.create && <Button type="submit" className="rounded-xl">Submit</Button>}
+              </form>
+            </Form>
           </div>
         </div>
       </div>

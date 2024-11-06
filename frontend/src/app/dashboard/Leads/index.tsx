@@ -674,6 +674,16 @@ export default function ManageLeads() {
             cell: ({ row }) => <div>{row.getValue("cost")}</div>,
         },
         {
+            accessorKey:"status",
+            header:"Status",
+            cell:({row})=>(
+                <div className="flex items-center">
+                    <div className="w-3 h-3 rounded-full bg-green-500 mr-2"></div>
+                    <div>Active</div>
+                </div>
+            )
+        },
+        {
             id: "actions",
             enableHiding: false,
             cell: ({ row }) => {
@@ -719,6 +729,7 @@ export default function ManageLeads() {
 
             },
         },
+        
     ]
     const deleteLead = async (id: string) => {
         try {

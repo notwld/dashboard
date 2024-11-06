@@ -101,8 +101,8 @@ export default function LeadCreateFormPage() {
                 },
                 body: JSON.stringify(values),
             }).then(() => {
-                // navigate('/leads')
                 toast({ title: 'Lead created successfully', description: 'The lead has been created successfully.', category: 'success' })
+                navigate('/leads')
             }).catch((
                 error
             ) => {
@@ -424,6 +424,36 @@ export default function LeadCreateFormPage() {
                                             <Input {...field} placeholder="Enter the cost" type="number" min={0} />
                                             <FormDescription>
                                                 Enter the cost.
+                                            </FormDescription>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="cost"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Status</FormLabel>
+                                            <Select onValueChange={(value) => {
+                                                // form.setValue("service", value)
+                                            }}>
+                                                <SelectTrigger className="w-[180px]">
+                                                    <SelectValue placeholder="Select Status" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectGroup>
+                                                        {/* {services.map((service) => (
+                                                            <SelectItem key={service} value={service}>
+                                                                {service}
+                                                            </SelectItem>
+                                                        ))} */}
+
+                                                    </SelectGroup>
+                                                </SelectContent>
+                                            </Select>
+                                            <FormDescription>
+                                                Select the status (default: Active).
                                             </FormDescription>
                                             <FormMessage />
                                         </FormItem>

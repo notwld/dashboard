@@ -1,15 +1,15 @@
-import React from 'react'
 import { Card, CardContent, CardDescription, CardHeader } from '../../../components/ui/card'
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '../../../components/ui/Form/form'
+import { Form,  FormField, FormItem, FormLabel, FormMessage } from '../../../components/ui/Form/form'
 import { Input } from '../../../components/ui/Sidebar/input'
 import { useToast } from '../../../hooks/use-toaster'
 import { baseurl } from '../../../config/baseurl'
 import { Button } from '../../../components/ui/button'
 import logo from '../../../assets/logo.png'
 import { useNavigate } from 'react-router-dom'
+
 const formSchema = z.object({
     email: z.string().min(4, {
         message: "email must be at least 4 characters.",
@@ -49,7 +49,8 @@ export default function LoginPage() {
                     description: 'Logged in successfully',
                     category: 'success'
                 })
-                window.location = '/dashboard'
+                navigate('/dashboard')
+                window.location.reload()
             } else {
                 toast({
                     title: 'Error',

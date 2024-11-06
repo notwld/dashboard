@@ -29,9 +29,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "../../../components/ui/Modal/dialog"
-import { DropdownMenu } from '@radix-ui/react-dropdown-menu'
-import { DropdownMenuTrigger } from '../../../components/ui/Sidebar/dropdown-menu'
-import { DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from '../../../components/ui/Dropdown/dropdown'
+
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import {
