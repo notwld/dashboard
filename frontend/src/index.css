@@ -6,39 +6,42 @@
 
 @layer base {
   :root {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
+    --background: 0 0% 98%; /* Light background */
+    --foreground: 222.2 84% 4.9%; /* Dark foreground */
+    --card: 0 0% 98%; /* Light background for cards */
+    --card-foreground: 222.2 84% 4.9%; /* Dark text on cards */
+    --popover: 0 0% 98%; /* Light popover */
+    --popover-foreground: 222.2 84% 4.9%; /* Dark text on popover */
+    --primary: 217.2 91.2% 59.8%; /* Slightly vibrant primary color */
+    --primary-foreground: 0 0% 10%; /* Dark text on primary elements */
+    --secondary: 217.2 32.6% 90%; /* Light secondary color */
+    --secondary-foreground: 222.2 84% 4.9%; /* Dark text on secondary elements */
+    --muted: 217.2 32.6% 94%; /* Light muted color */
+    --muted-foreground: 222.2 84% 4.9%; /* Dark text on muted background */
+    --accent: 210 40% 95%; /* Light accent color */
+    --accent-foreground: 222.2 84% 4.9%; /* Dark text on accent */
+    --destructive: 0 62.8% 45%; /* Softer red for destructive actions */
+    --destructive-foreground: 0 0% 100%; /* White text on destructive background */
+    --border: 217.2 32.6% 80%; /* Light border */
+    --input: 0 0% 90%; /* Light input background */
+    --ring: 212.7 26.8% 40%; /* Slightly darker ring */
+    --chart-1: 220 70% 60%; /* Chart color 1 */
+    --chart-2: 160 60% 50%; /* Chart color 2 */
+    --chart-3: 30 80% 55%; /* Chart color 3 */
+    --chart-4: 280 65% 55%; /* Chart color 4 */
+    --chart-5: 340 75% 55%; /* Chart color 5 */
+    --sidebar-background: 0 0% 96%; /* Light sidebar */
+    --sidebar-foreground: 222.2 84% 4.9%; /* Dark text on sidebar */
+    --sidebar-primary: 220 70% 50%; /* Sidebar primary color */
+    --sidebar-primary-foreground: 0 0% 100%; /* White text on sidebar primary */
+    --sidebar-accent: 217.2 32.6% 90%; /* Light sidebar accent */
+    --sidebar-accent-foreground: 222.2 84% 4.9%; /* Dark text on sidebar accent */
+    --sidebar-border: 0 0% 80%; /* Light sidebar border */
+    --sidebar-ring: 217.2 91.2% 60%; /* Lighter sidebar ring */
+    .bg-background {
+      background-color: hsl(var(--background));
+    }
+}
 
   .dark {
     --background: 240 10% 3.9%;
@@ -73,6 +76,9 @@
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 240 4.9% 83.9%;
+    .bg-background {
+      background-color: hsl(var(--background));
+    }
   }
 
   * {
