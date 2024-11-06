@@ -41,16 +41,17 @@ router.post('/create-lead', async (req: Request, res: Response) => {
                 name: body.name,
                 email: body.email,
                 number: body.number,
-                cost:parseFloat(body.cost),
+                cost: parseFloat(body.cost),
                 comments: body.comments,
                 credits: Number(body.credits),
                 address: body.address,
-                assignee:{
-                    connect:{
-                        id:Number(body.userId)
+                status: body.status,
+                assignee: {
+                    connect: {
+                        id: Number(body.userId)
                     }
                 },
-                
+
             },
             include: {
                 assignee: true,
@@ -103,16 +104,17 @@ router.put('/update-lead/:id', async (req: Request, res: Response) => {
                 name: body.name,
                 email: body.email,
                 number: body.number,
-                cost:parseFloat(body.cost),
+                cost: parseFloat(body.cost),
+                status: body.status,
                 comments: body.comments,
                 credits: Number(body.credits),
                 address: body.address,
-                assignee:{
-                    connect:{
-                        id:Number(body.userId)
+                assignee: {
+                    connect: {
+                        id: Number(body.userId)
                     }
                 },
-                
+
             }
         });
 

@@ -91,6 +91,7 @@ export type Lead = {
     name: string
     email: string
     number: string
+    status: string
     address: string
     credits: number
     cost: number
@@ -103,6 +104,7 @@ const formSchema = z.object({
     userId: z.string().nonempty("Assigned person is required."),
     firstCall: z.string().optional(),
     comments: z.string().optional(),
+    status: z.string().optional(),
     service: z.string().nonempty("Service is required."),
     name: z.string().nonempty("Name is required."),
     email: z.string().email("Enter a valid email."),
@@ -167,6 +169,15 @@ export default function ManageLeads() {
         open: false,
         lead: {}
     })
+    const STATUS = [
+        "Paid",
+        "Already Hired",
+        "Call back scheduled",
+        "Voicemail",
+        "Wrong number",
+        "Number not in service",
+        "Refund"
+    ]
     const ProfileForm = () => {
 
         const form = useForm<z.infer<typeof formSchema>>({
@@ -179,6 +190,7 @@ export default function ManageLeads() {
                 firstCall: isDialogOpen.lead.firstCall || "",
                 comments: isDialogOpen.lead.comments || "",
                 service: isDialogOpen.lead.service || "",
+                status: isDialogOpen.lead.status || "",
                 name: isDialogOpen.lead.name || "",
                 email: isDialogOpen.lead.email || "",
                 number: isDialogOpen.lead.number || "",
@@ -515,6 +527,36 @@ export default function ManageLeads() {
                                 </FormItem>
                             )}
                         />
+                        <FormField
+                            control={form.control}
+                            name="cost"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Status</FormLabel>
+                                    <Select onValueChange={(value) => {
+                                        form.setValue("status", value)
+                                    }}>
+                                        <SelectTrigger className="w-[180px]">
+                                            <SelectValue placeholder="Select Status" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectGroup>
+                                                {STATUS.map((status) => (
+                                                    <SelectItem key={status} value={status}>
+                                                        {status}
+                                                    </SelectItem>
+                                                ))}
+
+                                            </SelectGroup>
+                                        </SelectContent>
+                                    </Select>
+                                    <FormDescription>
+                                        Select the status (default: Active).
+                                    </FormDescription>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
                         <Button type="submit" className='rounded-xl grid-cols-2'>{loading ? <Spinner className="mr-2">
                             <span className="sr-only">Updating Lead...</span>
                         </Spinner> : "Update Lead"}</Button>
@@ -677,9 +719,11 @@ export default function ManageLeads() {
             accessorKey: "status",
             header: "Status",
             cell: ({ row }) => (
-                <div className="flex items-center">
-                    <div className="w-3 h-3 rounded-full bg-green-500 mr-2"></div>
-                    <div>Active</div>
+                <div
+                    className={`text-center rounded-xl px-4 ${row.getValue("status") === "Paid" ? "bg-green-500" : "bg-red-500"}`}
+                >
+
+                    {row.getValue("status")}
                 </div>
             )
         },

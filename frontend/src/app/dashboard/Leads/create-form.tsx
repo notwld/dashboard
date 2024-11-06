@@ -87,7 +87,7 @@ export default function LeadCreateFormPage() {
             number: "",
             address: "",
             credits: "0",
-            status:"",
+            status: "",
             cost: "0",
         },
     })
@@ -137,7 +137,7 @@ export default function LeadCreateFormPage() {
     useEffect(() => {
         fetchUsers()
     }, [])
-    const[name, setName] = useState("")
+    const [name, setName] = useState("")
     const findName = (id: string) => {
         const user = users.find((user: User) => user.id === id)
         if (user) {
@@ -145,10 +145,13 @@ export default function LeadCreateFormPage() {
         }
     }
     const STATUS = [
-        "Active",
-        "Inactive",
-        "Pending",
-        "Completed",
+        "Paid",
+        "Already Hired",
+        "Call back scheduled",
+        "Voicemail",
+        "Wrong number",
+        "Number not in service",
+        "Refund"
     ]
 
     return (
@@ -253,9 +256,9 @@ export default function LeadCreateFormPage() {
                                             <Select
                                                 onValueChange={(value) => {
                                                     form.setValue("userId", value);
-                                                    findName(value)  
+                                                    findName(value)
                                                 }}
-                                                value={field.value}  
+                                                value={field.value}
                                             >
                                                 <SelectTrigger className="w-[180px]">
                                                     <SelectValue placeholder={"Select User"}>
@@ -444,7 +447,7 @@ export default function LeadCreateFormPage() {
                                         <FormItem>
                                             <FormLabel>Status</FormLabel>
                                             <Select onValueChange={(value) => {
-                                                // form.setValue("service", value)
+                                                form.setValue("status", value)
                                             }}>
                                                 <SelectTrigger className="w-[180px]">
                                                     <SelectValue placeholder="Select Status" />

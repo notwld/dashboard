@@ -10,7 +10,7 @@ const authorize = (req : Request, res : Response, next : NextFunction) => {
     if (!token) return res.send("Access Denied")
     try {
         const verified = jwt.verify(token, process.env.JWT_SECRET||"JWT_SECRET")
-        req.session.user = verified?.user_id
+        req.session.user = verified?.user_id || null
         next()
     } catch (err) {
         res.status(400).send("Invalid Token")
