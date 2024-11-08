@@ -32,24 +32,7 @@
 //                                             <TableCell>
 
 //                                                 {permissions.delete &&
-//                                                     <AlertDialog>
-//                                                         <AlertDialogTrigger>    <Button variant="destructive" className='rounded-xl text-xl'>Delete</Button> </AlertDialogTrigger>
-//                                                         <AlertDialogContent>
-//                                                             <AlertDialogHeader>
-//                                                                 <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-//                                                                 <AlertDialogDescription>
-//                                                                     This action cannot be undone. This will permanently delete your account
-//                                                                     and remove your data from our servers.
-//                                                                 </AlertDialogDescription>
-//                                                             </AlertDialogHeader>
-//                                                             <AlertDialogFooter>
-//                                                                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-//                                                                 <AlertDialogAction onClick={() => {
-//                                                                     deleteRole(role.id)
-//                                                                 }}>Continue</AlertDialogAction>
-//                                                             </AlertDialogFooter>
-//                                                         </AlertDialogContent>
-//                                                     </AlertDialog>}
+//    }
 //                                             </TableCell>}
 //                                     </TableRow>
 //                                 ))}
@@ -173,6 +156,10 @@ export function Roles() {
         fetchRoles()
         checkPermissions()
     }, [])
+    const [isAlertOpen, setIsAlertOpen] = useState({
+        open: false,
+        id: ''
+    })
     const columns: ColumnDef<Role>[] = [
         {
             id: "select",
@@ -257,16 +244,16 @@ export function Roles() {
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             {permissions.edit && <DropdownMenuItem
-                            onClick={() => {
-                                setRole(role)
-                                setIsDialogOpen(true)
-                            }}
+                                onClick={() => {
+                                    setRole(role)
+                                    setIsDialogOpen(true)
+                                }}
                             >
                                 Edit
                             </DropdownMenuItem>}
                             {permissions.delete && <DropdownMenuItem
                                 onClick={() => {
-                                    deleteRole(role.id)
+                                    setIsAlertOpen({ open: true, id: role.id })
                                 }}
                             >
                                 Delete
@@ -457,6 +444,23 @@ export function Roles() {
 
                 </DialogContent>
             </Dialog>
+            <AlertDialog open={isAlertOpen.open} onOpenChange={() => setIsAlertOpen({ open: false, id: '' })}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This action cannot be undone. This will permanently delete your account
+                            and remove your data from our servers.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => {
+                            deleteRole(isAlertOpen.id)
+                        }}>Continue</AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
             <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
                 <SidebarTrigger className="-ml-1" />
                 <Separator orientation="vertical" className="mr-2 h-4" />
@@ -486,10 +490,10 @@ export function Roles() {
             </header>
             <div className="flex items-center p-4">
                 <Input
-                    placeholder="Filter emails..."
-                    value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
+                    placeholder="Filter names..."
+                    value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
                     onChange={(event) =>
-                        table.getColumn("email")?.setFilterValue(event.target.value)
+                        table.getColumn("name")?.setFilterValue(event.target.value)
                     }
                     className="max-w-sm"
                 />
