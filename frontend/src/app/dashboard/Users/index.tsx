@@ -247,9 +247,18 @@ export default function Users() {
         },
         {
             accessorKey: "id",
-            header: "Id",
+            header: ({column}) => {
+                return (
+                    <div
+                        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                        className="cursor-pointer text-lg"
+                    >
+                        Id
+                    </div>
+                )
+            },
             cell: ({ row }) => (
-                <div className="capitalize">{row.getValue("id")}</div>
+                <div className="capitalize text-lg">{row.getValue("id")}</div>
             ),
         },
         {
@@ -259,28 +268,29 @@ export default function Users() {
                     <Button
                         variant="ghost"
                         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                        className='text-lg'
                     >
                         Name
                         <ArrowUpDown />
                     </Button>
                 )
             },
-            cell: ({ row }) => <div className="lowercase">{row.getValue("name")}</div>,
+            cell: ({ row }) => <div className="lowercase text-lg">{row.getValue("name")}</div>,
         },
         {
             accessorKey: "email",
-            header: () => <div className="text-right">Email</div>,
+            header: () => <div className="text-right text-lg">Email</div>,
             cell: ({ row }) => {
 
-                return <div className="text-right font-medium">{row.getValue("email")}</div>
+                return <div className="text-right text-lg">{row.getValue("email")}</div>
             },
         },
         {
             accessorKey: "role",
-            header: () => <div className="text-right">Role</div>,
+            header: () => <div className="text-right text-lg">Role</div>,
             cell: ({ row }) => {
 
-                return <div className="text-right font-medium">{row.getValue("role")?.name}</div>
+                return <div className="text-right text-xl">{row.getValue("role")?.name}</div>
             },
         },
         {
@@ -592,7 +602,7 @@ export default function Users() {
     return (
         <div className="w-full">
             <Dialog open={isDialogOpen} onOpenChange={() => setIsDialogOpen(!isDialogOpen)}>
-                
+
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle>Edit Profile</DialogTitle>

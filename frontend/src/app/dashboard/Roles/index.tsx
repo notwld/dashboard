@@ -136,9 +136,9 @@ export function Roles() {
         },
         {
             accessorKey: "id",
-            header: "Id",
+            header: () => <div className="text-lg">ID</div>,
             cell: ({ row }) => (
-                <div className="capitalize">{row.getValue("id")}</div>
+                <div className="text-lg capitalize">{row.getValue("id")}</div>
             ),
         },
         {
@@ -148,28 +148,29 @@ export function Roles() {
                     <Button
                         variant="ghost"
                         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                        className='text-lg'
                     >
                         Name
                         <ArrowUpDown />
                     </Button>
                 )
             },
-            cell: ({ row }) => <div className="lowercase">{row.getValue("name")}</div>,
+            cell: ({ row }) => <div className="lowercase text-lg">{row.getValue("name")}</div>,
         },
         {
             accessorKey: "createdAt",
-            header: () => <div className="text-right">Created At</div>,
+            header: () => <div className="text-right text-lg">Created At</div>,
             cell: ({ row }) => {
 
-                return <div className="text-right font-medium">{format(new Date(row.getValue("createdAt")), "MMM dd, yyyy")}</div>
+                return <div className="text-right font-medium text-lg">{format(new Date(row.getValue("createdAt")), "MMM dd, yyyy")}</div>
             },
         },
         {
             accessorKey: "updatedAt",
-            header: () => <div className="text-right">Updated At</div>,
+            header: () => <div className="text-right text-lg">Updated At</div>,
             cell: ({ row }) => {
 
-                return <div className="text-right font-medium">{format(new Date(row.getValue("updatedAt")), "MMM dd, yyyy")}</div>
+                return <div className="text-right font-medium text-lg">{format(new Date(row.getValue("updatedAt")), "MMM dd, yyyy")}</div>
             },
         },
         {

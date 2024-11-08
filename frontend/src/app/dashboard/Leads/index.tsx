@@ -635,7 +635,7 @@ export default function ManageLeads() {
                     month: "short",
                     year: "numeric"
                 });
-                return <div>{formattedDate}</div>;
+                return <div className='w-[120px]'>{formattedDate}</div>;
             },
         },
         {
@@ -653,7 +653,7 @@ export default function ManageLeads() {
                     hour12: true
                 });
 
-                return <div>{formattedTime}</div>;
+                return <div className='w-[120px]'>{formattedTime}</div>;
             },
         },
         {
@@ -677,17 +677,17 @@ export default function ManageLeads() {
         {
             accessorKey: "comments",
             header: "Comments",
-            cell: ({ row }) => <div>{row.getValue("comments")}</div>,
+            cell: ({ row }) => <div className='w-[250px]'>{row.getValue("comments")}</div>,
         },
         {
             accessorKey: "service",
             header: "Service",
-            cell: ({ row }) => <div>{row.getValue("service")}</div>,
+            cell: ({ row }) => <div className='w-[150px]'>{row.getValue("service")}</div>,
         },
         {
             accessorKey: "name",
             header: "Name",
-            cell: ({ row }) => <div>{row.getValue("name")}</div>,
+            cell: ({ row }) => <div className='w-[150px]'>{row.getValue("name")}</div>,
         },
         {
             accessorKey: "email",
@@ -702,7 +702,7 @@ export default function ManageLeads() {
         {
             accessorKey: "address",
             header: "Address",
-            cell: ({ row }) => <div>{row.getValue("address")}</div>,
+            cell: ({ row }) => <div className='w-[250px]'>{row.getValue("address")}</div>,
         },
         {
             accessorKey: "credits",
@@ -719,7 +719,7 @@ export default function ManageLeads() {
             header: "Status",
             cell: ({ row }) => (
                 <div
-                    className={`text-center rounded-xl px-4 ${row.getValue("status") === "Paid" ? "bg-green-500" : "bg-red-500"}`}
+                    className={`w-[250px] text-center rounded-xl px-4 ${row.getValue("status") === "Paid" ? "bg-green-500" : "bg-red-500"}`}
                 >
                     {row.getValue("status")}
                 </div>
