@@ -677,7 +677,7 @@ export default function ManageLeads() {
         {
             accessorKey: "comments",
             header: "Comments",
-            cell: ({ row }) => <div className='w-[250px]'>{row.getValue("comments")}</div>,
+            cell: ({ row }) => <div className='w-[350px]'>{row.getValue("comments")}</div>,
         },
         {
             accessorKey: "service",

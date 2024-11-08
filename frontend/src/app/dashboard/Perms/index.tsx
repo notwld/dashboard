@@ -213,7 +213,7 @@ const Permissions = () => {
                                 }}
                               />
                             </FormControl>
-                            <FormLabel>{item.label}</FormLabel>
+                            <FormLabel className="text-lg">{item.label}</FormLabel>
                           </FormItem>
                         )} />
                       ))}
