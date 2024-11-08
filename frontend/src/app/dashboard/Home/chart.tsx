@@ -153,7 +153,6 @@ import { TrendingUp } from "lucide-react";
 
 
 function TopPayingCustomersChart({ leads }) {
-  // 1. Prepare chart data by aggregating total paid per customer
   const chartData = leads.reduce((acc, lead) => {
     const { name, credits } = lead;
     const payment = parseInt(credits, 10) || 0;
@@ -167,12 +166,11 @@ function TopPayingCustomersChart({ leads }) {
     return acc;
   }, {});
 
-  // Convert to array and sort to highlight top-paying customers
   const sortedData = Object.values(chartData)
     .sort((a, b) => b.totalPaid - a.totalPaid)
     .map((customer, index) => ({
       ...customer,
-      fill: `hsl(${(index * 50) % 360}, 70%, 50%)`, // Dynamic color for each segment
+      fill: `hsl(${(index * 50) % 360}, 70%, 50%)`, 
     }));
 
   // 2. Chart Configuration
@@ -182,7 +180,6 @@ function TopPayingCustomersChart({ leads }) {
     },
   } satisfies ChartConfig;
 
-  // 3. Render the chart component
   return (
     <Card className="flex flex-col">
       <CardHeader className="items-center pb-0">

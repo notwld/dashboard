@@ -41,6 +41,9 @@ app.use("/auth", Auth);
 app.use('/role', Role);
 app.use('/perm', Permission);
 app.use('/lead', Lead);
+
+
+
 http.createServer(app).listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });

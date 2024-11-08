@@ -57,7 +57,11 @@ router.get('/get-users', async (req: Request, res: Response) => {
     try {
         const users = await prisma.user.findMany({
             include: {
-                role: true,
+                role: {
+                    include: {
+                        permissions: true,
+                    }
+                }
             },
         });
         // console.log(users);
