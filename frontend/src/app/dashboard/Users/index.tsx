@@ -360,7 +360,7 @@ export default function Users() {
                                     <TableHead className="text-left text-lg">Role</TableHead>
                                     <TableHead className="text-left text-lg">Created At</TableHead>
                                     <TableHead className="text-left text-lg">Updated At</TableHead>
-                                    {   permissions.edit || permissions.delete &&
+                                    {   (permissions.edit || permissions.delete) &&
                                         <TableHead className="text-left text-lg">Actions At</TableHead>}
                                 </TableRow>
                             </TableHeader>
@@ -373,7 +373,7 @@ export default function Users() {
                                         <TableCell className="text-left text-lg">{user.role ? user?.role?.name : "No Role"}</TableCell>
                                         <TableCell className="text-left text-lg">{user.createdAt}</TableCell>
                                         <TableCell className="text-left text-lg">{user.updatedAt}</TableCell>
-                                       {    permissions.edit || permissions.delete &&
+                                       {    (permissions.edit || permissions.delete) &&
                                         <TableCell className="text-left text-lg">
 
                                             {permissions.edit &&

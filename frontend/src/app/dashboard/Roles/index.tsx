@@ -1,24 +1,87 @@
-import { useNavigate } from "react-router-dom"
-import { Button } from "../../../components/ui/button"
-import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage } from "../../../components/ui/Sidebar/breadcrumb"
-import { Separator } from "../../../components/ui/Sidebar/separator"
-import { SidebarTrigger } from "../../../components/ui/Sidebar/sidebar"
-import {
-    Table,
-    TableBody,
-    TableCaption,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "../../../components/ui/Table/table"
-import { AlertDialog } from '@radix-ui/react-alert-dialog'
-import { AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../../../components/ui/Alert/alert'
 
-import { useEffect, useState } from "react"
-import { baseurl } from "../../../config/baseurl"
-import { useToast } from "../../../hooks/use-toaster"
+
+// export function Roles() {
+
+//     return (
+//         <div>
+
+//             <div className="flex flex-1 flex-col gap-4 p-4">
+
+//                 <div className="min-h-[100vh] flex-1 rounded-xl md:min-h-min" >
+//                     <div className="p-4 rounded-xl bg-muted/50">
+//                         <Table>
+//                             <TableCaption className="text-lg">{roles.length} Roles found in the system. {loading && <Spinner />}</TableCaption>
+//                             <TableHeader>
+//                                 <TableRow>
+//                                     <TableHead className="w-[100px] text-lg">Id</TableHead>
+//                                     <TableHead className="text-lg">Name</TableHead>
+//                                     <TableHead className="text-left text-lg">Created At</TableHead>
+//                                     <TableHead className="text-left text-lg">Updated At</TableHead>
+//                                     {(permissions.edit || permissions.delete) &&
+//                                         <TableHead className="text-left text-lg">Actions At</TableHead>}
+//                                 </TableRow>
+//                             </TableHeader>
+//                             <TableBody>
+//                                 {roles.map((role: Role) => (
+//                                     <TableRow key={role.id}>
+//                                         <TableCell className="text-lg">{role.id}</TableCell>
+//                                         <TableCell className="text-lg">{role.name}</TableCell>
+//                                         <TableCell className="text-lg">{role.createdAt}</TableCell>
+//                                         <TableCell className="text-lg">{role.updatedAt}</TableCell>
+//                                         {(permissions.edit || permissions.delete) &&
+//                                             <TableCell>
+
+//                                                 {permissions.delete &&
+//                                                     <AlertDialog>
+//                                                         <AlertDialogTrigger>    <Button variant="destructive" className='rounded-xl text-xl'>Delete</Button> </AlertDialogTrigger>
+//                                                         <AlertDialogContent>
+//                                                             <AlertDialogHeader>
+//                                                                 <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+//                                                                 <AlertDialogDescription>
+//                                                                     This action cannot be undone. This will permanently delete your account
+//                                                                     and remove your data from our servers.
+//                                                                 </AlertDialogDescription>
+//                                                             </AlertDialogHeader>
+//                                                             <AlertDialogFooter>
+//                                                                 <AlertDialogCancel>Cancel</AlertDialogCancel>
+//                                                                 <AlertDialogAction onClick={() => {
+//                                                                     deleteRole(role.id)
+//                                                                 }}>Continue</AlertDialogAction>
+//                                                             </AlertDialogFooter>
+//                                                         </AlertDialogContent>
+//                                                     </AlertDialog>}
+//                                             </TableCell>}
+//                                     </TableRow>
+//                                 ))}
+
+//                             </TableBody>
+//                         </Table>
+//                     </div>
+//                 </div>
+//             </div>
+
+//         </div>
+
+//     )
+// }
+
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../../../components/ui/Alert/alert'
+import { useState, useEffect } from "react"
+import * as React from "react"
+import {
+    ColumnDef,
+    ColumnFiltersState,
+    SortingState,
+    VisibilityState,
+    flexRender,
+    getCoreRowModel,
+    getFilteredRowModel,
+    getPaginationRowModel,
+    getSortedRowModel,
+    useReactTable,
+} from "@tanstack/react-table"
 import { set, z } from "zod"
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '../../../components/ui/Form/form'
 import {
     Dialog,
     DialogClose,
@@ -29,28 +92,58 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "../../../components/ui/Modal/dialog"
+import { format } from "date-fns"
 
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
+
+import { Popover, PopoverContent, PopoverTrigger } from '../../../components/ui/popover'
+import { CalendarIcon } from 'lucide-react'
+import { Calendar } from '../../../components/ui/calendar'
+import { cn } from '../../../lib/utils'
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectScrollDownButton, SelectValue, SelectScrollUpButton, SelectSeparator, SelectTrigger } from '../../../components/ui/Select/select'
+import { Textarea } from '../../../components/ui/textarea'
+
+import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react"
+
+import { Button } from "../../../components/ui/button"
+import { Checkbox } from "../../../components/ui/Checkbox/checkbox"
 import {
-    Form,
-    FormControl,
-    FormDescription,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from "../../../components/ui/Form/form"
+    DropdownMenu,
+    DropdownMenuCheckboxItem,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "../../../components/ui/Dropdown/dropdown"
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "../../../components/ui/Table/table"
+import { useNavigate } from 'react-router-dom'
+import { baseurl } from '../../../config/baseurl'
+import { Spinner } from '../../../components/ui/spinner'
+import { toast, useToast } from '../../../hooks/use-toaster'
+import { SidebarTrigger } from '../../../components/ui/Sidebar/sidebar'
+import { Separator } from '../../../components/ui/Sidebar/separator'
+import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage } from '../../../components/ui/Sidebar/breadcrumb'
 import { Input } from '../../../components/ui/Sidebar/input'
-import { Spinner } from "../../../components/ui/spinner"
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+
 type Role = {
-    id: number;
-    name: string;
-    createdAt: string;
-    updatedAt: string;
-};
+    id: string
+    name: string
+    createdAt: string
+    updatedAt: string
+}
+
 
 export function Roles() {
+    const [sorting, setSorting] = useState<SortingState>([])
     const navigate = useNavigate()
     const [roles, setRoles] = useState([])
     const [role, setRole] = useState<Role>()
@@ -80,6 +173,111 @@ export function Roles() {
         fetchRoles()
         checkPermissions()
     }, [])
+    const columns: ColumnDef<Role>[] = [
+        {
+            id: "select",
+            header: ({ table }) => (
+                <Checkbox
+                    checked={
+                        table.getIsAllPageRowsSelected() ||
+                        (table.getIsSomePageRowsSelected() && "indeterminate")
+                    }
+                    onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+                    aria-label="Select all"
+                />
+            ),
+            cell: ({ row }) => (
+                <Checkbox
+                    checked={row.getIsSelected()}
+                    onCheckedChange={(value) => row.toggleSelected(!!value)}
+                    aria-label="Select row"
+                />
+            ),
+            enableSorting: false,
+            enableHiding: false,
+        },
+        {
+            accessorKey: "id",
+            header: "Id",
+            cell: ({ row }) => (
+                <div className="capitalize">{row.getValue("id")}</div>
+            ),
+        },
+        {
+            accessorKey: "name",
+            header: ({ column }) => {
+                return (
+                    <Button
+                        variant="ghost"
+                        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                    >
+                        Name
+                        <ArrowUpDown />
+                    </Button>
+                )
+            },
+            cell: ({ row }) => <div className="lowercase">{row.getValue("name")}</div>,
+        },
+        {
+            accessorKey: "createdAt",
+            header: () => <div className="text-right">Created At</div>,
+            cell: ({ row }) => {
+
+                return <div className="text-right font-medium">{format(new Date(row.getValue("createdAt")), "MMM dd, yyyy")}</div>
+            },
+        },
+        {
+            accessorKey: "updatedAt",
+            header: () => <div className="text-right">Updated At</div>,
+            cell: ({ row }) => {
+
+                return <div className="text-right font-medium">{format(new Date(row.getValue("updatedAt")), "MMM dd, yyyy")}</div>
+            },
+        },
+        {
+            id: "actions",
+            enableHiding: false,
+            cell: ({ row }) => {
+                const role = row.original
+
+                return (
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                                <span className="sr-only">Open menu</span>
+                                <MoreHorizontal />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuItem
+                                onClick={() => navigator.clipboard.writeText(role.id)}
+                            >
+                                Copy role ID
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            {permissions.edit && <DropdownMenuItem
+                            onClick={() => {
+                                setRole(role)
+                                setIsDialogOpen(true)
+                            }}
+                            >
+                                Edit
+                            </DropdownMenuItem>}
+                            {permissions.delete && <DropdownMenuItem
+                                onClick={() => {
+                                    deleteRole(role.id)
+                                }}
+                            >
+                                Delete
+
+                            </DropdownMenuItem>}
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                )
+            },
+        },
+    ]
     const deleteRole = async (id: number) => {
         setLoading(true)
         await fetch(baseurl + `/role/delete-role/${id}`, {
@@ -122,14 +320,14 @@ export function Roles() {
         if (permissionObj) {
             const permissionArray = ["Create Roles", "Read Roles", "Edit Roles", "Delete Roles"];
             const updatedPermissions = { ...permissions }; // Create a copy of the initial permissions
-    
+
             permissionObj.forEach((permission) => {
                 const permissionKey = permission.name.split(" ")[0].toLowerCase();
                 if (permissionArray.includes(permission.name)) {
                     updatedPermissions[permissionKey] = true;
                 }
             });
-    
+
             setPermissions(updatedPermissions); // Set the state once with the updated permissions
         }
         console.log(permissions)
@@ -194,6 +392,7 @@ export function Roles() {
 
         }
 
+
         return (
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 mt-5">
@@ -219,9 +418,45 @@ export function Roles() {
                 </form>
             </Form>
         )
-    }
+    } const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
+        []
+    )
+    const [columnVisibility, setColumnVisibility] =
+        React.useState<VisibilityState>({})
+    const [rowSelection, setRowSelection] = React.useState({})
+
+    const table = useReactTable({
+        data: roles,
+        columns,
+        onSortingChange: setSorting,
+        onColumnFiltersChange: setColumnFilters,
+        getCoreRowModel: getCoreRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
+        getSortedRowModel: getSortedRowModel(),
+        getFilteredRowModel: getFilteredRowModel(),
+        onColumnVisibilityChange: setColumnVisibility,
+        onRowSelectionChange: setRowSelection,
+        state: {
+            sorting,
+            columnFilters,
+            columnVisibility,
+            rowSelection,
+        },
+    })
+
     return (
-        <div>
+        <div className="w-full">
+            <Dialog open={isDialogOpen} onOpenChange={() => setIsDialogOpen(false)}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Edit Role</DialogTitle>
+                        <DialogDescription>
+                            <ProfileForm />
+                        </DialogDescription>
+                    </DialogHeader>
+
+                </DialogContent>
+            </Dialog>
             <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
                 <SidebarTrigger className="-ml-1" />
                 <Separator orientation="vertical" className="mr-2 h-4" />
@@ -235,7 +470,7 @@ export function Roles() {
                                         Roles
                                     </div>
                                     {permissions.create && <div>
-                                        
+
                                         <Button className="ml-4 rounded-xl"
                                             onClick={() => {
                                                 navigate('/create-role')
@@ -249,79 +484,116 @@ export function Roles() {
                 </Breadcrumb>
 
             </header>
-            <div className="flex flex-1 flex-col gap-4 p-4">
-
-                <div className="min-h-[100vh] flex-1 rounded-xl md:min-h-min" >
-                    <div className="p-4 rounded-xl bg-muted/50">
-                        <Table>
-                            <TableCaption className="text-lg">{roles.length} Roles found in the system. {loading && <Spinner />}</TableCaption>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead className="w-[100px] text-lg">Id</TableHead>
-                                    <TableHead className="text-lg">Name</TableHead>
-                                    <TableHead className="text-left text-lg">Created At</TableHead>
-                                    <TableHead className="text-left text-lg">Updated At</TableHead>
-                                    {permissions.edit || permissions.delete &&
-                                        <TableHead className="text-left text-lg">Actions At</TableHead>}
+            <div className="flex items-center p-4">
+                <Input
+                    placeholder="Filter emails..."
+                    value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
+                    onChange={(event) =>
+                        table.getColumn("email")?.setFilterValue(event.target.value)
+                    }
+                    className="max-w-sm"
+                />
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="outline" className="ml-auto">
+                            Columns <ChevronDown />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        {table
+                            .getAllColumns()
+                            .filter((column) => column.getCanHide())
+                            .map((column) => {
+                                return (
+                                    <DropdownMenuCheckboxItem
+                                        key={column.id}
+                                        className="capitalize"
+                                        checked={column.getIsVisible()}
+                                        onCheckedChange={(value) =>
+                                            column.toggleVisibility(!!value)
+                                        }
+                                    >
+                                        {column.id}
+                                    </DropdownMenuCheckboxItem>
+                                )
+                            })}
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            </div>
+            <div className="rounded-md border m-4">
+                <Table>
+                    <TableHeader>
+                        {table.getHeaderGroups().map((headerGroup) => (
+                            <TableRow key={headerGroup.id}>
+                                {headerGroup.headers.map((header) => {
+                                    return (
+                                        <TableHead key={header.id}>
+                                            {header.isPlaceholder
+                                                ? null
+                                                : flexRender(
+                                                    header.column.columnDef.header,
+                                                    header.getContext()
+                                                )}
+                                        </TableHead>
+                                    )
+                                })}
+                            </TableRow>
+                        ))}
+                    </TableHeader>
+                    <TableBody>
+                        {table.getRowModel().rows?.length ? (
+                            table.getRowModel().rows.map((row) => (
+                                <TableRow
+                                    key={row.id}
+                                    data-state={row.getIsSelected() && "selected"}
+                                >
+                                    {row.getVisibleCells().map((cell) => (
+                                        <TableCell key={cell.id}>
+                                            {flexRender(
+                                                cell.column.columnDef.cell,
+                                                cell.getContext()
+                                            )}
+                                        </TableCell>
+                                    ))}
                                 </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {roles.map((role: Role) => (
-                                    <TableRow key={role.id}>
-                                        <TableCell className="text-lg">{role.id}</TableCell>
-                                        <TableCell className="text-lg">{role.name}</TableCell>
-                                        <TableCell className="text-lg">{role.createdAt}</TableCell>
-                                        <TableCell className="text-lg">{role.updatedAt}</TableCell>
-                                      {  permissions.edit || permissions.delete &&
-                                        <TableCell>
-                                            {   permissions.edit &&
-                                                <Dialog open={isDialogOpen} onOpenChange={() => setIsDialogOpen(!isDialogOpen)}>
-                                                <DialogTrigger>
-                                                    <Button variant="default" className="mr-2 rounded-xl text-lg" onClick={() => {
-                                                        setRole(role)
-                                                    }}>Edit</Button>
-                                                </DialogTrigger>
-                                                <DialogContent>
-                                                    <DialogHeader>
-                                                        <DialogTitle>Edit Role</DialogTitle>
-                                                        <DialogDescription>
-                                                            <ProfileForm />
-
-                                                        </DialogDescription>
-                                                    </DialogHeader>
-
-                                                </DialogContent>
-                                            </Dialog>}
-                                            {   permissions.delete &&
-                                                <AlertDialog>
-                                                <AlertDialogTrigger>    <Button variant="destructive" className='rounded-xl text-xl'>Delete</Button> </AlertDialogTrigger>
-                                                <AlertDialogContent>
-                                                    <AlertDialogHeader>
-                                                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                                                        <AlertDialogDescription>
-                                                            This action cannot be undone. This will permanently delete your account
-                                                            and remove your data from our servers.
-                                                        </AlertDialogDescription>
-                                                    </AlertDialogHeader>
-                                                    <AlertDialogFooter>
-                                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                        <AlertDialogAction onClick={() => {
-                                                            deleteRole(role.id)
-                                                        }}>Continue</AlertDialogAction>
-                                                    </AlertDialogFooter>
-                                                </AlertDialogContent>
-                                            </AlertDialog>}
-                                        </TableCell>}
-                                    </TableRow>
-                                ))}
-
-                            </TableBody>
-                        </Table>
-                    </div>
+                            ))
+                        ) : (
+                            <TableRow>
+                                <TableCell
+                                    colSpan={columns.length}
+                                    className="h-24 text-center"
+                                >
+                                    No results.
+                                </TableCell>
+                            </TableRow>
+                        )}
+                    </TableBody>
+                </Table>
+            </div>
+            <div className="flex items-center justify-end space-x-2 p-4">
+                <div className="flex-1 text-sm text-muted-foreground">
+                    {table.getFilteredSelectedRowModel().rows.length} of{" "}
+                    {table.getFilteredRowModel().rows.length} row(s) selected.
+                </div>
+                <div className="space-x-2">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => table.previousPage()}
+                        disabled={!table.getCanPreviousPage()}
+                    >
+                        Previous
+                    </Button>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => table.nextPage()}
+                        disabled={!table.getCanNextPage()}
+                    >
+                        Next
+                    </Button>
                 </div>
             </div>
-
         </div>
-
     )
 }

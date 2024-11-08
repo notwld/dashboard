@@ -386,7 +386,6 @@ export default function ManageLeads() {
                                             <SelectGroup>
                                                 <SelectItem value="answered">Answered</SelectItem>
                                                 <SelectItem value="unanswered">Unanswered</SelectItem>
-
                                             </SelectGroup>
                                         </SelectContent>
                                     </Select>
@@ -722,7 +721,6 @@ export default function ManageLeads() {
                 <div
                     className={`text-center rounded-xl px-4 ${row.getValue("status") === "Paid" ? "bg-green-500" : "bg-red-500"}`}
                 >
-
                     {row.getValue("status")}
                 </div>
             )
