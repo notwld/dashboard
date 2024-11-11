@@ -13,7 +13,7 @@ import {
     CardDescription,
     CardHeader,
     CardTitle,
-    
+
 } from "../../../components/ui/card"
 import {
     Command,
@@ -33,7 +33,7 @@ import { Switch } from '../../../components/ui/switch'
 import { useEffect, useState } from 'react'
 import { baseurl } from '../../../config/baseurl'
 import { ScrollArea } from '../../../components/ui/scroll-area'
-import { Chart1, SalesChart, TopPayingCustomersChart, TopServicesChart } from './chart'
+import { Chart1, SalesChart, Status, TopPayingCustomersChart, TopServicesChart } from './chart'
 type User = {
     id: string
     name: string
@@ -129,15 +129,18 @@ export default function Home() {
                     </BreadcrumbList>
                 </Breadcrumb>
             </header>
-            <div className="flex flex-1 flex-col gap-4 p-4">
+            <div className="flex flex-col gap-4 p-4">
+            <div className="flex" >
+                  <div className=" rounded-xl" >
+                        <SalesChart leads={leads} />
+                    </div>
+                </div>
                 <div className="grid auto-rows-min gap-4 md:grid-cols-3">
                     <div className=" rounded-xl h-full" >
                         <TopPayingCustomersChart leads={leads} />
                     </div>
-                    <div className=" rounded-xl h-full" >
-                    <SalesChart leads={leads} />
+                    <Status leads={leads} />
 
-                    </div>
                     <div className=" rounded-xl " >
                         <Card className='h-full rounded-xl'>
                             <CardHeader>
@@ -197,11 +200,7 @@ export default function Home() {
                         </Card>
                     </div>
                 </div>
-                <div className="flex-1 rounded-xl" >
-                    <div className="rounded-xl ">
-                        <Chart1 leads={leads} />
-                    </div>
-                </div>
+               
             </div>
         </div>
     )

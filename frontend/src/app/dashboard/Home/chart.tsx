@@ -1,5 +1,5 @@
 import * as React from "react"
-import { Bar, BarChart, CartesianGrid, Line, LineChart, RadarChart, ResponsiveContainer, XAxis, YAxis } from "recharts"
+import { Bar, BarChart, CartesianGrid, LabelList, Line, LineChart, RadarChart, ResponsiveContainer, XAxis, YAxis } from "recharts"
 import {
     Card,
     CardContent,
@@ -75,7 +75,7 @@ function Chart1({ leads }) {
         <Card>
             <CardHeader className="flex flex-col items-stretch space-y-0 border-b p-0 sm:flex-row">
                 <div className="flex flex-1 flex-col justify-center gap-1 px-6 py-5 sm:py-6">
-                    <CardTitle>Bar Chart - Status Analysis</CardTitle>
+                    <CardTitle>Status Analysis</CardTitle>
                     <CardDescription>Showing total entries by status</CardDescription>
                 </div>
                 <div className="flex">
@@ -87,10 +87,10 @@ function Chart1({ leads }) {
                             onClick={() => setActiveChart(key)}
                         >
                             <span className="text-xs text-muted-foreground">
-                                {chartConfig.status.label} - {key}
+                                {key}
                             </span>
                             <span className="text-lg font-bold leading-none sm:text-3xl">
-                                {(total[key] || 0).toLocaleString()}
+                                ${(total[key] || 0).toLocaleString()}
                             </span>
                         </button>
                     ))}
@@ -153,62 +153,56 @@ import { TrendingUp } from "lucide-react";
 
 
 function TopPayingCustomersChart({ leads }) {
-    const chartData = leads.reduce((acc, lead) => {
-        const { name, credits } = lead;
-        const payment = parseInt(credits, 10) || 0;
+    type Client = {
+        client: string;
+        totalCredits: string;
+        deals: string;
+    };
+    const clients = leads.reduce((acc, lead) => {
+        const { name: client, status, credits } = lead;
+        const amount = parseInt(credits, 10) || 0;
 
-        if (name) {
-            if (!acc[name]) {
-                acc[name] = { name: name, totalPaid: 0 };
+        if (client && status === "Paid") {
+            if (!acc[client]) {
+                acc[client] = { client: client, totalCredits: 0, deals: 0 };
             }
-            acc[name].totalPaid += payment;
+            acc[client].totalCredits += amount;
+            acc[client].deals += 1; // Increment deals count for each completed deal
         }
         return acc;
     }, {});
-
-    const sortedData = Object.values(chartData)
-        .sort((a, b) => b.totalPaid - a.totalPaid)
-        .map((customer, index) => ({
-            ...customer,
-            fill: `hsl(${(index * 50) % 360}, 70%, 50%)`,
-        }));
-
-    // 2. Chart Configuration
-    const chartConfig = {
-        totalPaid: {
-            label: "Total Paid",
-        },
-    } satisfies ChartConfig;
+    console.log(clients)
 
     return (
         <Card className="flex flex-col">
-            <CardHeader className="items-center pb-0">
-                <CardTitle>Top Paying Customers</CardTitle>
-                <CardDescription>Ranking by Total Amount Paid</CardDescription>
+            <CardHeader className=" pb-0">
+                <CardTitle>Deals Closed</CardTitle>
+                <CardDescription>Clients who paid</CardDescription>
             </CardHeader>
-            <CardContent className="flex-1 pb-0">
-                <ChartContainer
-                    config={chartConfig}
-                    className="mx-auto aspect-square max-h-[250px]"
-                >
-                    <PieChart>
-                        <ChartTooltip
-                            cursor={false}
-                            content={<ChartTooltipContent hideLabel />}
-                        />
-                        <Pie data={sortedData} dataKey="totalPaid" nameKey="name" />
-                    </PieChart>
-                </ChartContainer>
+            <CardContent className="">
+                    <ScrollArea className="h-[290px] w-full">
+                <Table className="w-full">
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Client</TableHead>
+                            <TableHead>Deals</TableHead>
+                            <TableHead>Total Credits</TableHead>
+                        </TableRow>
+                    </TableHeader>
+
+                    <TableBody className="w-full">
+                        {Object.values(clients).map((client: Client, index:Number) => (
+                            <TableRow key={index}>
+                                <TableCell>{client.client}</TableCell>
+                                <TableCell>{client.deals}</TableCell>
+                                <TableCell>${client.totalCredits}</TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+                        </ScrollArea>
             </CardContent>
-            <CardFooter className="flex-col gap-2 text-sm">
-                <div className="flex items-center gap-2 font-medium leading-none">
-                    {/* Trending up by 5.2% this month  */}
-                    <TrendingUp className="h-4 w-4" />
-                </div>
-                <div className="leading-none text-muted-foreground">
-                    Showing total amount paid by each customer
-                </div>
-            </CardFooter>
+           
         </Card>
     );
 
@@ -289,6 +283,9 @@ function TopServicesChart({ leads }) {
 }
 
 import { Area, AreaChart } from "recharts"
+import { Avatar, AvatarFallback, AvatarImage } from "../../../components/ui/avatar";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../../components/ui/Table/table";
+import { ScrollArea } from "../../../components/ui/scroll-area";
 function SalesChart({ leads }) {
     const [monthlySales, setMonthlySales] = React.useState([]);
     const [currentMonthSales, setCurrentMonthSales] = React.useState(0);
@@ -330,11 +327,11 @@ function SalesChart({ leads }) {
             <CardHeader>
                 <CardTitle>Monthly Sales Chart</CardTitle>
                 <CardDescription>
-                    Showing total sales for each month
+                    ${currentMonthSales.toLocaleString()} earned this month
                 </CardDescription>
             </CardHeader>
             <CardContent>
-                <ChartContainer config={chartConfig}>
+                <ChartContainer className="h-[40vh] w-[81vw]" config={chartConfig}>
                     <AreaChart
                         accessibilityLayer
                         data={monthlySales}
@@ -355,7 +352,7 @@ function SalesChart({ leads }) {
                             tickLine={false}
                             axisLine={false}
                             tickMargin={8}
-                            tickFormatter={(value) => `$${value}`}
+                            tickFormatter={(value) => `$${value/1000}k`}
                         />
                         <ChartTooltip
                             cursor={false}
@@ -375,4 +372,75 @@ function SalesChart({ leads }) {
         </Card>
     );
 }
-export { Chart1, TopPayingCustomersChart, TopServicesChart, SalesChart }
+
+function Status({ leads }) {
+    // Generate the chart data with counts for each status
+    const chartData = Object.values(
+        leads.reduce((acc, lead) => {
+            const { status } = lead;
+            if (status) {
+                if (!acc[status]) {
+                    acc[status] = { status: status, count: 0 };
+                }
+                acc[status].count += 1;
+            }
+            return acc;
+        }, {})
+    );
+
+    return (
+        <Card >
+            <CardHeader>
+                <CardTitle>Pipeline</CardTitle>
+                <CardDescription>Leads by Status</CardDescription>
+            </CardHeader>
+            <CardContent >
+                <ChartContainer config={chartConfig}>
+                    <BarChart
+                        data={chartData}
+                        layout="vertical"
+                        margin={{ right: 16 }}
+                    >
+                        <CartesianGrid horizontal={false} />
+                        <YAxis
+                            dataKey="status"
+                            type="category"
+                            tickLine={false}
+                            axisLine={false}
+                            tickMargin={10} 
+                            className="text-[9.5px]"
+                        />
+                        <XAxis dataKey="count" type="number" />
+                        <ChartTooltip
+                            cursor={false}
+                            content={<ChartTooltipContent indicator="line" />}
+                        />
+                        <Bar
+                            dataKey="count"
+                            layout="vertical"
+                            fill="#8884d8"
+                            radius={4}
+                        >
+                            {/* <LabelList
+                                dataKey="status"
+                                position="insideLeft"
+                                offset={8}
+                                className="fill-foreground"
+                                fontSize={10}
+                            />
+                            */}
+                            <LabelList
+                                dataKey="count"
+                                position="right"
+                                offset={8}
+                                className="fill-foreground"
+                                fontSize={12}
+                            />
+                        </Bar>
+                    </BarChart>
+                </ChartContainer>
+            </CardContent>
+        </Card>
+    );
+}
+export { Chart1, TopPayingCustomersChart, TopServicesChart, SalesChart , Status}
