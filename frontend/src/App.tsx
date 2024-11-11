@@ -30,7 +30,6 @@ const ProtectedRoute = ({ children }) => {
         });
 
         const data = await res.json();
-        console.log(data)
         if (data && data === token) {
           setIsAuthenticated(true);
         } else {

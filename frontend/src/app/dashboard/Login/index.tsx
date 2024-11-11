@@ -43,7 +43,7 @@ export default function LoginPage() {
             const json = await response.json()
             if (response.ok) {
                 localStorage.setItem('token', json.token)
-                localStorage.setItem('user', JSON.stringify(json.user))
+                localStorage.setItem('user', json.user.name)
                 toast({
                     title: 'Success',
                     description: 'Logged in successfully',

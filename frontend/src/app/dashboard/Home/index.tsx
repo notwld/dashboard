@@ -50,7 +50,7 @@ type User = {
 export default function Home() {
     const [darkMode, setDarkMode] = useState(true)
     const [users, setUsers] = useState([])
-    const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')))
+    const [user, setUser] = useState(localStorage.getItem('user'))
     const [leads, setLeads] = useState([])
     const [loading, setLoading] = useState(false)
     const togggleDarkMode = () => {
@@ -91,7 +91,7 @@ export default function Home() {
 
     useEffect(() => {
         fetchUsers()
-        setUser(JSON.parse(localStorage.getItem('user')))
+        setUser(localStorage.getItem('user'))
         fetchLeads()
     }, [])
     return (
@@ -106,7 +106,7 @@ export default function Home() {
                                 <BreadcrumbPage className="flex justify-between items-center text-lg w-full">
                                     <div>
 
-                                        Welcome {user?.name}
+                                        Welcome {user}
                                     </div>
                                     <div className='flex items-center space-x-4'>
                                         <span className='text-muted-foreground'>
