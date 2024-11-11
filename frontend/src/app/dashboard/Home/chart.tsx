@@ -176,14 +176,14 @@ function TopPayingCustomersChart({ leads }) {
     return (
         <Card className="flex flex-col">
             <CardHeader className=" pb-0">
-                <CardTitle>Deals Closed</CardTitle>
-                <CardDescription>Clients who paid</CardDescription>
+                <CardTitle className="text-3xl">Deals Closed</CardTitle>
+                <CardDescription className="text-[16px]">Clients who paid</CardDescription>
             </CardHeader>
             <CardContent className="">
                 <ScrollArea className="h-[290px] w-full">
                     <Table className="w-full">
                         <TableHeader>
-                            <TableRow>
+                            <TableRow className="text-[18px]">
                                 <TableHead>Client</TableHead>
                                 <TableHead>Deals</TableHead>
                                 <TableHead>Total Credits</TableHead>
@@ -192,7 +192,7 @@ function TopPayingCustomersChart({ leads }) {
 
                         <TableBody className="w-full">
                             {Object.values(clients).map((client: Client, index: Number) => (
-                                <TableRow key={index}>
+                                <TableRow className="text-[18px]" key={index}>
                                     <TableCell>{client.client}</TableCell>
                                     <TableCell>{client.deals}</TableCell>
                                     <TableCell>${client.totalCredits}</TableCell>
@@ -295,7 +295,7 @@ import { Progress } from "../../../components/progress";
 function SalesChart({ leads }) {
     const [monthlySales, setMonthlySales] = React.useState([]);
     const [currentMonthSales, setCurrentMonthSales] = React.useState(0);
-    const [goal, setGoal] = React.useState(0);
+    const [goal, setGoal] = React.useState(1000)
 
     React.useEffect(() => {
         // Aggregate sales data by month
@@ -348,20 +348,22 @@ function SalesChart({ leads }) {
             <CardHeader>
                 <div className="flex justify-between items-center">
                     <div>
-                        <CardTitle className="pb-1">Monthly Sales Chart</CardTitle>
+                        <CardTitle className="pb-1 text-3xl">Monthly Sales Chart</CardTitle>
                         <CardDescription>
-                            ${currentMonthSales.toLocaleString()} (goal ${goal}) earned this month 
-                            <div className="flex gap-2 w-[430px] mt-1">
-                                <Progress value={progress} />
-                                <span className="w-full">
-                                    {progress} % {progress >= 100 ? 'completed' : 'to goal'}
+                           <span className="text-[18px]">
+                           ${currentMonthSales.toLocaleString()} (goal ${goal}) earned this month 
+                           </span>
+                            <div className="flex gap-2 w-[550px] mt-1">
+                                <Progress value={progress >= 100 ? 100 : progress} />
+                                <span className="w-full text-[16px]">
+                                     {progress >= 100 ? 'completed' : `${progress} % to goal`}
                                 </span>
                             </div>
                         </CardDescription>
                     </div>
                     <Dialog>
                         <DialogTrigger asChild>
-                            <Button variant="outline">Set Goal</Button>
+                            <Button variant="outline" className="text-xl">Set Goal</Button>
                         </DialogTrigger>
                         <DialogContent className="sm:max-w-[425px]">
                             <DialogHeader>
@@ -411,12 +413,14 @@ function SalesChart({ leads }) {
                             axisLine={false}
                             tickMargin={8}
                             tickFormatter={(value) => value.slice(0, 3)} // Short month name
+                            className="text-lg "
                         />
                         <YAxis
                             tickLine={false}
                             axisLine={false}
                             tickMargin={8}
                             tickFormatter={(value) => `$${value / 1000}k`}
+                            className="text-lg"
                         />
                         <ChartTooltip
                             cursor={false}
@@ -455,8 +459,8 @@ function Status({ leads }) {
     return (
         <Card >
             <CardHeader>
-                <CardTitle>Pipeline</CardTitle>
-                <CardDescription>Leads by Status</CardDescription>
+                <CardTitle className="text-3xl">Pipeline</CardTitle>
+                <CardDescription className="text-[16px]">Leads by Status</CardDescription>
             </CardHeader>
             <CardContent >
                 <ChartContainer config={chartConfig}>

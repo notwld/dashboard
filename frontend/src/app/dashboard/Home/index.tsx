@@ -144,8 +144,8 @@ export default function Home() {
                     <div className=" rounded-xl " >
                         <Card className='h-full rounded-xl'>
                             <CardHeader>
-                                <CardTitle>Team Members</CardTitle>
-                                <CardDescription>
+                                <CardTitle className='text-3xl'>Team Members</CardTitle>
+                                <CardDescription className='text-[18px]'>
                                     Invite your team members to collaborate.
                                 </CardDescription>
                             </CardHeader>
@@ -160,14 +160,14 @@ export default function Home() {
                                                     <AvatarFallback>{user?.name[0]}</AvatarFallback>
                                                 </Avatar>
                                                 <div>
-                                                    <p className="text-sm font-medium leading-none">{user.name}</p>
-                                                    <p className="text-sm text-muted-foreground">{user.email}</p>
+                                                    <p className="text-xl font-medium leading-none">{user.name}</p>
+                                                    <p className="text-lg text-muted-foreground">{user.email}</p>
                                                 </div>
                                             </div>
                                             <Popover>
                                                 <PopoverTrigger asChild>
                                                     <Button variant="outline" size="sm" className="ml-auto">
-                                                        <span>{user?.role?.name}</span>
+                                                        <span className='text-lg'>{user?.role?.name}</span>
                                                         <ChevronDownIcon className="ml-2 h-4 w-4 text-muted-foreground" />
                                                     </Button>
                                                 </PopoverTrigger>
@@ -179,7 +179,7 @@ export default function Home() {
                                                             <CommandGroup>
                                                                 {user?.role?.permissions?.map((permission, index) => (
                                                                     <CommandItem className="teamaspace-y-1 flex flex-col items-start px-4 py-2" key={index}>
-                                                                        <p>{permission.name}</p>
+                                                                        <p className='text-lg'>{permission.name}</p>
                                                                         <p className="text-sm text-muted-foreground">
                                                                             This user can {permission.name.toLowerCase()}.
                                                                         </p>
