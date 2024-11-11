@@ -66,6 +66,7 @@ export default function Home() {
         const res = await fetch(baseurl + "/user/get-users", {
             method: 'GET',
             headers: {
+                "x-access-token": `Bearer ${localStorage.getItem('token')}`,
                 'Content-Type': 'application/json',
             }
         })
@@ -75,7 +76,12 @@ export default function Home() {
     }
     const fetchLeads = async () => {
         setLoading(true)
-        const res = await fetch(baseurl + '/lead/get-leads')
+        const res = await fetch(baseurl + '/lead/get-leads',{
+            headers: {
+                "x-access-token": `Bearer ${localStorage.getItem('token')}`,
+                'Content-Type': 'application/json',
+            }
+        })
 
         const data = await res.json()
         console.log(data)

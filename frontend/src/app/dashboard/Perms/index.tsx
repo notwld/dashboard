@@ -58,8 +58,9 @@ const Permissions = () => {
     const res = await fetch(baseurl + `/user/get-user/${userId}`, {
       method: 'GET',
       headers: {
+        "x-access-token": `Bearer ${localStorage.getItem('token')}`,
         'Content-Type': 'application/json',
-      }
+    }
     })
     let permissionObj = await res.json();
     permissionObj = permissionObj.role.permissions;
@@ -85,7 +86,10 @@ const Permissions = () => {
   // Fetch roles data
   useEffect(() => {
     const fetchRoles = async () => {
-      const res = await fetch(baseurl + "/role/get-roles", { method: "GET", headers: { "Content-Type": "application/json" } });
+      const res = await fetch(baseurl + "/role/get-roles", { method: "GET", headers: {
+        "x-access-token": `Bearer ${localStorage.getItem('token')}`,
+        'Content-Type': 'application/json',
+    } });
       const data = await res.json();
       setRoles(data);
     };
@@ -99,7 +103,10 @@ const Permissions = () => {
         setLoading(true);
         const res = await fetch(`${baseurl}/perm/role/${role.id}`, {
           method: "GET",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "x-access-token": `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json',
+        }
         });
         const data = await res.json();
         const permissionNames = data.map((perm: { name: string }) => perm.name);
@@ -119,7 +126,10 @@ const Permissions = () => {
     setLoading(true);
     await fetch(`${baseurl}/perm/role/${role.id}`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "x-access-token": `Bearer ${localStorage.getItem('token')}`,
+        'Content-Type': 'application/json',
+    },
       body: JSON.stringify(data),
     })
       .then((res) => res.json())

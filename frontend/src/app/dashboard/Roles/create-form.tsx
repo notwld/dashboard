@@ -48,7 +48,8 @@ export default function RoleCreateFormPage() {
         await fetch(baseurl + "/role/create-role", {
             method: "POST",
             headers: {
-                "Content-Type": "application/json"
+                "x-access-token": `Bearer ${localStorage.getItem('token')}`,
+                'Content-Type': 'application/json',
             },
             body: JSON.stringify(values),
         }).then((res) => res.json())

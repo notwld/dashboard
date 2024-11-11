@@ -12,7 +12,7 @@ import Auth from './api/Auth';
 
 declare module 'express-session' {
     export interface SessionData {
-        user: string,
+        user_id: number,
         token: string
     }
 }
@@ -20,24 +20,31 @@ declare module 'express-session' {
 dotenv.config();
 
 const app = express();
+app.use(ExpressSession({
+    secret: process.env.SESSION_SECRET || 'secret',
+    resave: false,
+    saveUninitialized: false,
+    cookie: { secure: false, maxAge: 24 * 60 * 60 * 1000,}
+   
+    
+}));
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(ExpressSession({
-    secret: process.env.SESSION_SECRET || 'secret',
-    resave: true,
-    saveUninitialized: true,
-    cookie: { secure: false }
-}));
-app.use(cors());
-
-app.get('/', (req: Request, res: Response) => {
-    res.status(200).send('Hello World');
+app.use(cors(
+    {
+        origin: 'http://localhost:5173',
+        credentials: true
+    }
+));
+app.use("/auth", Auth);
+const authorize = require('./middleware/auth');
+app.get('/get-session', authorize, (req: Request, res: Response) => {
+    res.json(req.session.token);
 });
 
 app.use("/user", User);
-app.use("/auth", Auth);
 app.use('/role', Role);
 app.use('/perm', Permission);
 app.use('/lead', Lead);

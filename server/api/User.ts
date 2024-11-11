@@ -6,8 +6,10 @@ import bycrpt from 'bcrypt';
 const router = Router();
 const prisma = new PrismaClient();
 
+const authorize = require('../middleware/auth');
 
-router.post('/create-user', async (req: Request, res: Response) => {
+
+router.post('/create-user',authorize, async (req: Request, res: Response) => {
     try {
         const user = await prisma.user.findFirst({
             where: {
@@ -53,7 +55,7 @@ router.post('/create-user', async (req: Request, res: Response) => {
     }
 });
 
-router.get('/get-users', async (req: Request, res: Response) => {
+router.get('/get-users', authorize, async (req: Request, res: Response) => {
     try {
         const users = await prisma.user.findMany({
             include: {
@@ -71,7 +73,7 @@ router.get('/get-users', async (req: Request, res: Response) => {
         res.status(500).json({ message: 'Internal server error',status:500 });
     }
 });
-router.put('/update-user/:id', async (req: Request, res: Response) => {
+router.put('/update-user/:id', authorize, async (req: Request, res: Response) => {
     try {
         const salt = await bycrpt.genSalt(10);
         const hashedPassword = await bycrpt.hash(req.body.password, salt);
@@ -104,7 +106,7 @@ router.put('/update-user/:id', async (req: Request, res: Response) => {
         res.status(500).json({ message: 'Internal server error',status:500 });
     }
 });
-router.delete('/delete-user/:id', async (req: Request, res: Response) => {
+router.delete('/delete-user/:id', authorize, async (req: Request, res: Response) => {
     try {
         const user = await prisma.user.delete({
             where: {
@@ -125,7 +127,7 @@ router.delete('/delete-user/:id', async (req: Request, res: Response) => {
     }
 });
 
-router.get('/get-user/:id', async (req: Request, res: Response) => {
+router.get('/get-user/:id', authorize, async (req: Request, res: Response) => {
     try {
         const user = await prisma.user.findUnique({
             where: {

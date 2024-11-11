@@ -134,8 +134,9 @@ export default function ManageLeads() {
             const response = await fetch(baseurl + "/lead/download-leads", {
                 method: "GET",
                 headers: {
-                    "Content-Type": "application/json",
-                },
+                    "x-access-token": `Bearer ${localStorage.getItem('token')}`,
+                    'Content-Type': 'application/json',
+                }
             })
             const data = await response.blob()
             const url = window.URL.createObjectURL(data)
@@ -207,6 +208,7 @@ export default function ManageLeads() {
                 await fetch(baseurl + `/lead/update-lead/${isDialogOpen.lead.id}`, {
                     method: 'PUT',
                     headers: {
+                        "x-access-token": `Bearer ${localStorage.getItem('token')}`,
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify(values),
@@ -240,6 +242,7 @@ export default function ManageLeads() {
             const res = await fetch(baseurl + "/user/get-users", {
                 method: 'GET',
                 headers: {
+                    "x-access-token": `Bearer ${localStorage.getItem('token')}`,
                     'Content-Type': 'application/json',
                 }
             })
@@ -576,8 +579,10 @@ export default function ManageLeads() {
         const res = await fetch(baseurl + `/user/get-user/${userId}`, {
             method: 'GET',
             headers: {
+                "x-access-token": `Bearer ${localStorage.getItem('token')}`,
                 'Content-Type': 'application/json',
             }
+            
         })
         let permissionObj = await res.json();
         permissionObj = permissionObj.role.permissions;
@@ -778,8 +783,9 @@ export default function ManageLeads() {
             const response = await fetch(baseurl + `/lead/delete-lead/${id}`, {
                 method: 'DELETE',
                 headers: {
-                    'Content-Type': 'application/json'
-                },
+                    "x-access-token": `Bearer ${localStorage.getItem('token')}`,
+                    'Content-Type': 'application/json',
+                }
             })
             const data = await response.json()
             if (data.status) {
@@ -834,7 +840,12 @@ export default function ManageLeads() {
     const fetchLeads = async () => {
         try {
             setLoading(true)
-            const response = await fetch(baseurl + '/lead/get-leads')
+            const response = await fetch(baseurl + '/lead/get-leads',{
+                headers: {
+                    "x-access-token": `Bearer ${localStorage.getItem('token')}`,
+                    'Content-Type': 'application/json',
+                }
+            })
             const data = await response.json()
             setLeads(data)
             setLoading(false)

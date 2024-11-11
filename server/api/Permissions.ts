@@ -3,8 +3,9 @@ import { PrismaClient } from "@prisma/client";
 
 const router = Router();
 const prisma = new PrismaClient();
+const authorize = require('../middleware/auth');
 
-router.put('/role/:id', async (req: Request, res: Response) => {
+router.put('/role/:id', authorize, async (req: Request, res: Response) => {
     try {
         const roleId = Number(req.params.id);
         const role = await prisma.role.findUnique({
@@ -58,7 +59,7 @@ router.put('/role/:id', async (req: Request, res: Response) => {
     }
 });
 
-router.get('/role/:id', async (req: Request, res: Response) => {
+router.get('/role/:id', authorize, async (req: Request, res: Response) => {
     try {
         const role = await prisma.role.findUnique({
             where: {
@@ -79,14 +80,14 @@ router.get('/role/:id', async (req: Request, res: Response) => {
     }
 })
 
-router.get('/killswitch', async (req: Request, res: Response) => {
-    try {
-        await prisma.permission.deleteMany();
-        await prisma.role.deleteMany();
-        res.json({ message: 'All permissions and roles have been deleted' });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Internal server error' });
-    }
-})
+// router.get('/killswitch', async (req: Request, res: Response) => {
+//     try {
+//         await prisma.permission.deleteMany();
+//         await prisma.role.deleteMany();
+//         res.json({ message: 'All permissions and roles have been deleted' });
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).json({ message: 'Internal server error' });
+//     }
+// })
 export default router;

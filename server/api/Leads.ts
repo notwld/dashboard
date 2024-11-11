@@ -3,8 +3,9 @@ import { PrismaClient } from "@prisma/client";
 
 const router = Router();
 const prisma = new PrismaClient();
+const authorize = require('../middleware/auth');
 
-router.get('/get-leads', async (req: Request, res: Response) => {
+router.get('/get-leads', authorize, async (req: Request, res: Response) => {
     try {
         const leads = await prisma.lead.findMany(
             {
@@ -14,7 +15,6 @@ router.get('/get-leads', async (req: Request, res: Response) => {
             }
         );
         res.json(leads);
-        console.log(leads);
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Internal server error', status: 500 });
@@ -22,9 +22,9 @@ router.get('/get-leads', async (req: Request, res: Response) => {
 }
 );
 
-router.post('/create-lead', async (req: Request, res: Response) => {
+router.post('/create-lead', authorize, async (req: Request, res: Response) => {
     try {
-        const _id = 4;
+        const _id = req.session.user_id
 
         const body = req.body;
         if (!body.date || !body.time || !body.platform || !body.firstCall || !body.service || !body.name || !body.email || !body.number || !body.cost || !body.credits) {
@@ -51,6 +51,11 @@ router.post('/create-lead', async (req: Request, res: Response) => {
                         id: Number(body.userId)
                     }
                 },
+                User: {
+                    connect: {
+                        id: Number(_id)
+                    }
+                }
 
             },
             include: {
@@ -66,7 +71,7 @@ router.post('/create-lead', async (req: Request, res: Response) => {
     }
 });
 
-router.put('/update-lead/:id', async (req: Request, res: Response) => {
+router.put('/update-lead/:id', authorize, async (req: Request, res: Response) => {
     try {
         const lead = await prisma.lead.findUnique({
             where: {
@@ -125,7 +130,7 @@ router.put('/update-lead/:id', async (req: Request, res: Response) => {
     }
 });
 
-router.delete('/delete-lead/:id', async (req: Request, res: Response) => {
+router.delete('/delete-lead/:id', authorize , async (req: Request, res: Response) => {
     try {
         const lead = await prisma.lead.findUnique({
             where: {
@@ -152,7 +157,7 @@ router.delete('/delete-lead/:id', async (req: Request, res: Response) => {
 }
 );
 import { json2csv } from 'json-2-csv';
-router.get('/download-leads', async (req: Request, res: Response) => {
+router.get('/download-leads', authorize, async (req: Request, res: Response) => {
     try {
         const leads = await prisma.lead.findMany();
         const csv = await json2csv(leads, { emptyFieldValue: '' });

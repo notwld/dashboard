@@ -95,6 +95,7 @@ export function Roles() {
         const res = await fetch(baseurl + "/role/get-roles", {
             method: 'GET',
             headers: {
+                "x-access-token": `Bearer ${localStorage.getItem('token')}`,
                 'Content-Type': 'application/json',
             }
         })
@@ -222,6 +223,7 @@ export function Roles() {
         await fetch(baseurl + `/role/delete-role/${id}`, {
             method: 'DELETE',
             headers: {
+                "x-access-token": `Bearer ${localStorage.getItem('token')}`,
                 'Content-Type': 'application/json',
             }
         })
@@ -250,6 +252,7 @@ export function Roles() {
         const res = await fetch(baseurl + `/user/get-user/${userId}`, {
             method: 'GET',
             headers: {
+                "x-access-token": `Bearer ${localStorage.getItem('token')}`,
                 'Content-Type': 'application/json',
             }
         })
@@ -297,7 +300,8 @@ export function Roles() {
             await fetch(baseurl + `/role/update-role/${role?.id}`, {
                 method: "PUT",
                 headers: {
-                    "Content-Type": "application/json"
+                    "x-access-token": `Bearer ${localStorage.getItem('token')}`,
+                    'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({ ...values })
             }).then((res) => res.json())

@@ -3,8 +3,9 @@ import { PrismaClient } from "@prisma/client";
 
 const router = Router();
 const prisma = new PrismaClient();
+const authorize = require('../middleware/auth');
 
-router.get('/get-roles', async (req: Request, res: Response) => {
+router.get('/get-roles', authorize, async (req: Request, res: Response) => {
     try {
         const roles = await prisma.role.findMany({
             include: {
@@ -20,7 +21,7 @@ router.get('/get-roles', async (req: Request, res: Response) => {
 }
 );
 
-router.post('/create-role', async (req: Request, res: Response) => {
+router.post('/create-role', authorize, async (req: Request, res: Response) => {
     try {
         const role = await prisma.role.findFirst({
             where: {
@@ -46,7 +47,7 @@ router.post('/create-role', async (req: Request, res: Response) => {
     }
 }
 );
-router.put('/update-role/:id', async (req: Request, res: Response) => {
+router.put('/update-role/:id', authorize, async (req: Request, res: Response) => {
     try {
         const role = await prisma.role.findUnique({
             where: {
@@ -75,7 +76,7 @@ router.put('/update-role/:id', async (req: Request, res: Response) => {
     }
 }
 );
-router.delete('/delete-role/:id', async (req: Request, res: Response) => {
+router.delete('/delete-role/:id', authorize, async (req: Request, res: Response) => {
     try {
         const role = await prisma.role.findUnique({
             where: {

@@ -47,6 +47,7 @@ export default function UserCreateFormPage() {
             const res = await fetch(baseurl + "/role/get-roles", {
                 method: 'GET',
                 headers: {
+                    "x-access-token": `Bearer ${localStorage.getItem('token')}`,
                     'Content-Type': 'application/json',
                 }
             })
@@ -78,7 +79,8 @@ export default function UserCreateFormPage() {
         await fetch(baseurl + "/user/create-user", {
             method: "POST",
             headers: {
-                "Content-Type": "application/json"
+                "x-access-token": `Bearer ${localStorage.getItem('token')}`,
+                'Content-Type': 'application/json',
             },
             body: JSON.stringify({...values,roleId:role?.id})
         }).then((res) => res.json())

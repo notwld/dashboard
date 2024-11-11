@@ -337,6 +337,7 @@ export default function Users() {
         const res = await fetch(baseurl + "/user/get-users", {
             method: 'GET',
             headers: {
+                "x-access-token": `Bearer ${localStorage.getItem('token')}`,
                 'Content-Type': 'application/json',
             }
         })
@@ -349,6 +350,7 @@ export default function Users() {
         const res = await fetch(baseurl + "/role/get-roles", {
             method: 'GET',
             headers: {
+                "x-access-token": `Bearer ${localStorage.getItem('token')}`,
                 'Content-Type': 'application/json',
             }
         })
@@ -361,6 +363,7 @@ export default function Users() {
         const res = await fetch(baseurl + `/user/get-user/${userId}`, {
             method: 'GET',
             headers: {
+                "x-access-token": `Bearer ${localStorage.getItem('token')}`,
                 'Content-Type': 'application/json',
             }
         })
@@ -398,6 +401,7 @@ export default function Users() {
         await fetch(baseurl + `/user/delete-user/${id}`, {
             method: 'DELETE',
             headers: {
+                "x-access-token": `Bearer ${localStorage.getItem('token')}`,
                 'Content-Type': 'application/json',
             }
         }).then(() => {
@@ -463,7 +467,8 @@ export default function Users() {
             await fetch(baseurl + `/user/update-user/${user?.id}`, {
                 method: "PUT",
                 headers: {
-                    "Content-Type": "application/json"
+                    "x-access-token": `Bearer ${localStorage.getItem('token')}`,
+                    'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({ ...values, roleId: role?.id })
             }).then((res) => res.json())
