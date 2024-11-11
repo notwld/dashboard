@@ -248,8 +248,7 @@ export function Roles() {
             })
     }
     const checkPermissions = async () => {
-        const userId = JSON.parse(localStorage.getItem('user') || '{}').id;
-        const res = await fetch(baseurl + `/user/get-user/${userId}`, {
+        const res = await fetch(baseurl + `/user/get-user`, {
             method: 'GET',
             headers: {
                 "x-access-token": `Bearer ${localStorage.getItem('token')}`,

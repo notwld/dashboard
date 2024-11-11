@@ -34,6 +34,7 @@ import { useEffect, useState } from 'react'
 import { baseurl } from '../../../config/baseurl'
 import { ScrollArea } from '../../../components/ui/scroll-area'
 import { Chart1, SalesChart, Status, TopPayingCustomersChart, TopServicesChart } from './chart'
+import Board from './board'
 type User = {
     id: string
     name: string
@@ -76,7 +77,7 @@ export default function Home() {
     }
     const fetchLeads = async () => {
         setLoading(true)
-        const res = await fetch(baseurl + '/lead/get-leads',{
+        const res = await fetch(baseurl + '/lead/get-leads', {
             headers: {
                 "x-access-token": `Bearer ${localStorage.getItem('token')}`,
                 'Content-Type': 'application/json',
@@ -136,8 +137,8 @@ export default function Home() {
                 </Breadcrumb>
             </header>
             <div className="flex flex-col gap-4 p-4">
-            <div className="flex" >
-                  <div className=" rounded-xl" >
+                <div className="flex" >
+                    <div className=" rounded-xl" >
                         <SalesChart leads={leads} />
                     </div>
                 </div>
@@ -206,7 +207,9 @@ export default function Home() {
                         </Card>
                     </div>
                 </div>
-               
+            <div>
+                <Board leads={leads} />
+            </div>
             </div>
         </div>
     )
