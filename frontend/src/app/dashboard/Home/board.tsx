@@ -20,12 +20,13 @@ function Draggable({ id, children }) {
 
     const style = {
         transform: CSS.Translate.toString(transform),
+        color: 'white',
     };
 
     return (
         <div ref={setNodeRef} style={style} {...listeners} {...attributes} className="mb-2">
-            <Card>
-                <CardContent>{children}</CardContent>
+            <Card className='text-white'>
+                <CardContent className='text-white'>{children}</CardContent>
             </Card>
         </div>
     );
@@ -41,6 +42,7 @@ function Droppable({ id, children }) {
         opacity: isOver ? 1 : 0.5,
         border: '1px solid #ddd',
         borderRadius: '8px',
+        color:"white",
         padding: '10px',
         minHeight: '200px',
     };
@@ -89,8 +91,12 @@ function Board() {
     const renderDraggableCards = (columnId) => {
         return columns[columnId].map((card) => (
             <Draggable key={card} id={card}>
-                <CardHeader className='ring-0'>{card.title}</CardHeader>
-                <CardDescription className='ring-0'>{card.description}</CardDescription>
+                <div className='z-10 '>
+                <CardHeader className='ring-0 text-white p-0 py-3'><span className='text-2xl'> {card.title}</span>
+                <CardDescription className='ring-0 text-[18px] text-white'>{card.description}</CardDescription>
+                </CardHeader>
+                
+                </div>
             </Draggable>
         ));
     };
@@ -105,8 +111,8 @@ function Board() {
                             <h3 className='text-lg'>To Do</h3>
                             <Dialog>
                                 <DialogTrigger asChild>
-                                    <span className='text-2xl cursor-pointer'>
-                                        +
+                                    <span className='text-[19px] cursor-pointer'>
+                                        + Add Task
                                     </span>
                                 </DialogTrigger>
                                 <DialogContent>
