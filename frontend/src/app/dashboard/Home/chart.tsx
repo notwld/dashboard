@@ -180,29 +180,29 @@ function TopPayingCustomersChart({ leads }) {
                 <CardDescription>Clients who paid</CardDescription>
             </CardHeader>
             <CardContent className="">
-                    <ScrollArea className="h-[290px] w-full">
-                <Table className="w-full">
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Client</TableHead>
-                            <TableHead>Deals</TableHead>
-                            <TableHead>Total Credits</TableHead>
-                        </TableRow>
-                    </TableHeader>
-
-                    <TableBody className="w-full">
-                        {Object.values(clients).map((client: Client, index:Number) => (
-                            <TableRow key={index}>
-                                <TableCell>{client.client}</TableCell>
-                                <TableCell>{client.deals}</TableCell>
-                                <TableCell>${client.totalCredits}</TableCell>
+                <ScrollArea className="h-[290px] w-full">
+                    <Table className="w-full">
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Client</TableHead>
+                                <TableHead>Deals</TableHead>
+                                <TableHead>Total Credits</TableHead>
                             </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-                        </ScrollArea>
+                        </TableHeader>
+
+                        <TableBody className="w-full">
+                            {Object.values(clients).map((client: Client, index: Number) => (
+                                <TableRow key={index}>
+                                    <TableCell>{client.client}</TableCell>
+                                    <TableCell>{client.deals}</TableCell>
+                                    <TableCell>${client.totalCredits}</TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </ScrollArea>
             </CardContent>
-           
+
         </Card>
     );
 
@@ -286,9 +286,16 @@ import { Area, AreaChart } from "recharts"
 import { Avatar, AvatarFallback, AvatarImage } from "../../../components/ui/avatar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../../components/ui/Table/table";
 import { ScrollArea } from "../../../components/ui/scroll-area";
+import { Button } from "../../../components/ui/button";
+import { Input } from "../../../components/ui/Sidebar/input";
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogTitle, DialogTrigger } from "../../../components/ui/dialog";
+import { DialogHeader } from "../../../components/ui/Modal/dialog";
+import { Label } from "../../../components/ui/Sidebar/label";
+import { Progress } from "../../../components/progress";
 function SalesChart({ leads }) {
     const [monthlySales, setMonthlySales] = React.useState([]);
     const [currentMonthSales, setCurrentMonthSales] = React.useState(0);
+    const [goal, setGoal] = React.useState(0);
 
     React.useEffect(() => {
         // Aggregate sales data by month
@@ -321,14 +328,71 @@ function SalesChart({ leads }) {
             color: "hsl(var(--chart-1))",
         },
     };
+    const [progress, setProgress] = React.useState(0)
+    const handleGoal = () => {
+        localStorage.setItem('goal', goal)
+        const progress = (parseFloat(currentMonthSales) / parseFloat(goal)) * 100
+        setProgress(progress.toFixed(1))
+    }
+    React.useEffect(() => {
+        const goal = localStorage.getItem('goal')
+        if (goal) {
+            const progress = (parseFloat(currentMonthSales) / parseFloat(goal)) * 100
+            setProgress(progress.toFixed(1))
+        }
 
+    }, [handleGoal])
+    
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Monthly Sales Chart</CardTitle>
-                <CardDescription>
-                    ${currentMonthSales.toLocaleString()} earned this month
-                </CardDescription>
+                <div className="flex justify-between items-center">
+                    <div>
+                        <CardTitle className="pb-1">Monthly Sales Chart</CardTitle>
+                        <CardDescription>
+                            ${currentMonthSales.toLocaleString()} (goal ${goal}) earned this month 
+                            <div className="flex gap-2 w-[430px] mt-1">
+                                <Progress value={progress} />
+                                <span className="w-full">
+                                    {progress} % {progress >= 100 ? 'completed' : 'to goal'}
+                                </span>
+                            </div>
+                        </CardDescription>
+                    </div>
+                    <Dialog>
+                        <DialogTrigger asChild>
+                            <Button variant="outline">Set Goal</Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-[425px]">
+                            <DialogHeader>
+                                <DialogTitle>Set Goal</DialogTitle>
+                                <DialogDescription>
+                                    Set a monthly sales goal to track your progress
+                                </DialogDescription>
+                            </DialogHeader>
+                            <div className="grid gap-4 py-4">
+                                <div className="grid grid-cols-4 items-center gap-4">
+                                    <Label htmlFor="name" className="text-right">
+                                        Goal
+                                    </Label>
+                                    <Input
+                                        id="name"
+                                        defaultValue="1000"
+                                        className="col-span-3"
+                                        onChange={(e) => setGoal(e.target.value)}
+                                    />
+                                </div>
+                            </div>
+
+                            <DialogFooter>
+                                <DialogClose asChild>
+
+                                    <Button type="submit" onClick={() => handleGoal()}>Save changes</Button>
+                                </DialogClose>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
+                </div>
             </CardHeader>
             <CardContent>
                 <ChartContainer className="h-[40vh] w-[81vw]" config={chartConfig}>
@@ -348,11 +412,11 @@ function SalesChart({ leads }) {
                             tickMargin={8}
                             tickFormatter={(value) => value.slice(0, 3)} // Short month name
                         />
-                        <YAxis 
+                        <YAxis
                             tickLine={false}
                             axisLine={false}
                             tickMargin={8}
-                            tickFormatter={(value) => `$${value/1000}k`}
+                            tickFormatter={(value) => `$${value / 1000}k`}
                         />
                         <ChartTooltip
                             cursor={false}
@@ -407,7 +471,7 @@ function Status({ leads }) {
                             type="category"
                             tickLine={false}
                             axisLine={false}
-                            tickMargin={10} 
+                            tickMargin={10}
                             className="text-[9.5px]"
                         />
                         <XAxis dataKey="count" type="number" />
@@ -443,4 +507,4 @@ function Status({ leads }) {
         </Card>
     );
 }
-export { Chart1, TopPayingCustomersChart, TopServicesChart, SalesChart , Status}
+export { Chart1, TopPayingCustomersChart, TopServicesChart, SalesChart, Status }
