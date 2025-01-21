@@ -341,7 +341,7 @@ function SalesChart({ leads }) {
             setProgress(progress.toFixed(1))
         }
 
-    }, [handleGoal])
+    }, [monthlySales])
     
     return (
         <Card>

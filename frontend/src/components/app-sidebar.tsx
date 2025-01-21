@@ -19,6 +19,21 @@ const data = {
   versions: [],
   navMain: [
     {
+      title: "Dashboard",
+      url: "#",
+      items: [
+        {
+          title: "Stats",
+          url: "/",
+        },
+        {
+          title: "Attendance",
+          url: "/attendance",
+        },
+        
+      ],
+    },
+    {
       title: "Access Control",
       url: "#",
       items: [
@@ -45,6 +60,21 @@ const data = {
           url: "/leads",
         },
        
+      ],
+    },
+    {
+      title: "Payment Link",
+      url: "#",
+      items: [
+        
+        {
+          title: "Payments",
+          url: "/leads",
+        },
+        {
+          title: "Create Link",
+          url: "/leads",
+        },
       ],
     },
     

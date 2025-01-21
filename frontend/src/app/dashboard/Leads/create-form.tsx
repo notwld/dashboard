@@ -65,6 +65,7 @@ export default function LeadCreateFormPage() {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
+                    "x-access-token": localStorage.getItem('token') || ""
                 }
             })
             const data = await res.json()
@@ -100,6 +101,7 @@ export default function LeadCreateFormPage() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'x-access-token': localStorage.getItem('token') || ""
                 },
                 body: JSON.stringify(values),
             }).then(() => {
@@ -128,6 +130,7 @@ export default function LeadCreateFormPage() {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
+                "x-access-token": localStorage.getItem('token') || ""
             }
         })
         const data = await res.json()

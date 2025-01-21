@@ -127,11 +127,12 @@ router.delete('/delete-user/:id', authorize, async (req: Request, res: Response)
     }
 });
 
-router.get('/get-user/:id', authorize, async (req: Request, res: Response) => {
+router.get('/get-user/', authorize, async (req: Request, res: Response) => {
     try {
+        const user_id = req.session.user_id 
         const user = await prisma.user.findUnique({
             where: {
-                id: parseInt(req.params.id),
+                id: user_id,
             },
             include: {
                 role: {

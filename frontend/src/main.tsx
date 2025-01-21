@@ -12,6 +12,7 @@ import Permissions from './app/dashboard/Perms/index.tsx'
 import ManageLeads from './app/dashboard/Leads/index.tsx'
 import LeadCreateFormPage from './app/dashboard/Leads/create-form.tsx'
 import LoginPage from './app/dashboard/Login/index.tsx'
+import Attendance from './app/dashboard/Attedance/index.tsx'
 
  
 
@@ -27,6 +28,10 @@ const routes = createBrowserRouter([
       {
         path:'/dashboard',
         element:<ProtectedRoute><Home /></ProtectedRoute>,
+      },
+      {
+        path:'/attendance',
+        element:<ProtectedRoute><Attendance /></ProtectedRoute>,
       },
       {
         path:'/users',

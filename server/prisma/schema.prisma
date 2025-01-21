@@ -17,6 +17,18 @@ model User {
   lead     Lead[]
   assignee Lead[] @relation("LeadAssignee")
 
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  Attendance Attendance[]
+}
+
+model Attendance {
+  id        Int      @id @default(autoincrement())
+  date      DateTime @default(now())
+  time      String   @default("00:00 AM")
+  isPresent Boolean
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
