@@ -1,3 +1,5 @@
+// schema.prisma
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -8,29 +10,20 @@ datasource db {
 }
 
 model User {
-  id       Int    @id @default(autoincrement())
-  name     String
-  email    String @unique
-  password String
-  role     Role?  @relation(fields: [roleId], references: [id])
-  roleId   Int?
-  lead     Lead[]
-  assignee Lead[] @relation("LeadAssignee")
-
-  createdAt  DateTime     @default(now())
-  updatedAt  DateTime     @updatedAt
-  Attendance Attendance[]
-}
-
-model Attendance {
-  id        Int      @id @default(autoincrement())
-  date      DateTime @default(now())
-  time      String   @default("00:00 AM")
-  isPresent Boolean
-  user      User     @relation(fields: [userId], references: [id])
-  userId    Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            Int             @id @default(autoincrement())
+  name          String
+  email         String          @unique
+  password      String
+  role          Role?           @relation(fields: [roleId], references: [id])
+  roleId        Int?
+  lead          Lead[]
+  assignee      Lead[]          @relation("LeadAssignee")
+  attendance    Attendance[]
+  breaks        Break[]
+  leaveRequests LeaveRequest[]
+  leaveBalance  Int             @default(5)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
 }
 
 model Role {
@@ -72,3 +65,49 @@ model Lead {
   status     String?
   assignee   User?    @relation("LeadAssignee", fields: [assigneeId], references: [id])
 }
+
+model Attendance {
+  id          Int       @id @default(autoincrement())
+  date        DateTime  @default(now())
+  checkIn     DateTime  @default(now())
+  checkOut    DateTime?
+  isPresent   Boolean   @default(true)
+  isOnLeave   Boolean   @default(false)
+  totalHours  Float     @default(0)
+  user        User      @relation(fields: [userId], references: [id])
+  userId      Int
+  breaks      Break[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Break {
+  id           Int        @id @default(autoincrement())
+  startTime    DateTime   @default(now())
+  endTime      DateTime?
+  duration     Float      @default(0)
+  attendance   Attendance @relation(fields: [attendanceId], references: [id])
+  attendanceId Int
+  user         User       @relation(fields: [userId], references: [id])
+  userId       Int
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+model LeaveRequest {
+  id          Int           @id @default(autoincrement())
+  date        DateTime
+  reason      String?
+  status      LeaveStatus   @default(PENDING)
+  user        User          @relation(fields: [userId], references: [id])
+  userId      Int
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+enum LeaveStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+

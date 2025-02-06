@@ -44,6 +44,7 @@ export default function LoginPage() {
             if (response.ok) {
                 localStorage.setItem('token', json.token)
                 localStorage.setItem('user', json.user.name)
+                localStorage.setItem('userId', json.user.id)
                 toast({
                     title: 'Success',
                     description: 'Logged in successfully',

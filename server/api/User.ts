@@ -37,6 +37,7 @@ router.post('/create-user',authorize, async (req: Request, res: Response) => {
                 email: req.body.email,
                 name: req.body.username,
                 password: hashedPassword,
+                leaveBalance: req.body.leaveBalance || 5,
                 role: {
                     connect: {
                         id: req.body.roleId,
@@ -85,6 +86,7 @@ router.put('/update-user/:id', authorize, async (req: Request, res: Response) =>
                 email: req.body.email,
                 name: req.body.username,
                 password: hashedPassword,
+                leaveBalance: req.body.leaveBalance,
                 role: {
                     connect: {
                         id: req.body.roleId,

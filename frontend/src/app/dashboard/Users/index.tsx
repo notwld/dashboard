@@ -81,6 +81,7 @@ type User = {
         id: number;
         name: string;
     };
+    leaveBalance: number;
     createdAt: string;
     updatedAt: string;
 };
@@ -179,6 +180,22 @@ export default function Users() {
             },
         },
         {
+            accessorKey: "leaveBalance",
+            header: () => <div className="text-right text-lg">Leave Balance</div>,
+            cell: ({ row }) => {
+
+                return <div className="text-right text-xl">{row.getValue("leaveBalance")}</div>
+            },
+        },
+        {
+            accessorKey: "createdAt",
+            header: () => <div className="text-right text-lg">Created At</div>,
+            cell: ({ row }) => {
+
+                return <div className="text-right text-xl">{format(new Date(row.getValue("createdAt")), "dd/MM/yyyy")}</div>
+            },
+        },
+        {
             id: "actions",
             enableHiding: false,
             cell: ({ row }) => {
@@ -228,6 +245,7 @@ export default function Users() {
         })
         const data = await res.json()
         setUsers(data)
+        console.log(data)
         setLoading(false)
     }
     const fetchRoles = async () => {
@@ -316,6 +334,10 @@ export default function Users() {
             email: z.string().email(),
             password: z.string().min(8),
             confirmPassword: z.string().min(8),
+            leaveBalance: z
+        .string()
+        .refine((val) => !isNaN(Number(val)), { message: "Must be a number" })
+        .transform((val) => Number(val)), 
             role: z.object({
                 id: z.number()
             })
@@ -327,6 +349,7 @@ export default function Users() {
                 username: user?.name,
                 email: user?.email,
                 password: "",
+                leaveBalance: user?.leaveBalance,
                 confirmPassword: "",
                 role: {
                     id: 0
@@ -435,6 +458,19 @@ export default function Users() {
                         </DropdownMenuContent>
                     </DropdownMenu>
                     {!role && <FormMessage>Role is required</FormMessage>}
+                        <FormField  
+                        control={form.control}
+                        name="leaveBalance"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Leave Balance</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="Enter a leave balance" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
 
                     <FormField
                         control={form.control}

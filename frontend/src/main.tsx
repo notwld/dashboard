@@ -13,6 +13,9 @@ import ManageLeads from './app/dashboard/Leads/index.tsx'
 import LeadCreateFormPage from './app/dashboard/Leads/create-form.tsx'
 import LoginPage from './app/dashboard/Login/index.tsx'
 import Attendance from './app/dashboard/Attedance/index.tsx'
+import CreatePaymentLink from './app/dashboard/PaymentLink/create.tsx'
+import Brands from './app/dashboard/Management/Brands/index.tsx'
+import HR from './app/dashboard/Management/HR/index.tsx'
 
  
 
@@ -30,8 +33,20 @@ const routes = createBrowserRouter([
         element:<ProtectedRoute><Home /></ProtectedRoute>,
       },
       {
+        path:'/brands',
+        element:<ProtectedRoute><Brands /></ProtectedRoute>,
+      },
+      {
+        path:'/hr',
+        element:<ProtectedRoute><HR /></ProtectedRoute>,
+      },
+      {
         path:'/attendance',
         element:<ProtectedRoute><Attendance /></ProtectedRoute>,
+      },
+      {
+        path:'/create-link',
+        element:<ProtectedRoute><CreatePaymentLink /></ProtectedRoute>,
       },
       {
         path:'/users',

@@ -9,6 +9,8 @@ import Role from './api/Roles';
 import Permission from './api/Permissions';
 import Lead from './api/Leads';
 import Auth from './api/Auth';
+import Payment from './api/Payment';
+import  Attendance  from './api/Attendance';
 
 declare module 'express-session' {
     export interface SessionData {
@@ -48,6 +50,8 @@ app.use("/user", User);
 app.use('/role', Role);
 app.use('/perm', Permission);
 app.use('/lead', Lead);
+app.use('/payment', Payment);
+app.use('/attendance', Attendance);
 
 
 

@@ -34,6 +34,21 @@ const data = {
       ],
     },
     {
+      title: "Management",
+      url: "#",
+      items: [
+        {
+          title: "Brands",
+          url: "/brands",
+        },
+        {
+          title: "HR Management",
+          url: "/hr",
+        },
+        
+      ],
+    },
+    {
       title: "Access Control",
       url: "#",
       items: [
@@ -68,12 +83,12 @@ const data = {
       items: [
         
         {
-          title: "Payments",
+          title: "Manage Payments",
           url: "/leads",
         },
         {
           title: "Create Link",
-          url: "/leads",
+          url: "/create-link",
         },
       ],
     },

@@ -1,170 +1,326 @@
-import React from 'react'
-import { SidebarTrigger } from '../../../components/ui/Sidebar/sidebar'
-import { Separator } from '@radix-ui/react-dropdown-menu'
-import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage } from '../../../components/ui/Sidebar/breadcrumb'
-import { format, startOfMonth, endOfMonth, eachDayOfInterval } from 'date-fns';
-import { CheckCircle } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/card';
+import { useState, useEffect } from "react";
+import { SidebarTrigger } from "../../../components/ui/Sidebar/sidebar";
+import { Separator } from "../../../components/ui/Sidebar/separator";
+import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage } from "../../../components/ui/Sidebar/breadcrumb";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../../../components/ui/card";
+import { Button } from "../../../components/ui/button";
+import { Switch } from "../../../components/ui/switch";
+import { Calendar } from "../../../components/ui/calendar";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../../../components/ui/dialog";
+import { Progress } from "../../../components/progress";
+import { Component } from "./chart";
+import { WorkHoursChart } from "./workingChart";
+import { Table, TableHead, TableHeader } from "../../../components/ui/Table/table";
+import { Input } from "../../../components/ui/Sidebar/input";
+import { Popover, PopoverContent, PopoverTrigger } from "../../../components/ui/popover";
+import { CalendarIcon } from "lucide-react";
+import { cn } from "../../../lib/utils";
 
 export default function Attendance() {
-    // Static attendance data
-    const attendanceData = {
-        '2025-01-01': 'present',
-        '2025-01-02': 'present',
-        '2025-01-03': 'present',
-        '2025-01-04': 'present',
-        '2025-01-05': 'absent',
-        '2025-01-10': 'present',
-        '2025-01-15': 'absent',
-        '2025-01-20': 'present',
-        '2025-01-25': 'present',
-    };
-
-    // Generate dates for the current month
-    const currentMonth = new Date();
-    const dates = eachDayOfInterval({
-        start: startOfMonth(currentMonth),
-        end: endOfMonth(currentMonth),
+    const [selectedEmployee, setSelectedEmployee] = useState({
+        id: "1",
+        name: "John Doe",
+        email: "john@example.com",
+        leaveBalance: 3,
     });
-    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    // Static attendance data
+    const [attendance, setAttendance] = useState({});
+    const [selectedDate, setSelectedDate] = useState(null);
+    const [leaveHistory, setLeaveHistory] = useState([]);
+    const [isLeaveDialogOpen, setIsLeaveDialogOpen] = useState(false);
+    const [isOnBreak, setIsOnBreak] = useState(false);
+    const [breakTime, setBreakTime] = useState(0);
+    const [checkInTime, setCheckInTime] = useState(null);
+    const [workedHours, setWorkedHours] = useState(0);
+    const [breakHistory, setBreakHistory] = useState([]);
 
-    // Helper to generate calendar data for a month
-    const generateCalendar = (year, month) => {
-        const monthStart = new Date(year, month, 1);
-        const monthEnd = new Date(year, month + 1, 0);
-        return eachDayOfInterval({ start: monthStart, end: monthEnd });
+    const today = new Date().toISOString().split("T")[0];
+    const workingHoursPerDay = 9;
+
+    const handleAttendanceToggle = (checked) => {
+        if (checked && !checkInTime) {
+            setCheckInTime(new Date());
+        }
+        else {
+            setCheckInTime(null);
+        }
+        setAttendance((prev) => ({ ...prev, [today]: checked }));
     };
 
-    const currentDate = new Date();
-    const currentYear = currentDate.getFullYear();
+    const handleLeaveRequest = () => {
+        if (selectedDate && selectedEmployee.leaveBalance > 0) {
+            // Use the selected date directly without modification
+            const dateKey = selectedDate.toISOString().split("T")[0];
+            setAttendance((prev) => ({ ...prev, [dateKey]: false }));
+            setLeaveHistory([...leaveHistory, `Leave requested for ${dateKey}`]);
+            setSelectedEmployee({
+                ...selectedEmployee,
+                leaveBalance: selectedEmployee.leaveBalance - 1,
+            });
+            setIsLeaveDialogOpen(false);
+        }
+    };
 
-    // Dates for the current month
-    const currentMonthDates = generateCalendar(currentYear, currentMonth);
+    const handleBreakToggle = () => {
+        if (!isOnBreak) {
+            const breakStartTime = new Date();
+            setIsOnBreak(true);
+            const timer = setInterval(() => {
+                const now = new Date();
+                const duration = (now - breakStartTime) / (1000 * 60); // Duration in minutes
+                setBreakTime(duration);
+            }, 1000);
+
+            return () => {
+                clearInterval(timer);
+                const duration = breakTime;
+                setBreakHistory([...breakHistory, { startTime: breakStartTime, duration }]);
+                setBreakTime(0);
+            };
+        } else {
+            setIsOnBreak(false);
+        }
+    };
+
+    const formatTime = (hours) => {
+        const h = Math.floor(hours);
+        const m = Math.floor((hours - h) * 60);
+        return `${h}h ${m}m`;
+    };
+
+    const remainingHours = workingHoursPerDay - workedHours;
 
     return (
-        <div>
+        <div className="min-h-screen relative">
+            {/* Break Overlay */}
+            {isOnBreak && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+                    <Card className="w-96">
+                        <CardHeader>
+                            <CardTitle>On Break</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <p className="text-2xl font-bold text-center">{formatTime(breakTime / 60)}</p>
+                            <Button onClick={handleBreakToggle} className="w-full">
+                                End Break
+                            </Button>
+                        </CardContent>
+                    </Card>
+                </div>
+            )}
+
+            {/* Header */}
             <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
                 <SidebarTrigger className="-ml-1" />
                 <Separator orientation="vertical" className="mr-2 h-4" />
                 <Breadcrumb>
                     <BreadcrumbList>
-                        <div className="flex justify-between items-center w-[81vw]">
-                            <BreadcrumbItem className='flex w-full justify-between items-center'>
-                                <BreadcrumbPage className="flex justify-between items-center text-lg w-full">
-                                    <div>
-
-                                        <span className="text-lg font-semibold">Attendance</span>
-                                    </div>
-
-                                </BreadcrumbPage>
-                            </BreadcrumbItem>
-                        </div>
+                        <BreadcrumbItem>
+                            <BreadcrumbPage>
+                                <span className="text-lg font-semibold">Attendance</span>
+                            </BreadcrumbPage>
+                        </BreadcrumbItem>
                     </BreadcrumbList>
                 </Breadcrumb>
             </header>
-            <div className="flex flex-col gap-4 p-4">
-                <div className="flex flex-col items-center gap-4 justify-center">
-                    <CheckCircle className="h-64 w-64 text-green-500" />
-                    <span className="ml-2 text-lg font-semibold">
-                        Today's Attendance has been marked!
-                    </span>
-                </div>
-            </div>
-            <div>
-                <div className="flex my-10 items-center justify-center bg-gray-800 rounded-xl mx-4 py-5">
-                    <span className="text-2xl font-bold text-center">
-                        Attendance for January 2025
-                    </span>
-                </div>
-                <Card className="mx-4">
-                    <CardHeader>
-                        <CardTitle>
-                            <div className="grid grid-cols-7 gap-2">
-                                {dayNames.map((day) => (
-                                    <div key={day} className="text-center">
-                                        {day}
-                                    </div>
-                                ))}
-                            </div>
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="">
-                        <div className="grid grid-cols-7 gap-2">
-                            {dates.map((date) => {
-                                const formattedDate = format(date, 'yyyy-MM-dd');
-                                const attendance = attendanceData[formattedDate];
-                                return (
-                                    <div
-                                        key={formattedDate}
-                                        className={`text-center py-4 rounded-lg ${attendance === 'present'
-                                            ? 'bg-green-500'
-                                            : 'bg-red-500'
-                                            }`}
-                                    >
-                                        <span className="font-semibold text-xl">
-                                            {format(date, 'dd')}
-                                        </span>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
-            <div className="p-4">
-                <h2 className="text-xl font-bold text-center my-6">Yearly Attendance</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {Array.from({ length: 12 }).map((_, monthIndex) => {
-                        const dates = generateCalendar(currentYear, monthIndex);
-                        const monthName = format(new Date(currentYear, monthIndex), "MMMM yyyy");
-                        return (
-                            <div key={monthIndex} className="p-2">
-                                <div className="flex my-4 items-center justify-center bg-gray-800 rounded-xl py-2">
-                                    <span className="text-xl font-bold text-center">{monthName}</span>
-                                </div>
-                                <Card>
-                                    <CardHeader>
-                                        <CardTitle>
-                                            <div className="grid grid-cols-7 gap-2">
-                                                {dayNames.map((day) => (
-                                                    <div key={day} className="text-center">
-                                                        {day}
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </CardTitle>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <div className="grid grid-cols-7 gap-2">
-                                            {dates.map((date) => {
-                                                const formattedDate = format(date, "yyyy-MM-dd");
-                                                const attendance = attendanceData[formattedDate];
-                                                return (
-                                                    <div
-                                                        key={formattedDate}
-                                                        className={`text-center py-4 rounded-lg ${attendance === "present"
-                                                            ? "bg-green-500"
-                                                            : attendance === "absent"
-                                                                ? "bg-red-500"
-                                                                : "bg-gray-200"
-                                                            }`}
-                                                    >
-                                                        <span className="font-semibold text-xl">
-                                                            {format(date, "dd")}
-                                                        </span>
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            </div>
-                        );
-                    })}
-                </div>
-            </div>
 
+
+            <div className="grid grid-cols-3 gap-5 p-4">
+                <div >
+                    <Card className="h-[450px]">
+                        <CardHeader>
+                            <CardTitle>Monthly Attendance</CardTitle>
+                            <CardDescription>Current Month</CardDescription>
+
+                        </CardHeader>
+                        <CardContent className="flex justify-center items-center">
+                            <Calendar
+                                mode="multiple"
+                                selected={Object.entries(attendance)
+                                    .filter(([_, value]) => value)
+                                    .map(([date]) => new Date(date))}
+                                modifiers={{
+                                    absent: Object.entries(attendance)
+                                        .filter(([_, value]) => !value)
+                                        .map(([date]) => new Date(date)),
+                                }}
+                                modifiersClassNames={{
+                                    absent: "bg-orange-500 text-white",
+                                    selected: "bg-green-500 text-white",
+                                }}
+                            />
+                        </CardContent>
+                    </Card>
+                </div>
+                <div className="">
+                    <Card className="w-full h-[450px]">
+                        <CardHeader>
+                            <CardTitle>Leave Details</CardTitle>
+                            <CardDescription>2025</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="grid grid-cols-2 gap-5">
+                                <div className="flex flex-col justify-center">
+                                    <div className="flex justify-between mb-2">
+                                        <p>On Time</p>
+                                        <p>3</p>
+                                    </div>
+                                    <div className="flex justify-between mb-2">
+                                        <p>Late Attendance</p>
+                                        <p>3</p>
+                                    </div>
+
+                                    <div className="flex justify-between mb-2">
+                                        <p>Leave Balance</p>
+                                        <p>3</p>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <p>Leave Taken</p>
+                                        <p>1</p>
+                                    </div>
+                                </div>
+                                <div className="flex flex-col">
+                                    <Component />
+                                </div>
+                                <div
+                                    className="col-span-2 text-center"
+                                >
+                                    <Dialog open={isLeaveDialogOpen} onOpenChange={setIsLeaveDialogOpen}>
+                                        <DialogTrigger asChild>
+                                            <Button
+                                                variant="outline"
+                                                disabled={selectedEmployee.leaveBalance === 0}
+                                                className="mt-4"
+                                            >
+                                                Apply for Leave
+                                            </Button>
+                                        </DialogTrigger>
+                                        <DialogContent>
+                                            <DialogHeader>
+                                                <DialogTitle>Apply For Leave</DialogTitle>
+                                            </DialogHeader>
+
+
+                                            <Input placeholder="Your Name" />
+                                            <Input placeholder="Leave Type" />
+                                            <Popover>
+                                                <PopoverTrigger asChild>
+                                                    <Button
+                                                        variant={"outline"}
+                                                        className={cn(
+                                                            "w-[240px] justify-start text-left font-normal",
+                                                            selectedDate
+                                                            && "text-muted-foreground"
+                                                        )}
+                                                    >
+                                                        <CalendarIcon />
+                                                        {selectedDate ? selectedDate?.toLocaleDateString() : "Select Date"}
+                                                    </Button>
+                                                </PopoverTrigger>
+                                                <PopoverContent className="w-auto p-0" align="start">
+                                                    <Calendar
+                                                        mode="single"
+                                                        selected={selectedDate}
+                                                        onSelect={setSelectedDate}
+                                                        initialFocus
+                                                    />
+                                                </PopoverContent>
+                                            </Popover>
+                                            <Input placeholder="Reason" />
+                                            <Button
+                                                onClick={handleLeaveRequest}
+                                                disabled={!selectedDate}
+                                                className="w-full"
+                                            >
+                                                Confirm Leave
+                                            </Button>
+                                        </DialogContent>
+                                    </Dialog>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+                <div >
+                    <Card className="h-[450px]">
+                        <CardHeader>
+                            <CardTitle>Today's Status</CardTitle>
+                            <CardDescription>
+                                Checked In: {checkInTime ? checkInTime.toLocaleTimeString() : "N/A"}
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            
+                            {checkInTime && (
+                                <div className="space-y-2">
+                                    <WorkHoursChart checkInTime={checkInTime} isOnBreak={isOnBreak} breakHistory={breakHistory} checked={attendance[today] || false} onCheckedChange={handleAttendanceToggle} />
+
+                                </div>
+                            )}
+                        </CardContent>
+                        <CardFooter className="flex-col gap-2 text-sm">
+                            <Button className="w-full" variant="secondary" onClick={handleAttendanceToggle}>
+                                {attendance[today] ? "Check Out" : "Check In"}
+                            </Button>
+                        </CardFooter>
+                    </Card>
+                </div>
+                <div className="col-span-3 w-full">
+                <div className="grid grid-cols-3 gap-5">
+                    <div>
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Total Hours Today</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                   <Component />
+                                </CardContent>
+                            </Card>
+                    </div>
+                    <div>
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Total Hours Week</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <Component />
+                                </CardContent>
+                            </Card>
+                    </div>
+                    <div>
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Total Hours Month</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <Component />
+                                </CardContent>
+                            </Card>
+                    </div>
+                    
+                </div>
+
+                </div>
+                <div className="col-span-3 w-full">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Leave History</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          {leaveHistory.length > 0 ? 
+                                leaveHistory.map((leave) => (
+                                  <div>
+                                    <p>{leave}</p>
+                                  </div>
+                                ))
+                              
+                           : (
+                            <p className="text-center text-lg text-muted-foreground">No leave history</p>
+                          )}
+
+                        </CardContent>
+                    </Card>
+                </div>
+            </div>
         </div>
-    )
+    );
 }
