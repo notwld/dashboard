@@ -34,12 +34,7 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cors(
-    {
-        origin: 'http://localhost:5173',
-        credentials: true
-    }
-));
+app.use(cors());
 app.use("/auth", Auth);
 const authorize = require('./middleware/auth');
 app.get('/get-session', authorize, (req: Request, res: Response) => {

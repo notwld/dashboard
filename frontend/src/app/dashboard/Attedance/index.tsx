@@ -15,6 +15,9 @@ import { Input } from "../../../components/ui/Sidebar/input";
 import { Popover, PopoverContent, PopoverTrigger } from "../../../components/ui/popover";
 import { CalendarIcon } from "lucide-react";
 import { cn } from "../../../lib/utils";
+import { Todays } from "./todayschart";
+import { Weekly } from "./weekly";
+import { Monthly } from "./monthly";
 
 export default function Attendance() {
     const [selectedEmployee, setSelectedEmployee] = useState({
@@ -272,7 +275,7 @@ export default function Attendance() {
                                     <CardTitle>Total Hours Today</CardTitle>
                                 </CardHeader>
                                 <CardContent>
-                                   <Component />
+                                   <Todays/>
                                 </CardContent>
                             </Card>
                     </div>
@@ -282,7 +285,7 @@ export default function Attendance() {
                                     <CardTitle>Total Hours Week</CardTitle>
                                 </CardHeader>
                                 <CardContent>
-                                    <Component />
+                                    <Weekly/>
                                 </CardContent>
                             </Card>
                     </div>
@@ -292,7 +295,7 @@ export default function Attendance() {
                                     <CardTitle>Total Hours Month</CardTitle>
                                 </CardHeader>
                                 <CardContent>
-                                    <Component />
+                                    <Monthly />
                                 </CardContent>
                             </Card>
                     </div>
