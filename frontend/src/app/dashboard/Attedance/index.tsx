@@ -18,6 +18,7 @@ import { cn } from "../../../lib/utils";
 import { Todays } from "./todayschart";
 import { Weekly } from "./weekly";
 import { Monthly } from "./monthly";
+import { ScrollArea } from "../../../components/ui/scroll-area";
 
 export default function Attendance() {
     const [selectedEmployee, setSelectedEmployee] = useState({
@@ -128,6 +129,83 @@ export default function Attendance() {
 
 
             <div className="grid grid-cols-3 gap-5 p-4">
+                <div className="col-span-3 w-full">
+                    <Card className="w-full">
+                        <CardHeader>
+                            <CardTitle>
+                                Welcome John!
+                            </CardTitle>
+                            <CardDescription>
+                                Full Stack Developer
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="flex flex-col gap-4">
+                            <div>
+                                <span className="text-lg font-semibold">
+                                    Check In/Out History
+                                </span>
+                            </div>
+                            <ScrollArea className="h-48 rounded-md w-full" >
+                                <div className="flex justify-between items-center gap-4 my-2">
+                                    <div className="flex flex-col justify-center items-center">
+                                        <p className="text-center">09:00 AM</p>
+                                    </div>
+                                    <div
+                                        className="bg-slate-800 w-full h-1 rounded-full"
+                                    />
+                                    <div className="flex flex-col justify-center items-center ">
+                                        <p className="text-center">06:00 PM</p>
+                                    </div>
+                                </div>
+                                <div className="flex justify-between items-center gap-4 my-2">
+                                    <div className="flex flex-col justify-center items-center">
+                                        <p className="text-center">09:00 AM</p>
+                                    </div>
+                                    <div
+                                        className="bg-slate-800 w-full h-1 rounded-full"
+                                    />
+                                    <div className="flex flex-col justify-center items-center ">
+                                        <p className="text-center">06:00 PM</p>
+                                    </div>
+                                </div>
+                                <div className="flex justify-between items-center gap-4 my-2">
+                                    <div className="flex flex-col justify-center items-center">
+                                        <p className="text-center">09:00 AM</p>
+                                    </div>
+                                    <div
+                                        className="bg-slate-800 w-full h-1 rounded-full"
+                                    />
+                                    <div className="flex flex-col justify-center items-center ">
+                                        <p className="text-center">06:00 PM</p>
+                                    </div>
+                                </div>
+                                <div className="flex justify-between items-center gap-4 my-2">
+                                    <div className="flex flex-col justify-center items-center">
+                                        <p className="text-center">09:00 AM</p>
+                                    </div>
+                                    <div
+                                        className="bg-slate-800 w-full h-1 rounded-full"
+                                    />
+                                    <div className="flex flex-col justify-center items-center ">
+                                        <p className="text-center">06:00 PM</p>
+                                    </div>
+                                </div>
+                                <div className="flex justify-between items-center gap-4 my-2">
+                                    <div className="flex flex-col justify-center items-center">
+                                        <p className="text-center">09:00 AM</p>
+                                    </div>
+                                    <div
+                                        className="bg-slate-800 w-full h-1 rounded-full"
+                                    />
+                                    <div className="flex flex-col justify-center items-center ">
+                                        <p className="text-center">06:00 PM</p>
+                                    </div>
+                                </div>
+                            </ScrollArea>
+                        </CardContent>
+                    </Card>
+
+                </div>
                 <div >
                     <Card className="h-[450px]">
                         <CardHeader>
@@ -252,7 +330,7 @@ export default function Attendance() {
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            
+
                             {checkInTime && (
                                 <div className="space-y-2">
                                     <WorkHoursChart checkInTime={checkInTime} isOnBreak={isOnBreak} breakHistory={breakHistory} checked={attendance[today] || false} onCheckedChange={handleAttendanceToggle} />
@@ -267,58 +345,26 @@ export default function Attendance() {
                         </CardFooter>
                     </Card>
                 </div>
-                <div className="col-span-3 w-full">
-                <div className="grid grid-cols-3 gap-5">
-                    <div>
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Total Hours Today</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                   <Todays/>
-                                </CardContent>
-                            </Card>
-                    </div>
-                    <div>
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Total Hours Week</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <Weekly/>
-                                </CardContent>
-                            </Card>
-                    </div>
-                    <div>
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Total Hours Month</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <Monthly />
-                                </CardContent>
-                            </Card>
-                    </div>
-                    
-                </div>
 
-                </div>
+
+
+
                 <div className="col-span-3 w-full">
                     <Card>
                         <CardHeader>
                             <CardTitle>Leave History</CardTitle>
                         </CardHeader>
                         <CardContent>
-                          {leaveHistory.length > 0 ? 
+                            {leaveHistory.length > 0 ?
                                 leaveHistory.map((leave) => (
-                                  <div>
-                                    <p>{leave}</p>
-                                  </div>
+                                    <div>
+                                        <p>{leave}</p>
+                                    </div>
                                 ))
-                              
-                           : (
-                            <p className="text-center text-lg text-muted-foreground">No leave history</p>
-                          )}
+
+                                : (
+                                    <p className="text-center text-lg text-muted-foreground">No leave history</p>
+                                )}
 
                         </CardContent>
                     </Card>

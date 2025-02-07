@@ -8,7 +8,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../..
 import { ScrollArea } from '../../../../components/ui/scroll-area'
 import { AttendanceToday } from './attendance'
 import { EmployeesTable } from './employees'
-import { LeavesTable } from './leaves'
+import  LeavesTable  from './leaves'
+import { EmployeesByDepartment } from './employeesbydepartment'
 export default function HR() {
     return (
         <div>
@@ -195,19 +196,6 @@ export default function HR() {
                 <Card className='col-span-3'>
                     <CardHeader>
                         <CardTitle>
-                            Employees Overview
-                        </CardTitle>
-                        <CardDescription>
-                            Employees and their Status
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <EmployeesTable />
-                    </CardContent>
-                </Card>
-                <Card className='col-span-3'>
-                    <CardHeader>
-                        <CardTitle>
                             Leaves 
                         </CardTitle>
                         <CardDescription>
@@ -218,6 +206,34 @@ export default function HR() {
                         <LeavesTable />
                     </CardContent>
                 </Card>
+                <Card className='col-span-3'>
+                    <CardHeader>
+                        <CardTitle>
+                        Employees By Department
+
+                        </CardTitle>
+                        <CardDescription>
+                            Number of Employees in each Department
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className='flex justify-center items-center'>
+                        <EmployeesByDepartment />
+                    </CardContent>
+                </Card>
+                <Card className='col-span-3'>
+                    <CardHeader>
+                        <CardTitle>
+                            Employees Overview
+                        </CardTitle>
+                        <CardDescription>
+                            Employees and their Status
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <EmployeesTable />
+                    </CardContent>
+                </Card>
+                
             </div>
         </div>
     )

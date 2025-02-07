@@ -5,8 +5,8 @@ import { Pie, PieChart, Label } from "recharts"
 import { Card, CardContent } from "../../../components/ui/card"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "../../../components/ui/chart"
 
-const workedMinutes = 450  // Example: 7 hours 30 minutes → 7 * 60 + 30
-const totalMinutes = 540   // 9 hours → 9 * 60
+const workedMinutes = 450  
+const totalMinutes = 540
 
 const workedHours = Math.floor(workedMinutes / 60)
 const workedMins = workedMinutes % 60

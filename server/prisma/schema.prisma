@@ -71,8 +71,9 @@ model Attendance {
   date        DateTime  @default(now())
   checkIn     DateTime  @default(now())
   checkOut    DateTime?
-  isPresent   Boolean   @default(true)
+  isPresent   Boolean   @default(false)
   isOnLeave   Boolean   @default(false)
+  isLate      Boolean   @default(false)
   totalHours  Float     @default(0)
   user        User      @relation(fields: [userId], references: [id])
   userId      Int
