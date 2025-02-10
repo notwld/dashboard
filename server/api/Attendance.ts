@@ -6,218 +6,186 @@ const authorize = require('../middleware/auth.ts');
 const router = Router();
 const prisma = new PrismaClient();
 
-// Check-in for the day
-router.post("/check-in/:id", authorize, async (req: any, res: any) => {
+router.post('/check-in', authorize, async (req: any, res: any) => {
+  const { userId, checkInTime } = req.body;
   try {
-    const userId = parseInt(req.params.id);
+    console.log(userId, checkInTime);
+    await prisma.attendance.create({
+      data: {
+        user: {
+          connect: { id: parseInt(userId) }
+        },
+        checkIn: checkInTime,
+        isPresent: true
+      }
+    });
+    return res.status(200).send({ message: 'Check-in successful' });
+  }
+  catch (err) {
+    res.status(500).send({ message: 'Internal Server Error' });
+  }
+});
+import { subHours, startOfDay, endOfDay } from 'date-fns';
+
+router.post('/check-out', authorize, async (req: any, res: any) => {
+  const { userId, checkOutTime } = req.body;
+
+  try {
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    console.log(today);
-    // Check if already checked in today
+    const todayStart = startOfDay(today); // 00:00:00 of today
+    const todayEnd = endOfDay(today); // 23:59:59 of today
+    console.log(todayStart, todayEnd);
     const existingAttendance = await prisma.attendance.findFirst({
       where: {
-        userId,
-        date: {
-          gte: today,
-          lt: new Date(today.getTime() + 24 * 60 * 60 * 1000),
+        userId: parseInt(userId),
+        checkOut: null, // Ensure it's an active check-in
+        checkIn: {
+          gte: todayStart, // Check-in must be today
+          lte: todayEnd,
         },
       },
     });
-
-    if (existingAttendance) {
-      return res.status(400).json({ message: "Already checked in today" });
-    }
-
-    const attendance = await prisma.attendance.create({
-      data: {
-        userId,
-        checkIn: new Date(),
-        isPresent: true,
-      },
-    });
-
-    res.json(attendance);
-  } catch (error) {
-    res.status(500).json({ error: "Failed to check in" });
-  }
-});
-
-// Check-out for the day
-router.post("/check-out/:id", authorize, async (req: any, res: any) => {
-  try {
-    const userId = parseInt(req.params.id);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const attendance = await prisma.attendance.findFirst({
+    const workedHours = (new Date(checkOutTime).getTime() - new Date(existingAttendance?.checkIn || 0).getTime()) / (1000 * 60 * 60);
+    const updatedAttendance = await prisma.attendance.updateMany({
       where: {
-        userId,
-        date: {
-          gte: today,
-          lt: new Date(today.getTime() + 24 * 60 * 60 * 1000),
+        userId: parseInt(userId),
+        checkOut: null, // Ensure it's an active check-in
+        checkIn: {
+          gte: todayStart, // Check-in must be today
+          lte: todayEnd,
         },
-        checkOut: null,
       },
-      include: {
-        breaks: true,
-      },
-    });
-
-    if (!attendance) {
-      return res.status(404).json({ message: "No active attendance found" });
-    }
-
-    const checkOutTime = new Date();
-    const totalBreakDuration = attendance.breaks.reduce((acc, curr) => acc + curr.duration, 0);
-    const totalHours = (checkOutTime.getTime() - attendance.checkIn.getTime()) / (1000 * 60 * 60) - totalBreakDuration;
-
-    const updatedAttendance = await prisma.attendance.update({
-      where: { id: attendance.id },
       data: {
         checkOut: checkOutTime,
-        totalHours: Math.max(0, totalHours),
+        totalHours: workedHours || 0,
+
       },
     });
 
-    res.json(updatedAttendance);
-  } catch (error) {
-    res.status(500).json({ error: "Failed to check out" });
+    if (updatedAttendance.count === 0) {
+      return res.status(404).send({ message: "No active check-in found for today" });
+    }
+
+    return res.status(200).send({ message: "Check-out successful" });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).send({ message: "Internal Server Error" });
   }
 });
 
-// Start break
-router.post("/break/start/:id", authorize, async (req:any, res: any) => {
+router.post('/all-attendance', authorize, async (req: any, res: any) => {
   try {
-    const userId = parseInt(req.params.id);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const allAttendance = await prisma.attendance.findMany(
+      {
+        where: {
+          userId: parseInt(req.body.userId),
 
-    const attendance = await prisma.attendance.findFirst({
-      where: {
-        userId,
-        date: {
-          gte: today,
-          lt: new Date(today.getTime() + 24 * 60 * 60 * 1000),
         },
-      },
-    });
 
-    if (!attendance) {
-      return res.status(404).json({ message: "No active attendance found" });
-    }
-
-    const activeBreak = await prisma.break.findFirst({
-      where: {
-        userId,
-        attendanceId: attendance.id,
-        endTime: null,
-      },
-    });
-
-    if (activeBreak) {
-      return res.status(400).json({ message: "Already on break" });
-    }
-
-    const newBreak = await prisma.break.create({
-      data: {
-        userId,
-        attendanceId: attendance.id,
-      },
-    });
-
-    res.json(newBreak);
-  } catch (error) {
-    res.status(500).json({ error: "Failed to start break" });
+      }
+    );
+    return res.status(200).send(allAttendance);
+  }
+  catch (err) {
+    res.status(500).send({ message: 'Internal Server Error' });
   }
 });
-
-// End break
-router.post("/break/end/:id", authorize, async (req:any, res: any) => {
+router.get("/all/hr", authorize, async (req: any, res: any) => {
   try {
-    const userId =  parseInt(req.params.id);
-
-    const activeBreak = await prisma.break.findFirst({
-      where: {
-        userId,
-        endTime: null,
-      },
-    });
-
-    if (!activeBreak) {
-      return res.status(404).json({ message: "No active break found" });
-    }
-
-    const endTime = new Date();
-    const duration = (endTime.getTime() - activeBreak.startTime.getTime()) / (1000 * 60 * 60); // in hours
-
-    const updatedBreak = await prisma.break.update({
-      where: { id: activeBreak.id },
-      data: {
-        endTime,
-        duration,
-      },
-    });
-
-    res.json(updatedBreak);
-  } catch (error) {
-    res.status(500).json({ error: "Failed to end break" });
-  }
-});
-
-// Request leave
-router.post("/leave/:id", authorize, async (req:any, res: any) => {
-  try {
-    const userId = parseInt(req.params.id);
-    const { date, reason } = req.body;
-
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-    });
-
-    if (!user || user.leaveBalance <= 0) {
-      return res.status(400).json({ message: "Insufficient leave balance" });
-    }
-
-    const leaveRequest = await prisma.leaveRequest.create({
-      data: {
-        userId,
-        date: new Date(date),
-        reason,
-      },
-    });
-
-    res.json(leaveRequest);
-  } catch (error) {
-    res.status(500).json({ error: "Failed to request leave" });
-  }
-});
-
-// Get user's attendance history
-router.get("/history/:id", authorize, async (req: Request, res: Response) => {
-  try {
-    const userId = parseInt(req.params.id);
-    const { startDate, endDate } = req.query;
-    console.log(startDate, endDate);
-    const attendance = await prisma.attendance.findMany({
-      where: {
-        userId,
-        date: {
-          gte: startDate ? new Date(startDate as string) : undefined,
-          lte: endDate ? new Date(endDate as string) : undefined,
-        },
-      },
+    const attendanceRecords = await prisma.attendance.findMany({
       include: {
-        breaks: true,
-      },
-      orderBy: {
-        date: 'desc',
+        user: true,
       },
     });
 
-    res.json(attendance);
+    const formattedData = attendanceRecords.map((record) => ({
+      id: record.id,
+      username: record.user.name,
+      checkInTime: record.checkIn,
+      checkOutTime: record.checkOut,
+      date: record.date,
+      isPresent: record.isPresent,
+      isOnLeave: record.isOnLeave,
+      leaveStatus: record.leaveStatus,
+    }));
+    console.log(formattedData);
+    res.json({ formattedData });
   } catch (error) {
-    res.status(500).json({ error: "Failed to fetch attendance history" });
+    console.error("Error fetching attendance:", error);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+})
+
+router.post("/apply-leave", authorize, async (req: any, res: any) => {
+  const { userId, reason, leaveType, date } = req.body;
+  try {
+    await prisma.attendance.create({
+      data: {
+        user: {
+          connect: { id: parseInt(userId) }
+        },
+
+        isOnLeave: true,
+        leaveStatus: 'PENDING',
+        leaveType,
+        date,
+        leaveReason: reason
+      }
+    });
+    return res.status(200).send({ message: 'Leave applied successfully' });
+  }
+  catch (err) {
+    res.status(500).send({ message: 'Internal Server Error' });
   }
 });
 
+router.post("/update-leave", authorize, async (req: any, res: any) => {
+  const { id, status } = req.body;
+  console.log(id, status);
+  try {
+    const updated = await prisma.attendance.update({
+      where: {
+        id: parseInt(id)
+      },
+      data: {
+        leaveStatus: status
+      }
+    });
+    if(status === 'APPROVED') {
+      await prisma.user.update({
+        where: {
+          id: updated?.userId
+        },
+        data: {
+          leaveBalance: {
+            decrement: 1
+          }
+        }
+      });
+    }
+    return res.status(200).send({ message: 'Leave updated successfully' });
+  }
+  catch (err) {
+    res.status(500).send({ message: 'Internal Server Error' });
+  }
+})
+
+router.get("/get-users", authorize, async (req: any, res: any) => {
+  try {
+    const users = await prisma.user.findMany(
+      {
+        select: {
+          id: true,
+          name: true,
+          leaveBalance: true,
+        }
+      }
+    );
+    return res.status(200).send(users);
+  }
+  catch (err) {
+    res.status(500).send({ message: 'Internal Server Error' });
+  }
+}
+)
 export default router;

@@ -19,6 +19,8 @@ import { Todays } from "./todayschart";
 import { Weekly } from "./weekly";
 import { Monthly } from "./monthly";
 import { ScrollArea } from "../../../components/ui/scroll-area";
+import { baseurl } from "../../../config/baseurl";
+import { CheckInOutHistory } from "./recentChecks";
 
 export default function Attendance() {
     const [selectedEmployee, setSelectedEmployee] = useState({
@@ -27,7 +29,7 @@ export default function Attendance() {
         email: "john@example.com",
         leaveBalance: 3,
     });
-    const [attendance, setAttendance] = useState({});
+    const [attendance, setAttendance] = useState([]);
     const [selectedDate, setSelectedDate] = useState(null);
     const [leaveHistory, setLeaveHistory] = useState([]);
     const [isLeaveDialogOpen, setIsLeaveDialogOpen] = useState(false);
@@ -40,28 +42,104 @@ export default function Attendance() {
     const today = new Date().toISOString().split("T")[0];
     const workingHoursPerDay = 9;
 
-    const handleAttendanceToggle = (checked) => {
+    const handleAttendanceToggle = async (checked) => {
+        const userId = localStorage.getItem('userId');
+        const token = localStorage.getItem('token');
+        console.log(checked, checkInTime);
         if (checked && !checkInTime) {
-            setCheckInTime(new Date());
+
+            // User is checking in
+            const newCheckInTime = new Date();
+            setCheckInTime(newCheckInTime);
+
+            try {
+                await fetch(baseurl + "/attendance/check-in", {
+                    method: 'POST',
+                    headers: {
+                        "x-access-token": `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        userId,
+                        checkInTime: newCheckInTime,
+                    }),
+                });
+
+                fetchAttendance(); // Refresh attendance data
+            } catch (error) {
+                console.error("Check-in failed:", error);
+            }
+        } else if (checkInTime) {
+            // User is checking out
+            const checkOutTime = new Date();
+
+            try {
+                const response = await fetch(baseurl + "/attendance/check-out", {
+                    method: 'POST',
+                    headers: {
+                        "x-access-token": `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        userId,
+                        checkOutTime,
+                    }),
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    setCheckInTime(null); // Reset check-in state
+                    fetchAttendance(); // Refresh attendance data
+                } else {
+                    console.error("Check-out failed:", data.message);
+                }
+            } catch (error) {
+                console.error("Check-out error:", error);
+            }
         }
-        else {
-            setCheckInTime(null);
-        }
-        setAttendance((prev) => ({ ...prev, [today]: checked }));
     };
 
-    const handleLeaveRequest = () => {
-        if (selectedDate && selectedEmployee.leaveBalance > 0) {
-            // Use the selected date directly without modification
-            const dateKey = selectedDate.toISOString().split("T")[0];
-            setAttendance((prev) => ({ ...prev, [dateKey]: false }));
-            setLeaveHistory([...leaveHistory, `Leave requested for ${dateKey}`]);
-            setSelectedEmployee({
-                ...selectedEmployee,
-                leaveBalance: selectedEmployee.leaveBalance - 1,
-            });
-            setIsLeaveDialogOpen(false);
-        }
+    const fetchAttendance = async () => {
+        await fetch(baseurl + "/attendance/all-attendance", {
+            method: 'POST',
+            headers: {
+                "x-access-token": `Bearer ${localStorage.getItem('token')}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                userId: localStorage.getItem('userId'),
+            }),
+        }).then((res) => res.json())
+            .then((data) => {
+                setAttendance(data);
+                console.log(data);
+            })
+            .catch((err) => console.log(err));
+    }
+    useEffect(() => {
+        fetchAttendance();
+    }
+        , []);
+    const handleLeaveRequest = async () => {
+        await fetch(baseurl + "/attendance/apply-leave", {
+            method: 'POST',
+            headers: {
+                "x-access-token": `Bearer ${localStorage.getItem('token')}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                userId: localStorage.getItem('userId'),
+                date: selectedDate,
+                reason: reason,
+                leaveType: leaveType,
+            }),
+        }).then((res) => res.json())
+            .then((data) => {
+                console.log(data);
+                setLeaveHistory([...leaveHistory, data.message]);
+                setIsLeaveDialogOpen(false);
+        })
+        
     };
 
     const handleBreakToggle = () => {
@@ -92,7 +170,43 @@ export default function Attendance() {
     };
 
     const remainingHours = workingHoursPerDay - workedHours;
+    const todayAttendance = attendance.find(
+        (entry) => entry.date.split("T")[0] === today && entry.checkIn
+    );
 
+    useEffect(() => {
+        if (todayAttendance) {
+            setCheckInTime(new Date(todayAttendance.checkIn));
+        } else {
+            setCheckInTime(null);
+        }
+    }, [attendance]);
+
+    // Calculate worked hours
+    useEffect(() => {
+        if (checkInTime) {
+            const interval = setInterval(() => {
+                const now = new Date();
+                let totalWorked = (now - checkInTime) / (1000 * 60 * 60); // Convert ms to hours
+
+                // Subtract break durations
+                let totalBreakTime = breakHistory.reduce((acc, breakEntry) => {
+                    if (breakEntry.start && breakEntry.end) {
+                        return acc + (new Date(breakEntry.end) - new Date(breakEntry.start)) / (1000 * 60 * 60);
+                    }
+                    return acc;
+                }, 0);
+
+                setWorkedHours(Math.max(0, totalWorked - totalBreakTime));
+            }, 1000); // Update every second
+
+            return () => clearInterval(interval);
+        } else {
+            setWorkedHours(0);
+        }
+    }, [checkInTime, breakHistory]);
+    const [leaveType, setLeaveType] = useState("");
+    const [reason, setReason] = useState("");
     return (
         <div className="min-h-screen relative">
             {/* Break Overlay */}
@@ -133,76 +247,13 @@ export default function Attendance() {
                     <Card className="w-full">
                         <CardHeader>
                             <CardTitle>
-                                Welcome John!
+                                Welcome {localStorage.getItem("user") || "User"}
                             </CardTitle>
                             <CardDescription>
                                 Full Stack Developer
                             </CardDescription>
                         </CardHeader>
-                        <CardContent className="flex flex-col gap-4">
-                            <div>
-                                <span className="text-lg font-semibold">
-                                    Check In/Out History
-                                </span>
-                            </div>
-                            <ScrollArea className="h-48 rounded-md w-full" >
-                                <div className="flex justify-between items-center gap-4 my-2">
-                                    <div className="flex flex-col justify-center items-center">
-                                        <p className="text-center">09:00 AM</p>
-                                    </div>
-                                    <div
-                                        className="bg-slate-800 w-full h-1 rounded-full"
-                                    />
-                                    <div className="flex flex-col justify-center items-center ">
-                                        <p className="text-center">06:00 PM</p>
-                                    </div>
-                                </div>
-                                <div className="flex justify-between items-center gap-4 my-2">
-                                    <div className="flex flex-col justify-center items-center">
-                                        <p className="text-center">09:00 AM</p>
-                                    </div>
-                                    <div
-                                        className="bg-slate-800 w-full h-1 rounded-full"
-                                    />
-                                    <div className="flex flex-col justify-center items-center ">
-                                        <p className="text-center">06:00 PM</p>
-                                    </div>
-                                </div>
-                                <div className="flex justify-between items-center gap-4 my-2">
-                                    <div className="flex flex-col justify-center items-center">
-                                        <p className="text-center">09:00 AM</p>
-                                    </div>
-                                    <div
-                                        className="bg-slate-800 w-full h-1 rounded-full"
-                                    />
-                                    <div className="flex flex-col justify-center items-center ">
-                                        <p className="text-center">06:00 PM</p>
-                                    </div>
-                                </div>
-                                <div className="flex justify-between items-center gap-4 my-2">
-                                    <div className="flex flex-col justify-center items-center">
-                                        <p className="text-center">09:00 AM</p>
-                                    </div>
-                                    <div
-                                        className="bg-slate-800 w-full h-1 rounded-full"
-                                    />
-                                    <div className="flex flex-col justify-center items-center ">
-                                        <p className="text-center">06:00 PM</p>
-                                    </div>
-                                </div>
-                                <div className="flex justify-between items-center gap-4 my-2">
-                                    <div className="flex flex-col justify-center items-center">
-                                        <p className="text-center">09:00 AM</p>
-                                    </div>
-                                    <div
-                                        className="bg-slate-800 w-full h-1 rounded-full"
-                                    />
-                                    <div className="flex flex-col justify-center items-center ">
-                                        <p className="text-center">06:00 PM</p>
-                                    </div>
-                                </div>
-                            </ScrollArea>
-                        </CardContent>
+                        <CheckInOutHistory attendance={attendance} />
                     </Card>
 
                 </div>
@@ -211,26 +262,39 @@ export default function Attendance() {
                         <CardHeader>
                             <CardTitle>Monthly Attendance</CardTitle>
                             <CardDescription>Current Month</CardDescription>
-
                         </CardHeader>
                         <CardContent className="flex justify-center items-center">
                             <Calendar
                                 mode="multiple"
-                                selected={Object.entries(attendance)
-                                    .filter(([_, value]) => value)
-                                    .map(([date]) => new Date(date))}
+                                selected={attendance
+                                    ?.filter((entry) => entry?.isPresent === true)
+                                    ?.map((entry) => entry?.date ? new Date(entry.date) : null)
+                                    ?.filter(Boolean)} // Remove null values
                                 modifiers={{
-                                    absent: Object.entries(attendance)
-                                        .filter(([_, value]) => !value)
-                                        .map(([date]) => new Date(date)),
+                                    absent: attendance
+                                        ?.filter((entry) => entry?.isPresent === false && entry?.isOnLeave === false)
+                                        ?.map((entry) => entry?.date ? new Date(entry.date) : null)
+                                        ?.filter(Boolean),
+                                    leave: attendance
+                                        ?.filter((entry) => entry?.isOnLeave === true && entry?.leaveStatus === "APPROVED")
+                                        ?.map((entry) => entry?.date ? new Date(entry.date) : null)
+                                        ?.filter(Boolean),
+                                    late: attendance
+                                        ?.filter((entry) => entry?.isLate === true)
+                                        ?.map((entry) => entry?.date ? new Date(entry.date) : null)
+                                        ?.filter(Boolean),
                                 }}
                                 modifiersClassNames={{
-                                    absent: "bg-orange-500 text-white",
+                                    absent: "bg-red-500 text-white",
                                     selected: "bg-green-500 text-white",
+                                    leave: "bg-gray-500 text-white",
+                                    late: "bg-yellow-500 text-white",
                                 }}
                             />
                         </CardContent>
                     </Card>
+
+
                 </div>
                 <div className="">
                     <Card className="w-full h-[450px]">
@@ -281,8 +345,10 @@ export default function Attendance() {
                                             </DialogHeader>
 
 
-                                            <Input placeholder="Your Name" />
-                                            <Input placeholder="Leave Type" />
+                                            <Input placeholder="Your Name" disabled defaultValue={`${localStorage.getItem("user") || "Enter your name"}`} />
+                                            <Input onChange={(e)=>{
+                                                setLeaveType(e.target.value);
+                                            }} placeholder="Leave Type" defaultValue={""} />
                                             <Popover>
                                                 <PopoverTrigger asChild>
                                                     <Button
@@ -306,7 +372,10 @@ export default function Attendance() {
                                                     />
                                                 </PopoverContent>
                                             </Popover>
-                                            <Input placeholder="Reason" />
+                                            <Input placeholder="Reason" onChange={(e)=>{
+                                                setReason(e.target.value);
+                                            }
+                                            } defaultValue={""} />
                                             <Button
                                                 onClick={handleLeaveRequest}
                                                 disabled={!selectedDate}
@@ -322,7 +391,7 @@ export default function Attendance() {
                     </Card>
                 </div>
                 <div >
-                    <Card className="h-[450px]">
+                    <Card className="h-[450px] ring-1 animate-pulse ring-orange-900 hover:animate-none">
                         <CardHeader>
                             <CardTitle>Today's Status</CardTitle>
                             <CardDescription>
@@ -330,17 +399,21 @@ export default function Attendance() {
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
-
                             {checkInTime && (
                                 <div className="space-y-2">
-                                    <WorkHoursChart checkInTime={checkInTime} isOnBreak={isOnBreak} breakHistory={breakHistory} checked={attendance[today] || false} onCheckedChange={handleAttendanceToggle} />
-
+                                    <WorkHoursChart
+                                        checkInTime={checkInTime}
+                                        isOnBreak={isOnBreak}
+                                        breakHistory={breakHistory}
+                                        checked={!!todayAttendance}
+                                        onCheckedChange={handleAttendanceToggle}
+                                    />
                                 </div>
                             )}
                         </CardContent>
                         <CardFooter className="flex-col gap-2 text-sm">
                             <Button className="w-full" variant="secondary" onClick={handleAttendanceToggle}>
-                                {attendance[today] ? "Check Out" : "Check In"}
+                                {todayAttendance ? "Check Out" : "Check In"}
                             </Button>
                         </CardFooter>
                     </Card>
@@ -355,16 +428,17 @@ export default function Attendance() {
                             <CardTitle>Leave History</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            {leaveHistory.length > 0 ?
-                                leaveHistory.map((leave) => (
-                                    <div>
-                                        <p>{leave}</p>
+                            {
+                                attendance?.filter((entry) => entry.isOnLeave === true).map((entry, index) => (
+                                    <div key={index} className="flex flex-col gap-2 my-2">
+                                     <p>
+                                        You applied for leave on {
+                                            new Date(entry.date).toLocaleDateString()
+                                        } which is {entry.leaveStatus?.toLowerCase()}.
+                                    </p>
                                     </div>
                                 ))
-
-                                : (
-                                    <p className="text-center text-lg text-muted-foreground">No leave history</p>
-                                )}
+                            }
 
                         </CardContent>
                     </Card>

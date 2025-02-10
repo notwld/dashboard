@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { SidebarTrigger } from '../../../../components/ui/Sidebar/sidebar'
 import { Separator } from '../../../../components/ui/Sidebar/separator'
 import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage } from '../../../../components/ui/Sidebar/breadcrumb'
@@ -8,9 +8,72 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../..
 import { ScrollArea } from '../../../../components/ui/scroll-area'
 import { AttendanceToday } from './attendance'
 import { EmployeesTable } from './employees'
-import  LeavesTable  from './leaves'
+import LeavesTable from './leaves'
 import { EmployeesByDepartment } from './employeesbydepartment'
+import AttendanceCard from './AttendanceCard'
+import { baseurl } from '../../../../config/baseurl'
 export default function HR() {
+    const [attendance, setAttendance] = useState([]);
+    const fetchAttendance = async () => {
+        await fetch(baseurl + "/attendance/all/hr", {
+            method: 'GET',
+            headers: {
+                "x-access-token": `Bearer ${localStorage.getItem('token')}`,
+                'Content-Type': 'application/json',
+            },
+
+        }).then((res) => res.json())
+            .then((data) => {
+                setAttendance(data.formattedData);
+            })
+            .catch((err) => console.log(err));
+    }
+    useEffect(() => {
+        fetchAttendance();
+    }
+        , []);
+
+    const handleUpdateLeave = async (id, status) => {
+        console.log(id, status);
+        await fetch(baseurl + "/attendance/update-leave", {
+            method: 'POST',
+            headers: {
+                "x-access-token": `Bearer ${localStorage.getItem('token')}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                id,
+                status
+            })
+        }).then((res) => res.json())
+            .then((data) => {
+                fetchAttendance();
+                fetchUserLeaves();
+            })
+            .catch((err) => {
+                console.log(err);
+
+            })
+    }
+    const [leaveBalance, setLeaveBalance] = useState([]);
+    const fetchUserLeaves = async () => {
+        await fetch(baseurl + "/attendance/get-users", {
+            method: 'GET',
+            headers: {
+                "x-access-token": `Bearer ${localStorage.getItem('token')}`,
+                'Content-Type': 'application/json',
+            },
+
+        }).then((res) => res.json())
+            .then((data) => {
+                setLeaveBalance(data);
+            })
+            .catch((err) => console.log(err));
+
+    }
+    useEffect(() => {
+        fetchUserLeaves();
+    }, [])
     return (
         <div>
             <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
@@ -32,40 +95,7 @@ export default function HR() {
                 </Breadcrumb>
             </header>
             <div className="grid grid-cols-3 p-4 gap-5">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>
-                            Check-In/Out
-                        </CardTitle>
-                        <CardDescription>
-                            Employees Attendance Overview
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <ScrollArea className="h-48 rounded-md  w-full" >
-                            <div className='bg-gray-900 w-full p-3 px-5 rounded-lg mb-3'>
-                                <span className='font-semibold'>
-                                    Waleed Checked Out at 12:00 AM
-                                </span>
-                            </div>
-                            <div className='bg-gray-900 w-full p-3 px-5 rounded-lg mb-3'>
-                                <span className='font-semibold'>
-                                    Waleed Checked In at 9:00 AM
-                                </span>
-                            </div>
-                            <div className='bg-gray-900 w-full p-3 px-5 rounded-lg mb-3'>
-                                <span className='font-semibold'>
-                                    Waleed Checked In at 9:00 AM
-                                </span>
-                            </div>
-                            <div className='bg-gray-900 w-full p-3 px-5 rounded-lg'>
-                                <span className='font-semibold'>
-                                    Waleed Checked In at 9:00 AM
-                                </span>
-                            </div>
-                        </ScrollArea>
-                    </CardContent>
-                </Card>
+                <AttendanceCard attendanceData={attendance} />
                 <Card>
                     <CardHeader>
                         <CardTitle>
@@ -119,97 +149,52 @@ export default function HR() {
                             Leave Overview
                         </CardTitle>
                         <CardDescription>
-                            Employees and their Leave Status
+                            Employees and their remaining leaves
                         </CardDescription>
                     </CardHeader>
                     <CardContent >
                         <ScrollArea className="h-48 rounded-md  w-full" >
-                            <div className=' w-full my-3 flex justify-between items-center'>
-                                <span className='font-semibold'>
-                                    Waleed
-                                </span>
-                                <span className='font-semibold'>
-                                    3 Leaves
-                                </span>
+                            <div className="flex flex-col gap-3">
+                                {leaveBalance.length > 0 ? (
+                                    leaveBalance.map((entry, index) => (
+                                        <div key={index} className="flex justify-between items-center">
+                                            <span>
+                                                {entry?.name}
+                                            </span>
+                                            <span>
+                                                {entry?.leaveBalance} Leaves
+                                            </span>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="text-center text-gray-500">No leave balance found.</div>
+                                )}
                             </div>
-                            <div className=' w-full my-3 flex justify-between items-center'>
-                                <span className='font-semibold'>
-                                    Waleed
-                                </span>
-                                <span className='font-semibold'>
-                                    3 Leaves
-                                </span>
-                            </div>
-                            <div className=' w-full my-3 flex justify-between items-center'>
-                                <span className='font-semibold'>
-                                    Waleed
-                                </span>
-                                <span className='font-semibold'>
-                                    3 Leaves
-                                </span>
-                            </div>
-                            <div className=' w-full my-3 flex justify-between items-center'>
-                                <span className='font-semibold'>
-                                    Waleed
-                                </span>
-                                <span className='font-semibold'>
-                                    3 Leaves
-                                </span>
-                            </div>
-                            <div className=' w-full my-3 flex justify-between items-center'>
-                                <span className='font-semibold'>
-                                    Waleed
-                                </span>
-                                <span className='font-semibold'>
-                                    3 Leaves
-                                </span>
-                            </div>
-                            <div className=' w-full my-3 flex justify-between items-center'>
-                                <span className='font-semibold'>
-                                    Waleed
-                                </span>
-                                <span className='font-semibold'>
-                                    3 Leaves
-                                </span>
-                            </div>
-                            <div className=' w-full my-3 flex justify-between items-center'>
-                                <span className='font-semibold'>
-                                    Waleed
-                                </span>
-                                <span className='font-semibold'>
-                                    3 Leaves
-                                </span>
-                            </div>
-                            <div className=' w-full my-3 flex justify-between items-center'>
-                                <span className='font-semibold'>
-                                    Waleed
-                                </span>
-                                <span className='font-semibold'>
-                                    3 Leaves
-                                </span>
-                            </div>
-                            
-                            
+                    
+
+
                         </ScrollArea>
                     </CardContent>
                 </Card>
                 <Card className='col-span-3'>
                     <CardHeader>
                         <CardTitle>
-                            Leaves 
+                            Leaves
                         </CardTitle>
                         <CardDescription>
                             Pending Leaves Requests
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <LeavesTable />
+                        <LeavesTable attendance={attendance}
+                            handleUpdateLeave={handleUpdateLeave}
+                        />
                     </CardContent>
                 </Card>
                 <Card className='col-span-3'>
                     <CardHeader>
                         <CardTitle>
-                        Employees By Department
+                            Employees By Department
 
                         </CardTitle>
                         <CardDescription>
@@ -233,7 +218,7 @@ export default function HR() {
                         <EmployeesTable />
                     </CardContent>
                 </Card>
-                
+
             </div>
         </div>
     )

@@ -77,6 +77,9 @@ model Attendance {
   totalHours  Float     @default(0)
   user        User      @relation(fields: [userId], references: [id])
   userId      Int
+  leaveReason String?
+  leaveType   String?
+  leaveStatus LeaveStatus? @default(PENDING)
   breaks      Break[]
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
