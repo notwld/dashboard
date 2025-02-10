@@ -1,28 +1,32 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { SidebarTrigger } from '../../../../components/ui/Sidebar/sidebar'
 import { Separator } from '../../../../components/ui/Sidebar/separator'
 import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage } from '../../../../components/ui/Sidebar/breadcrumb'
 import { Button } from '../../../../components/ui/button'
 import { useNavigate } from 'react-router-dom'
+import { baseurl } from '../../../../config/baseurl'
 
 export default function Brands() {
+    const navigate = useNavigate()
     const [brands, setBrands] = useState([
-        {
-            name: 'designtech360',
-            logo:"http://localhost:5173/src/assets/logo.png",
-            description: 'This is a description of brand 1'
-        },
-        {
-            name: 'mizetechnologies',
-            logo:"http://localhost:5173/src/assets/logo.png",
-            description: 'This is a description of brand 2'
-        },
-        {
-            name: 'Brand 3',
-            logo:"http://localhost:5173/src/assets/logo.png",
-            description: 'This is a description of brand 3'
-        }
     ])
+    const fetchBrands = async () => {
+        await fetch(baseurl+'/brand/all', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-access-token': `Bearer ${localStorage.getItem('token')}`
+            }
+        }).then((res) => res.json())
+            .then((data) => {
+                setBrands(data)
+            })
+            .catch((err) => console.log(err))
+    }
+    useEffect(() => {
+        fetchBrands()
+    }
+        , []);
     return (
         <div>
             <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
@@ -40,6 +44,12 @@ export default function Brands() {
 
                                 </BreadcrumbPage>
                             </BreadcrumbItem>
+                            <div className='flex gap-4'>
+                                <Button onClick={() => navigate('/brands/add')}>
+                                    Add Brand
+                                </Button>
+                            </div>
+
                         </div>
                     </BreadcrumbList>
                 </Breadcrumb>
@@ -49,7 +59,7 @@ export default function Brands() {
                 {brands.map((brand, index) => (
                     <div key={index} className='flex gap-4 items-center'>
                         <div className='w-20 h-20 rounded-full'>
-                            <img src={brand.logo} alt="logo" className='w-full h-full object-contain' />
+                        <img src={`${baseurl}/brand/logo/${brand.logo}`} alt="Brand Logo" className='w-full h-full object-contain' />
                         </div>
                         <div>
                             <h1 className='font-bold text-lg'>{brand.name}</h1>

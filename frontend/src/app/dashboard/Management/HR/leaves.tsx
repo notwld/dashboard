@@ -11,6 +11,8 @@ export default function LeavesTable({ attendance = [], handleUpdateLeave }) {
                             <br />
                             Reason: {entry?.leaveReason || "No reason provided"}
                             <br />
+                            Leave Type: {entry?.leaveType}
+                            <br />
                             <span className="text-sm font-semibold text-green-500">
                                 {entry?.leaveStatus}
                             </span>

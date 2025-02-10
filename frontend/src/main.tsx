@@ -16,6 +16,7 @@ import Attendance from './app/dashboard/Attedance/index.tsx'
 import CreatePaymentLink from './app/dashboard/PaymentLink/create.tsx'
 import Brands from './app/dashboard/Management/Brands/index.tsx'
 import HR from './app/dashboard/Management/HR/index.tsx'
+import AddBrand from './app/dashboard/Management/Brands/add.tsx'
 
  
 
@@ -35,6 +36,10 @@ const routes = createBrowserRouter([
       {
         path:'/brands',
         element:<ProtectedRoute><Brands /></ProtectedRoute>,
+      },
+      {
+        path:"/brands/add",
+        element:<ProtectedRoute><AddBrand /></ProtectedRoute>
       },
       {
         path:'/hr',

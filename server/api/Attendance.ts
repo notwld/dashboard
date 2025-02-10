@@ -107,6 +107,8 @@ router.get("/all/hr", authorize, async (req: any, res: any) => {
       isPresent: record.isPresent,
       isOnLeave: record.isOnLeave,
       leaveStatus: record.leaveStatus,
+      leaveReason: record.leaveReason,
+      leaveType: record.leaveType,
     }));
     console.log(formattedData);
     res.json({ formattedData });

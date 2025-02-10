@@ -115,3 +115,12 @@ enum LeaveStatus {
   REJECTED
 }
 
+model Brand {
+  id                    String   @id @default(cuid())
+  name                  String
+  description           String
+  logo                  String?
+  stripeSecretKey       String?
+  stripePublishableKey  String?
+  createdAt             DateTime @default(now())
+}

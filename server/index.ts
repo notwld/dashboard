@@ -11,6 +11,8 @@ import Lead from './api/Leads';
 import Auth from './api/Auth';
 import Payment from './api/Payment';
 import  Attendance  from './api/Attendance';
+import path from 'node:path';
+import Brand from './api/Brand';
 
 declare module 'express-session' {
     export interface SessionData {
@@ -22,6 +24,7 @@ declare module 'express-session' {
 dotenv.config();
 
 const app = express();
+app.use(express.static(path.join(__dirname, 'public')));
 app.use(ExpressSession({
     secret: process.env.SESSION_SECRET || 'secret',
     resave: false,
@@ -32,8 +35,11 @@ app.use(ExpressSession({
 }));
 const PORT = process.env.PORT || 3000;
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ 
+    limit: '50mb', 
+    extended: true 
+}));
 app.use(cors());
 app.use("/auth", Auth);
 const authorize = require('./middleware/auth');
@@ -47,6 +53,7 @@ app.use('/perm', Permission);
 app.use('/lead', Lead);
 app.use('/payment', Payment);
 app.use('/attendance', Attendance);
+app.use("/brand", Brand);
 
 
 
