@@ -190,4 +190,119 @@ router.get("/get-users", authorize, async (req: any, res: any) => {
   }
 }
 )
+const getToday = () => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return today;
+};
+router.post("/user-summary", async (req:any, res:any) => {
+  try {
+    const { userId } = req.body;
+
+    if (!userId) {
+      return res.status(400).json({ error: "User ID is required" });
+    }
+
+    // Fetch all attendance records for the user
+    const attendanceRecords = await prisma.attendance.findMany({
+      where: { userId:parseInt(userId) },
+      select: { checkIn: true, isLate: true, isOnLeave: true },
+    });
+
+    // Define the cutoff time for on-time attendance (6:15 PM)
+    const cutoffTime = new Date();
+    cutoffTime.setHours(18, 15, 0, 0); // 6:15 PM
+
+    // Calculate on-time count
+    let onTimeCount = 0;
+    let lateCount = 0;
+    let leaveCount = 0;
+
+    attendanceRecords.forEach((record) => {
+      const checkInTime = new Date(record.checkIn);
+
+      if (record.isOnLeave) {
+        leaveCount++;
+      } else if (checkInTime < cutoffTime) {
+        onTimeCount++;
+      } else {
+        lateCount++;
+      }
+    });
+
+    // Get leave balance from User table
+    const user = await prisma.user.findUnique({
+      where: { id: parseInt(userId) },
+      select: { leaveBalance: true },
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.json({
+      onTime: onTimeCount,
+      late: lateCount,
+      leavesTaken: leaveCount,
+      leaveBalance: user.leaveBalance,
+    });
+  } catch (error) {
+    console.error("Error fetching attendance summary:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+// API to get employee attendance summary
+router.get("/summary", async (req, res) => {
+  try {
+    const today = getToday();
+    const checkInCutoff = new Date(today);
+    checkInCutoff.setHours(18, 15, 0, 0); // 6:15 PM
+
+    // Get total employees
+    const totalEmployees = await prisma.user.count();
+
+    // Get today's attendance records
+    const attendanceRecords = await prisma.attendance.findMany({
+      where: {
+        date: {
+          gte: today,
+        },
+      },
+      select: {
+        userId: true,
+        isPresent: true,
+        isOnLeave: true,
+        checkIn: true,
+      },
+    });
+
+    // Count present, absent, and late employees
+    let presentToday = 0;
+    let lateToday = 0;
+    let presentUserIds = new Set();
+
+    attendanceRecords.forEach((record) => {
+      if (record.isPresent) {
+        presentToday++;
+        presentUserIds.add(record.userId);
+        if (record.checkIn && record.checkIn > checkInCutoff) {
+          lateToday++;
+        }
+      }
+    });
+
+    // Absent employees = Total users - Present users
+    const absentToday = totalEmployees - presentToday;
+
+    res.json({
+      totalEmployees,
+      presentToday,
+      absentToday,
+      lateToday,
+    });
+  } catch (error) {
+    console.error("Error fetching attendance summary:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
 export default router;

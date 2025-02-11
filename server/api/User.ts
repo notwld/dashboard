@@ -36,6 +36,7 @@ router.post('/create-user',authorize, async (req: Request, res: Response) => {
             data: {
                 email: req.body.email,
                 name: req.body.username,
+                department: req.body.department,
                 password: hashedPassword,
                 leaveBalance: req.body.leaveBalance || 5,
                 role: {
@@ -58,7 +59,7 @@ router.post('/create-user',authorize, async (req: Request, res: Response) => {
 
 router.get('/get-users', authorize, async (req: Request, res: Response) => {
     try {
-        const users = await prisma.user.findMany({
+        let users = await prisma.user.findMany({
             include: {
                 role: {
                     include: {
@@ -67,6 +68,7 @@ router.get('/get-users', authorize, async (req: Request, res: Response) => {
                 }
             },
         });
+     
         // console.log(users);
         res.json(users);
     } catch (error) {
@@ -76,38 +78,46 @@ router.get('/get-users', authorize, async (req: Request, res: Response) => {
 });
 router.put('/update-user/:id', authorize, async (req: Request, res: Response) => {
     try {
-        const salt = await bycrpt.genSalt(10);
-        const hashedPassword = await bycrpt.hash(req.body.password, salt);
+        const updateData: any = {
+            email: req.body.email,
+            name: req.body.username,
+            leaveBalance: req.body.leaveBalance,
+            department: req.body.department,
+            role: {
+                connect: {
+                    id: req.body.roleId,
+                },
+            },
+        };
+
+        // Check if password is provided
+        if (req.body.password) {
+            const salt = await bycrpt.genSalt(10);
+            updateData.password = await bycrpt.hash(req.body.password, salt);
+        }
+
         const user = await prisma.user.update({
             where: {
                 id: parseInt(req.params.id),
             },
-            data: {
-                email: req.body.email,
-                name: req.body.username,
-                password: hashedPassword,
-                leaveBalance: req.body.leaveBalance,
-                role: {
-                    connect: {
-                        id: req.body.roleId,
-                    },
-                },
-            },
+            data: updateData,
             include: {
                 role: true,
             },
         });
+
         if (!user) {
-            res.status(404).json({ message: 'User not found',status:404 });
+            res.status(404).json({ message: 'User not found', status: 404 });
             return;
         }
-        // console.log(user);
+
         res.json(user);
     } catch (error) {
-        console.error(error); 
-        res.status(500).json({ message: 'Internal server error',status:500 });
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error', status: 500 });
     }
 });
+
 router.delete('/delete-user/:id', authorize, async (req: Request, res: Response) => {
     try {
         const user = await prisma.user.delete({

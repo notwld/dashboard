@@ -7,11 +7,11 @@ import { useNavigate } from 'react-router-dom'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../../components/ui/card'
 import { ScrollArea } from '../../../../components/ui/scroll-area'
 import { AttendanceToday } from './attendance'
-import { EmployeesTable } from './employees'
 import LeavesTable from './leaves'
 import { EmployeesByDepartment } from './employeesbydepartment'
 import AttendanceCard from './AttendanceCard'
 import { baseurl } from '../../../../config/baseurl'
+import EmployeesTable from './employees'
 export default function HR() {
     const [attendance, setAttendance] = useState([]);
     const fetchAttendance = async () => {
@@ -74,6 +74,36 @@ export default function HR() {
     useEffect(() => {
         fetchUserLeaves();
     }, [])
+    const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch(`${baseurl}/attendance/summary`, {
+          method: "GET",
+          headers: {
+            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!res.ok) {
+          throw new Error(`Failed to fetch data: ${res.statusText}`);
+        }
+
+        const jsonData: AttendanceSummary = await res.json();
+        setData(jsonData);
+      } catch (error: any) {
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
     return (
         <div>
             <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
@@ -106,42 +136,35 @@ export default function HR() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="grid grid-cols-2 gap-5 w-full justify-center items-center">
-                        <div className="flex flex-col gap-3 w-[80%]">
-                            <div className="flex justify-between items-center">
-                                <span>
-                                    Total Employees
-                                </span>
-                                <span>
-                                    10
-                                </span>
-                            </div>
-                            <div className="flex justify-between items-center">
-                                <span>
-                                    Present
-                                </span>
-                                <span>
-                                    8
-                                </span>
-                            </div>
-                            <div className="flex justify-between items-center">
-                                <span>
-                                    Absent
-                                </span>
-                                <span>
-                                    2
-                                </span>
-                            </div>
-                            <div className="flex justify-between items-center">
-                                <span>
-                                    Late
-                                </span>
-                                <span>
-                                    1
-                                </span>
-                            </div>
-                        </div>
-                        <AttendanceToday />
-                    </CardContent>
+      {loading ? (
+        <p>Loading...</p>
+      ) : error ? (
+        <p className="text-red-500">Error: {error}</p>
+      ) : data ? (
+        <div className="flex flex-col gap-3 w-[80%]">
+          <div className="flex justify-between items-center">
+            <span>Total Employees</span>
+            <span>{data.totalEmployees}</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span>Present</span>
+            <span>{data.presentToday}</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span>Absent</span>
+            <span>{data.absentToday}</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span>Late</span>
+            <span>{data.lateToday}</span>
+          </div>
+        </div>
+      ) : (
+        <p>No data available</p>
+      )}
+
+      <AttendanceToday data={data} />
+    </CardContent>
                 </Card>
                 <Card>
                     <CardHeader>

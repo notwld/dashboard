@@ -77,6 +77,7 @@ type User = {
     id: number;
     name: string;
     email: string;
+    department: string;
     role: {
         id: number;
         name: string;
@@ -180,6 +181,14 @@ export default function Users() {
             },
         },
         {
+            accessorKey:"department",
+            header: () => <div className="text-right text-lg">Department</div>,
+            cell: ({ row }) => {
+
+                return <div className="text-right text-xl">{row.getValue("department")}</div>
+            }
+        },
+        {
             accessorKey: "leaveBalance",
             header: () => <div className="text-right text-lg">Leave Balance</div>,
             cell: ({ row }) => {
@@ -220,6 +229,7 @@ export default function Users() {
                             {permissions.edit && <DropdownMenuItem onClick={() => {
                                 setUser(user)
                                 setIsDialogOpen(true)
+                                setRole(user.role)
                             }
                             }>
                                 Edit</DropdownMenuItem>}
@@ -332,8 +342,9 @@ export default function Users() {
         const formSchema = z.object({
             username: z.string().min(4).max(20),
             email: z.string().email(),
-            password: z.string().min(8),
-            confirmPassword: z.string().min(8),
+            department: z.string().optional(),
+            password: z.string().optional(),
+            confirmPassword: z.string().optional(),
             leaveBalance: z
         .string()
         .refine((val) => !isNaN(Number(val)), { message: "Must be a number" })
@@ -349,7 +360,8 @@ export default function Users() {
                 username: user?.name,
                 email: user?.email,
                 password: "",
-                leaveBalance: user?.leaveBalance,
+                department: user?.department,
+                leaveBalance: user?.leaveBalance?.toString(),
                 confirmPassword: "",
                 role: {
                     id: 0
@@ -364,12 +376,14 @@ export default function Users() {
                 })
                 return
             }
-            if (!values.password || values.password !== values.confirmPassword) {
-                toast({
-                    title: "Password Mismatch",
-                    description: `Passwords do not match.`,
-                })
-                return
+            if(values.password != "" && values.confirmPassword != ""){
+                if (!values.password || values.password !== values.confirmPassword) {
+                    toast({
+                        title: "Password Mismatch",
+                        description: `Passwords do not match.`,
+                    })
+                    return
+                }
             }
             await fetch(baseurl + `/user/update-user/${user?.id}`, {
                 method: "PUT",
@@ -458,6 +472,20 @@ export default function Users() {
                         </DropdownMenuContent>
                     </DropdownMenu>
                     {!role && <FormMessage>Role is required</FormMessage>}
+                    <FormField  
+                        control={form.control}
+                        name="department"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Department</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="Enter a department" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    
                         <FormField  
                         control={form.control}
                         name="leaveBalance"

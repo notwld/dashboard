@@ -207,6 +207,33 @@ export default function Attendance() {
     }, [checkInTime, breakHistory]);
     const [leaveType, setLeaveType] = useState("");
     const [reason, setReason] = useState("");
+    const [attendanceData, setAttendanceData] = useState({
+        onTime: 0,
+        late: 0,
+        leaveBalance: 0,
+        leavesTaken: 0,
+      });
+    useEffect(() => {
+        fetchAttendanceSummary();
+      }, []);
+    
+      const fetchAttendanceSummary = async () => {
+        try {
+          const userId = localStorage.getItem("userId"); // Ensure userId is stored in localStorage
+          const response = await fetch(baseurl+"/attendance/user-summary", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userId }),
+          });
+    
+          if (!response.ok) throw new Error("Failed to fetch data");
+    
+          const data = await response.json();
+          setAttendanceData(data);
+        } catch (error) {
+          console.error("Error fetching attendance summary:", error);
+        }
+      };
     return (
         <div className="min-h-screen relative">
             {/* Break Overlay */}
@@ -297,98 +324,68 @@ export default function Attendance() {
 
                 </div>
                 <div className="">
-                    <Card className="w-full h-[450px]">
-                        <CardHeader>
-                            <CardTitle>Leave Details</CardTitle>
-                            <CardDescription>2025</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="grid grid-cols-2 gap-5">
-                                <div className="flex flex-col justify-center">
-                                    <div className="flex justify-between mb-2">
-                                        <p>On Time</p>
-                                        <p>3</p>
-                                    </div>
-                                    <div className="flex justify-between mb-2">
-                                        <p>Late Attendance</p>
-                                        <p>3</p>
-                                    </div>
-
-                                    <div className="flex justify-between mb-2">
-                                        <p>Leave Balance</p>
-                                        <p>3</p>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <p>Leave Taken</p>
-                                        <p>1</p>
-                                    </div>
-                                </div>
-                                <div className="flex flex-col">
-                                    <Component />
-                                </div>
-                                <div
-                                    className="col-span-2 text-center"
-                                >
-                                    <Dialog open={isLeaveDialogOpen} onOpenChange={setIsLeaveDialogOpen}>
-                                        <DialogTrigger asChild>
-                                            <Button
-                                                variant="outline"
-                                                disabled={selectedEmployee.leaveBalance === 0}
-                                                className="mt-4"
-                                            >
-                                                Apply for Leave
-                                            </Button>
-                                        </DialogTrigger>
-                                        <DialogContent>
-                                            <DialogHeader>
-                                                <DialogTitle>Apply For Leave</DialogTitle>
-                                            </DialogHeader>
-
-
-                                            <Input placeholder="Your Name" disabled defaultValue={`${localStorage.getItem("user") || "Enter your name"}`} />
-                                            <Input onChange={(e)=>{
-                                                setLeaveType(e.target.value);
-                                            }} placeholder="Leave Type" defaultValue={""} />
-                                            <Popover>
-                                                <PopoverTrigger asChild>
-                                                    <Button
-                                                        variant={"outline"}
-                                                        className={cn(
-                                                            "w-[240px] justify-start text-left font-normal",
-                                                            selectedDate
-                                                            && "text-muted-foreground"
-                                                        )}
-                                                    >
-                                                        <CalendarIcon />
-                                                        {selectedDate ? selectedDate?.toLocaleDateString() : "Select Date"}
-                                                    </Button>
-                                                </PopoverTrigger>
-                                                <PopoverContent className="w-auto p-0" align="start">
-                                                    <Calendar
-                                                        mode="single"
-                                                        selected={selectedDate}
-                                                        onSelect={setSelectedDate}
-                                                        initialFocus
-                                                    />
-                                                </PopoverContent>
-                                            </Popover>
-                                            <Input placeholder="Reason" onChange={(e)=>{
-                                                setReason(e.target.value);
-                                            }
-                                            } defaultValue={""} />
-                                            <Button
-                                                onClick={handleLeaveRequest}
-                                                disabled={!selectedDate}
-                                                className="w-full"
-                                            >
-                                                Confirm Leave
-                                            </Button>
-                                        </DialogContent>
-                                    </Dialog>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
+                <Card className="w-full h-[450px]">
+      <CardHeader>
+        <CardTitle>Leave Details</CardTitle>
+        <CardDescription>2025</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-2 gap-5">
+          <div className="flex flex-col justify-center">
+            <div className="flex justify-between mb-2">
+              <p>On Time</p>
+              <p>{attendanceData.onTime}</p>
+            </div>
+            <div className="flex justify-between mb-2">
+              <p>Late Attendance</p>
+              <p>{attendanceData.late}</p>
+            </div>
+            <div className="flex justify-between mb-2">
+              <p>Leave Balance</p>
+              <p>{attendanceData.leaveBalance}</p>
+            </div>
+            <div className="flex justify-between">
+              <p>Leave Taken</p>
+              <p>{attendanceData.leavesTaken}</p>
+            </div>
+          </div>
+          <div className="flex flex-col">
+            <Component />
+          </div>
+          <div className="col-span-2 text-center">
+            <Dialog open={isLeaveDialogOpen} onOpenChange={setIsLeaveDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" disabled={attendanceData.leaveBalance === 0} className="mt-4">
+                  Apply for Leave
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Apply For Leave</DialogTitle>
+                </DialogHeader>
+                <Input placeholder="Your Name" disabled defaultValue={localStorage.getItem("user") || "Enter your name"} />
+                <Input onChange={(e) => setLeaveType(e.target.value)} placeholder="Leave Type" />
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className="w-[240px] justify-start text-left font-normal">
+                      <CalendarIcon />
+                      {selectedDate ? selectedDate.toLocaleDateString() : "Select Date"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar mode="single" selected={selectedDate} onSelect={setSelectedDate} initialFocus />
+                  </PopoverContent>
+                </Popover>
+                <Input placeholder="Reason" onChange={(e) => setReason(e.target.value)} />
+                <Button onClick={() => console.log("Submit leave request")} disabled={!selectedDate} className="w-full">
+                  Confirm Leave
+                </Button>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
                 </div>
                 <div >
                     <Card className="h-[450px] ring-1 animate-pulse ring-orange-900 hover:animate-none">
