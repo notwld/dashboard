@@ -12,6 +12,10 @@ import { EmployeesByDepartment } from './employeesbydepartment'
 import AttendanceCard from './AttendanceCard'
 import { baseurl } from '../../../../config/baseurl'
 import EmployeesTable from './employees'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../../components/ui/Tabs/tabs'
+import { Input } from '../../../../components/ui/Sidebar/input'
+import { Label } from '../../../../components/ui/Sidebar/label'
+import { TrendingUp } from 'lucide-react'
 export default function HR() {
     const [attendance, setAttendance] = useState([]);
     const fetchAttendance = async () => {
@@ -75,35 +79,73 @@ export default function HR() {
         fetchUserLeaves();
     }, [])
     const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await fetch(`${baseurl}/attendance/summary`, {
-          method: "GET",
-          headers: {
-            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-            "Content-Type": "application/json",
-          },
-        });
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const res = await fetch(`${baseurl}/attendance/summary`, {
+                    method: "GET",
+                    headers: {
+                        "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+                        "Content-Type": "application/json",
+                    },
+                });
 
-        if (!res.ok) {
-          throw new Error(`Failed to fetch data: ${res.statusText}`);
-        }
+                if (!res.ok) {
+                    throw new Error(`Failed to fetch data: ${res.statusText}`);
+                }
 
-        const jsonData: AttendanceSummary = await res.json();
-        setData(jsonData);
-      } catch (error: any) {
-        setError(error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+                const jsonData: AttendanceSummary = await res.json();
+                setData(jsonData);
+            } catch (error: any) {
+                setError(error.message);
+            } finally {
+                setLoading(false);
+            }
+        };
 
-    fetchData();
-  }, []);
+        fetchData();
+    }, []);
+    const [absentees, setAbsentees] = useState([]);
+    const fetchAbsentees = async () => {
+        await fetch(baseurl + "/attendance/all-absent-users", {
+            method: 'GET',
+            headers: {
+                "x-access-token": `Bearer ${localStorage.getItem('token')}`,
+                'Content-Type': 'application/json',
+            },
+
+        }).then((res) => res.json())
+            .then((data) => {
+                setAbsentees(data);
+                console.log(data);
+            })
+            .catch((err) => console.log(err));
+    }
+    useEffect(() => {
+        fetchAbsentees();
+    }, [])
+    const [topEmployees, setTopEmployees] = useState([]);
+    const fetchPerformance = async () => {
+        await fetch(baseurl + "/attendance/top-employees", {
+            method: 'GET',
+            headers: {
+                "x-access-token": `Bearer ${localStorage.getItem('token')}`,
+                'Content-Type': 'application/json',
+            },
+
+        }).then((res) => res.json())
+            .then((data) => {
+                setTopEmployees(data);
+            })
+            .catch((err) => console.log(err));
+
+    }
+    useEffect(() => {
+        fetchPerformance();
+    }, [])
     return (
         <div>
             <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
@@ -125,6 +167,16 @@ export default function HR() {
                 </Breadcrumb>
             </header>
             <div className="grid grid-cols-3 p-4 gap-5">
+                <Card className='col-span-3'>
+                    <CardHeader>
+                        <CardTitle>
+                            Welcome Back {localStorage.getItem('user') || "HR"}!
+                        </CardTitle>
+                        <CardDescription>
+                            You have pending leave requests to approve or reject.
+                        </CardDescription>
+                    </CardHeader>
+                </Card>
                 <AttendanceCard attendanceData={attendance} />
                 <Card>
                     <CardHeader>
@@ -136,35 +188,35 @@ export default function HR() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="grid grid-cols-2 gap-5 w-full justify-center items-center">
-      {loading ? (
-        <p>Loading...</p>
-      ) : error ? (
-        <p className="text-red-500">Error: {error}</p>
-      ) : data ? (
-        <div className="flex flex-col gap-3 w-[80%]">
-          <div className="flex justify-between items-center">
-            <span>Total Employees</span>
-            <span>{data.totalEmployees}</span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span>Present</span>
-            <span>{data.presentToday}</span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span>Absent</span>
-            <span>{data.absentToday}</span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span>Late</span>
-            <span>{data.lateToday}</span>
-          </div>
-        </div>
-      ) : (
-        <p>No data available</p>
-      )}
+                        {loading ? (
+                            <p>Loading...</p>
+                        ) : error ? (
+                            <p className="text-red-500">Error: {error}</p>
+                        ) : data ? (
+                            <div className="flex flex-col gap-3 w-[80%]">
+                                <div className="flex justify-between items-center">
+                                    <span>Total Employees</span>
+                                    <span>{data.totalEmployees}</span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span>Present</span>
+                                    <span>{data.presentToday}</span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span>Absent</span>
+                                    <span>{data.absentToday}</span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span>Late</span>
+                                    <span>{data.lateToday}</span>
+                                </div>
+                            </div>
+                        ) : (
+                            <p>No data available</p>
+                        )}
 
-      <AttendanceToday data={data} />
-    </CardContent>
+                        <AttendanceToday data={data} />
+                    </CardContent>
                 </Card>
                 <Card>
                     <CardHeader>
@@ -193,28 +245,13 @@ export default function HR() {
                                     <div className="text-center text-gray-500">No leave balance found.</div>
                                 )}
                             </div>
-                    
+
 
 
                         </ScrollArea>
                     </CardContent>
                 </Card>
-                <Card className='col-span-3'>
-                    <CardHeader>
-                        <CardTitle>
-                            Leaves
-                        </CardTitle>
-                        <CardDescription>
-                            Pending Leaves Requests
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <LeavesTable attendance={attendance}
-                            handleUpdateLeave={handleUpdateLeave}
-                        />
-                    </CardContent>
-                </Card>
-                <Card className='col-span-3'>
+                <Card className='col-span-2 h-64'>
                     <CardHeader>
                         <CardTitle>
                             Employees By Department
@@ -228,6 +265,74 @@ export default function HR() {
                         <EmployeesByDepartment />
                     </CardContent>
                 </Card>
+                <Card className='h-64 ring-2 ring-green-600'>
+                    <CardHeader>
+                        <CardTitle>
+                            Performance Overview
+                        </CardTitle>
+                        <CardDescription>
+                            Top Employees of the Month
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <ScrollArea className="h-48 rounded-md w-full">
+                            <div className="flex flex-col gap-3">
+                                {topEmployees.length > 0 ? (
+                                    topEmployees.map((entry, index) => (
+                                        <div key={index} className="flex justify-between items-center">
+                                            <span>
+                                                {entry?.name}
+                                            </span>
+                                            <span className="flex items-center gap-2">
+                                                <TrendingUp className="w-5 h-5 text-green-500" />
+                                                {entry?.performanceScore?.toFixed(1)}%
+                                            </span>
+                                            </div>
+                                    ))
+                                ) : (
+                                    <div className="text-center text-gray-500">No top performers found.</div>
+                                )}
+
+                            </div>
+                        </ScrollArea>
+                    </CardContent>
+                </Card>
+                
+                <Tabs defaultValue="account" className="col-span-3 w-full">
+                    <TabsList className="w-full py-10 justify-center items-center">
+                        <TabsTrigger value="account" className='py-5 w-[50%] text-lg'>Leaves</TabsTrigger>
+                        <TabsTrigger value="password" className='py-5 w-[50%] text-lg'>Absentees</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="account">
+                        <Card className='col-span-3'>
+                            
+                            <CardContent>
+                                <LeavesTable attendance={attendance}
+                                    handleUpdateLeave={handleUpdateLeave}
+                                />
+                            </CardContent>
+                        </Card>
+                    </TabsContent>
+                    <TabsContent value="password">
+                        <Card>
+                            
+                            <CardContent className="my-5">
+                                {absentees.length > 0 ? (
+                                    absentees.map((entry, index) => (
+                                        <div key={index} className="bg-slate-700 flex justify-between items-center py-4 px-5 rounded-lg my-2 cursor-pointer hover:bg-slate-800">
+                                            <span>
+                                                {entry.name} ({entry.email})
+                                            </span>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="text-center text-gray-500">No absentees found.</div>
+                                )}
+                            </CardContent>
+                            
+                        </Card>
+                    </TabsContent>
+                </Tabs>
                 <Card className='col-span-3'>
                     <CardHeader>
                         <CardTitle>

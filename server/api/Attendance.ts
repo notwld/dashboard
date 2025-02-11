@@ -9,7 +9,6 @@ const prisma = new PrismaClient();
 router.post('/check-in', authorize, async (req: any, res: any) => {
   const { userId, checkInTime } = req.body;
   try {
-    console.log(userId, checkInTime);
     await prisma.attendance.create({
       data: {
         user: {
@@ -34,7 +33,6 @@ router.post('/check-out', authorize, async (req: any, res: any) => {
     const today = new Date();
     const todayStart = startOfDay(today); // 00:00:00 of today
     const todayEnd = endOfDay(today); // 23:59:59 of today
-    console.log(todayStart, todayEnd);
     const existingAttendance = await prisma.attendance.findFirst({
       where: {
         userId: parseInt(userId),
@@ -110,7 +108,6 @@ router.get("/all/hr", authorize, async (req: any, res: any) => {
       leaveReason: record.leaveReason,
       leaveType: record.leaveType,
     }));
-    console.log(formattedData);
     res.json({ formattedData });
   } catch (error) {
     console.error("Error fetching attendance:", error);
@@ -143,7 +140,6 @@ router.post("/apply-leave", authorize, async (req: any, res: any) => {
 
 router.post("/update-leave", authorize, async (req: any, res: any) => {
   const { id, status } = req.body;
-  console.log(id, status);
   try {
     const updated = await prisma.attendance.update({
       where: {
@@ -305,4 +301,107 @@ router.get("/summary", async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
+router.get("/all-absent-users", authorize, async (req: Request, res: Response) => {
+  try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const presentUsers = await prisma.attendance.findMany({
+          where: {
+              date: {
+                gte: today,
+                lte: new Date(),
+              },
+              isPresent: true,
+              isOnLeave: false,
+          },
+          select: {
+              userId: true,
+          },
+      });
+
+      const presentUserIds = presentUsers.map((user) => user.userId);
+      console.log(presentUserIds);
+      const absentUsers = await prisma.user.findMany({
+          where: {
+              NOT: {
+                  id: {
+                      in: presentUserIds,
+                  },
+              },
+          },
+          select: {
+              id: true,
+              name: true,
+              email: true,
+              department: true,
+          },
+      });
+      console.log(absentUsers);
+      res.json(absentUsers);
+
+  } catch (error) {
+      console.error("Error fetching absent users:", error);
+      res.status(500).json({ message: "Internal server error", status: 500 });
+  }
+});
+const getTopEmployeesByAttendance = async (month: number, year: number, topN: number = 3) => {
+  // Get first and last day of the month
+  const startDate = new Date(year, month - 1, 1);
+  const endDate = new Date(year, month, 0);
+
+  const users = await prisma.user.findMany({
+    include: {
+      attendance: {
+        where: {
+          date: { gte: startDate, lte: endDate }, // Filter only this month's data
+        },
+        select: {
+          isPresent: true,
+          totalHours: true,
+          isLate: true,
+        },
+      },
+    },
+  });
+
+  // Calculate attendance-based performance score
+  const rankedUsers = users.map(user => {
+    const totalDaysPresent = user.attendance.filter(a => a.isPresent).length;
+    const totalHoursWorked = user.attendance.reduce((sum, a) => sum + a.totalHours, 0);
+    const lateDays = user.attendance.filter(a => a.isLate).length;
+
+    const performanceScore = (totalDaysPresent * 2) + (totalHoursWorked * 1) - (lateDays * 3);
+
+    return {
+      id: user.id,
+      name: user.name,
+      totalDaysPresent,
+      totalHoursWorked,
+      lateDays,
+      performanceScore,
+    };
+  });
+
+  // Sort employees by performance score in descending order
+  const topEmployees = rankedUsers
+    .sort((a, b) => b.performanceScore - a.performanceScore)
+    .slice(0, topN); // Get top N employees
+
+  return topEmployees;
+};
+
+router.get("/top-employees", authorize, async (req: Request, res: Response) => {
+  const month = new Date().getMonth() + 1; // Current month
+  const year = new Date().getFullYear();
+
+  try {
+    const topEmployees = await getTopEmployeesByAttendance(month, year);
+    res.json(topEmployees);
+  } catch (error) {
+    console.error("Error fetching top employees:", error);
+    res.status(500).json({ message: "Internal server error", status: 500 });
+  }
+});
+
 export default router;

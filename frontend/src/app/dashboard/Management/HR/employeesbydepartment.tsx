@@ -68,7 +68,7 @@ export function EmployeesByDepartment() {
   }, []);
 
   return (
-    <Card className="border-none w-[50vw]">
+    <Card className="border-none w-full h-36">
       <CardContent>
         {loading ? (
           <p>Loading...</p>
@@ -77,7 +77,7 @@ export function EmployeesByDepartment() {
         ) : departmentData.length === 0 ? (
           <p>No data available</p>
         ) : (
-          <ChartContainer  config={chartConfig}>
+          <ChartContainer  config={chartConfig} className="h-36 w-full">
             <BarChart data={departmentData}>
               <CartesianGrid vertical={false} />
               <XAxis dataKey="department" tickLine={false} tickMargin={10} axisLine={false} />

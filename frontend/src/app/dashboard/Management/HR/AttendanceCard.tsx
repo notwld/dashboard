@@ -54,7 +54,7 @@ const AttendanceCard = ({ attendanceData = [] }) => {
 
                                 return !record?.isOnLeave ? (
                                 <div key={index} className="bg-gray-900 w-full p-3 px-5 rounded-lg mb-3">
-                                    <span cl4assName="font-semibold">
+                                    <span className="font-semibold">
                                       [
                                         {format(new Date(record.date), "dd/MMM/yyyy")}
                                       ]  {record?.username} Checked In at {checkInTime} and {checkOutTime!=null?`Checked Out at ${checkOutTime}`:"has not Checked Out yet"}

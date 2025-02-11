@@ -11,7 +11,7 @@ export default function Brands() {
     const [brands, setBrands] = useState([
     ])
     const fetchBrands = async () => {
-        await fetch(baseurl+'/brand/all', {
+        await fetch(baseurl + '/brand/all', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -57,17 +57,20 @@ export default function Brands() {
             </header>
             <div className='grid grid-cols-3 gap-4 p-4 mt-6 mx-10'>
                 {brands.map((brand, index) => (
-                    <div key={index} className='flex gap-4 items-center'>
+                    <div key={index} className='flex gap-4 items-center hover:bg-white hover:text-black p-4 rounded-lg shadow-md transition-all cursor-pointer ring-1 ring-gray-600'>
                         <div className='w-20 h-20 rounded-full'>
-                        <img src={`${baseurl}/brand/logo/${brand.logo}`} alt="Brand Logo" className='w-full h-full object-contain' />
+                            <img src={`${baseurl}/${brand.logo}`} alt="Brand Logo" className='w-full h-full object-contain' />
                         </div>
                         <div>
                             <h1 className='font-bold text-lg'>{brand.name}</h1>
                             <p>{brand.description}</p>
                         </div>
+                        <div className='flex gap-2 justify-end items-center'>
+
+                        </div>
                     </div>
                 ))}
-                </div>
+            </div>
         </div>
     )
 }

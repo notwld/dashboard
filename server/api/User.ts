@@ -76,6 +76,8 @@ router.get('/get-users', authorize, async (req: Request, res: Response) => {
         res.status(500).json({ message: 'Internal server error',status:500 });
     }
 });
+
+
 router.put('/update-user/:id', authorize, async (req: Request, res: Response) => {
     try {
         const updateData: any = {

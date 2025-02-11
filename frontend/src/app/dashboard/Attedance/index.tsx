@@ -4,31 +4,18 @@ import { Separator } from "../../../components/ui/Sidebar/separator";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage } from "../../../components/ui/Sidebar/breadcrumb";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../../../components/ui/card";
 import { Button } from "../../../components/ui/button";
-import { Switch } from "../../../components/ui/switch";
 import { Calendar } from "../../../components/ui/calendar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../../../components/ui/dialog";
-import { Progress } from "../../../components/progress";
 import { Component } from "./chart";
 import { WorkHoursChart } from "./workingChart";
-import { Table, TableHead, TableHeader } from "../../../components/ui/Table/table";
 import { Input } from "../../../components/ui/Sidebar/input";
 import { Popover, PopoverContent, PopoverTrigger } from "../../../components/ui/popover";
 import { CalendarIcon } from "lucide-react";
-import { cn } from "../../../lib/utils";
-import { Todays } from "./todayschart";
-import { Weekly } from "./weekly";
-import { Monthly } from "./monthly";
-import { ScrollArea } from "../../../components/ui/scroll-area";
 import { baseurl } from "../../../config/baseurl";
 import { CheckInOutHistory } from "./recentChecks";
 
 export default function Attendance() {
-    const [selectedEmployee, setSelectedEmployee] = useState({
-        id: "1",
-        name: "John Doe",
-        email: "john@example.com",
-        leaveBalance: 3,
-    });
+
     const [attendance, setAttendance] = useState([]);
     const [selectedDate, setSelectedDate] = useState(null);
     const [leaveHistory, setLeaveHistory] = useState([]);
@@ -377,7 +364,7 @@ export default function Attendance() {
                   </PopoverContent>
                 </Popover>
                 <Input placeholder="Reason" onChange={(e) => setReason(e.target.value)} />
-                <Button onClick={() => console.log("Submit leave request")} disabled={!selectedDate} className="w-full">
+                <Button onClick={() => handleLeaveRequest()} disabled={!selectedDate} className="w-full">
                   Confirm Leave
                 </Button>
               </DialogContent>
