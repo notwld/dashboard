@@ -171,6 +171,7 @@ export default function ManageLeads() {
         lead: {}
     })
     const STATUS = [
+        "New",
         "Paid",
         "Already Hired",
         "Call back scheduled",
@@ -604,6 +605,42 @@ export default function ManageLeads() {
     React.useEffect(() => {
         checkPermissions()
     }, [])
+    const [file, setFile] = React.useState<File | null>(null)
+    const importLeads = async () => {
+        try {
+            const formData = new FormData()
+            formData.append('file', file)
+            const response = await fetch(baseurl + '/lead/import-leads', {
+                method: 'POST',
+                headers: {
+                    "x-access-token": `Bearer ${localStorage.getItem('token')}`,
+                },
+                body: formData
+            })
+            const data = await response.json()
+            if (data.status) {
+                toast({
+                    title: "Import Failed",
+                    description: `Leads could not be imported. Reason: ${data.message}`,
+                    category: "error"
+                })
+                return
+            }
+            toast({
+                title: "Leads Imported",
+                description: `Leads have been imported.`,
+                category: "success"
+            })
+            fetchLeads()
+        } catch (error) {
+            console.error(error)
+            toast({
+                title: "Import Failed",
+                description: `Leads could not be imported.`,
+                category: "error"
+            })
+        }
+    }
     const columns: ColumnDef<Lead>[] = [
         {
             id: "select",
@@ -856,8 +893,31 @@ export default function ManageLeads() {
     React.useEffect(() => {
         fetchLeads()
     }, [])
+    const uploadFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (!file) return
+        setFile(file)
+    }
+
+    const [fileModal, setFileModal] = React.useState(false)
     return (
         <div className="w-full">
+            <AlertDialog open={fileModal} onOpenChange={() => setFileModal(false)}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle className="text-lg">Import Leads</AlertDialogTitle>
+                        <AlertDialogDescription className="text-md">
+                            Upload a CSV file to import leads.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <input type="file" onChange={uploadFile} />
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={importLeads}>Import</AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
             <AlertDialog open={open.open} onOpenChange={() => {
                 setOpen({
                     open: false,
@@ -908,6 +968,12 @@ export default function ManageLeads() {
                                                     navigate('/create-lead')
                                                 }}
                                             >Create a Lead</Button>}
+                                            <Button className="ml-4 rounded-xl"
+                                                onClick={() => {
+                                                    setFileModal(true)
+                                                }}
+                                            >Import Leads</Button>
+
                                     </div>
                                 </BreadcrumbPage>
                             </BreadcrumbItem>

@@ -24,6 +24,25 @@ router.post('/check-in', authorize, async (req: any, res: any) => {
     res.status(500).send({ message: 'Internal Server Error' });
   }
 });
+
+router.post('/periodic-update', authorize, async (req: any, res: any) => {
+  const { userId, workedHours,attendanceId } = req.body;
+  try {
+    await prisma.attendance.update({
+      where: {
+        id: parseInt(attendanceId),
+        userId: parseInt(userId)
+      },
+      data: {
+        totalHours: workedHours
+      }
+    });
+    return res.status(200).send({ message: 'Check-in successful' });
+  }
+  catch (err) {
+    res.status(500).send({ message: 'Internal Server Error' });
+  }
+});
 import { subHours, startOfDay, endOfDay } from 'date-fns';
 
 router.post('/check-out', authorize, async (req: any, res: any) => {

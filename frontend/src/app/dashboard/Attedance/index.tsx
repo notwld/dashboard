@@ -149,6 +149,31 @@ export default function Attendance() {
             setIsOnBreak(false);
         }
     };
+    useEffect(() => {
+       
+        const interval = setInterval(() => {
+         const userId = localStorage.getItem('userId');
+         const token = localStorage.getItem('token');
+         const checkInTime = attendance.find(
+              (entry) => entry.date.split("T")[0] === today && entry.checkIn
+            );
+            console.log(checkInTime);
+            const response = fetch(baseurl + "/attendance/periodic-update", {
+                method: 'POST',
+                headers: {
+                    "x-access-token": `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    userId,
+                    workedHours,
+                    attendanceId: checkInTime.id,
+                }),
+            });
+            fetchAttendance();
+        }, 60000); 
+        return () => clearInterval(interval);
+      }, []); 
 
     const formatTime = (hours) => {
         const h = Math.floor(hours);
