@@ -57,7 +57,7 @@ const AttendanceCard = ({ attendanceData = [] }) => {
                                     <span className="font-semibold">
                                       [
                                         {format(new Date(record.date), "dd/MMM/yyyy")}
-                                      ]  {record?.username} Checked In at {checkInTime} and {checkOutTime!=null?`Checked Out at ${checkOutTime}`:"has not Checked Out yet"}
+                                      ]  {record?.username} checked in at {checkInTime} and {checkOutTime!=null?`Checked Out at ${checkOutTime}`:`has not checked out yet, worked for ${record?.totalHours?.toFixed(1)} hours.`}
                                     </span>
                                 </div>
                             ) : null;

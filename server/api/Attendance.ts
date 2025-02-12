@@ -110,6 +110,9 @@ router.post('/all-attendance', authorize, async (req: any, res: any) => {
 router.get("/all/hr", authorize, async (req: any, res: any) => {
   try {
     const attendanceRecords = await prisma.attendance.findMany({
+      orderBy: {
+        date: 'desc',
+      },
       include: {
         user: true,
       },
@@ -126,6 +129,7 @@ router.get("/all/hr", authorize, async (req: any, res: any) => {
       leaveStatus: record.leaveStatus,
       leaveReason: record.leaveReason,
       leaveType: record.leaveType,
+      totalHours: record.totalHours,
     }));
     res.json({ formattedData });
   } catch (error) {

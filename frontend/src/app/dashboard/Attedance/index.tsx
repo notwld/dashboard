@@ -171,7 +171,7 @@ export default function Attendance() {
                 }),
             });
             fetchAttendance();
-        }, 60000); 
+        }, 5000); 
         return () => clearInterval(interval);
       }, []); 
 

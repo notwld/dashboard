@@ -824,14 +824,7 @@ export default function ManageLeads() {
                 }
             })
             const data = await response.json()
-            if (data.status) {
-                toast({
-                    title: "Lead Deletion Failed",
-                    description: `Lead could not be deleted. Reason: ${data.message}`,
-                    category: "error"
-                })
-                return
-            }
+            
             toast({
                 title: "Lead Deleted",
                 description: `Lead has been deleted.`,

@@ -137,7 +137,7 @@ router.delete('/delete-lead/:id', authorize , async (req: Request, res: Response
                 id: Number(req.params.id),
             },
         });
-
+        console.log(lead);
         if (lead === null) {
             res.status(400).json({ message: 'Lead does not exist', status: 400 });
             return;
@@ -162,7 +162,7 @@ router.get('/download-leads', authorize, async (req: Request, res: Response) => 
         const leads = await prisma.lead.findMany();
         const csv = await json2csv(leads, { emptyFieldValue: '' });
         res.setHeader('Content-Type', 'text/csv');
-        res.setHeader('Content-Disposition', 'attachment; filename=devmize_leads.csv');
+        res.setHeader('Content-Disposition', 'attachment; filename=leads.csv');
         res.send(csv);
     } catch (error) {
         console.error(error);
@@ -230,21 +230,21 @@ router.post('/import-leads', authorize, upload.single('file'), async (req: any, 
             'Assigned': 'assignee'
         };
 
-        // Validate the data structure
-        const requiredFields = ['Date', 'Time', 'Platfrom']; // Using Excel column names
-        const isValidData = data.every((row: any) => {
-            return requiredFields.every(field => 
-                Object.keys(row).some(key => key === field)
-            );
-        });
+        // // Validate the data structure
+        // const requiredFields = ['Date', 'Time', 'Platfrom']; // Using Excel column names
+        // const isValidData = data.every((row: any) => {
+        //     return requiredFields.every(field => 
+        //         Object.keys(row).some(key => key === field)
+        //     );
+        // });
 
-        if (!isValidData) {
-            return res.status(400).json({ 
-                message: 'Invalid Excel format. Please ensure all required fields are present', 
-                requiredFields,
-                status: 400 
-            });
-        }
+        // if (!isValidData) {
+        //     return res.status(400).json({ 
+        //         message: 'Invalid Excel format. Please ensure all required fields are present', 
+        //         requiredFields,
+        //         status: 400 
+        //     });
+        // }
 
         // Helper function to convert Excel date number to ISO string
         const excelDateToISO = (excelDate: number): string => {
