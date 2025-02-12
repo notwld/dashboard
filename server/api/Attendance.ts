@@ -224,6 +224,9 @@ router.post("/user-summary", async (req:any, res:any) => {
 
     // Fetch all attendance records for the user
     const attendanceRecords = await prisma.attendance.findMany({
+      orderBy:{
+        date: 'desc',
+      },
       where: { userId:parseInt(userId) },
       select: { checkIn: true, isLate: true, isOnLeave: true },
     });
@@ -282,6 +285,9 @@ router.get("/summary", async (req, res) => {
 
     // Get today's attendance records
     const attendanceRecords = await prisma.attendance.findMany({
+      orderBy: {
+        date: 'desc',
+      },
       where: {
         date: {
           gte: today,
