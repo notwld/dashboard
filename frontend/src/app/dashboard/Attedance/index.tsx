@@ -149,6 +149,16 @@ export default function Attendance() {
             setIsOnBreak(false);
         }
     };
+    useEffect(()=>{
+        // auto fetch check in time of today and set it to checkInTime
+        attendance.map((entry) => {
+            if (entry.date.split("T")[0] === today && entry.checkIn) {
+                setCheckInTime(new Date(entry.checkIn));
+            }
+        }
+        )
+
+    },[])
     useEffect(() => {
        
         const interval = setInterval(() => {
