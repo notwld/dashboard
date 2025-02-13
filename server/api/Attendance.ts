@@ -26,18 +26,24 @@ router.post('/check-in', authorize, async (req: any, res: any) => {
 });
 
 router.post('/periodic-update', authorize, async (req: any, res: any) => {
-  const { userId, workedHours,attendanceId } = req.body;
+  const { userId, attendanceId } = req.body;
+  const currentAttendance = await prisma.attendance.findFirst({
+    where: {
+      id: parseInt(attendanceId),
+      userId: parseInt(userId),
+    },
+  });
+  const workedHours = (new Date().getTime() - new Date(currentAttendance?.checkIn || 0).getTime()) / (1000 * 60 * 60);
   try {
     await prisma.attendance.update({
       where: {
-        id: parseInt(attendanceId),
-        userId: parseInt(userId)
+        id: currentAttendance?.id || 0,
       },
       data: {
-        totalHours: workedHours
-      }
+        totalHours: workedHours || 0,
+      },
     });
-    return res.status(200).send({ message: 'Check-in successful' });
+    return res.status(200).send({ message: 'Periodic update successful' });
   }
   catch (err) {
     res.status(500).send({ message: 'Internal Server Error' });
@@ -172,7 +178,7 @@ router.post("/update-leave", authorize, async (req: any, res: any) => {
         leaveStatus: status
       }
     });
-    if(status === 'APPROVED') {
+    if (status === 'APPROVED') {
       await prisma.user.update({
         where: {
           id: updated?.userId
@@ -214,7 +220,7 @@ const getToday = () => {
   today.setHours(0, 0, 0, 0);
   return today;
 };
-router.post("/user-summary", async (req:any, res:any) => {
+router.post("/user-summary", async (req: any, res: any) => {
   try {
     const { userId } = req.body;
 
@@ -224,10 +230,10 @@ router.post("/user-summary", async (req:any, res:any) => {
 
     // Fetch all attendance records for the user
     const attendanceRecords = await prisma.attendance.findMany({
-      orderBy:{
+      orderBy: {
         date: 'desc',
       },
-      where: { userId:parseInt(userId) },
+      where: { userId: parseInt(userId) },
       select: { checkIn: true, isLate: true, isOnLeave: true },
     });
 
@@ -333,45 +339,45 @@ router.get("/summary", async (req, res) => {
 
 router.get("/all-absent-users", authorize, async (req: Request, res: Response) => {
   try {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const presentUsers = await prisma.attendance.findMany({
-          where: {
-              date: {
-                gte: today,
-                lte: new Date(),
-              },
-              isPresent: true,
-              isOnLeave: false,
-          },
-          select: {
-              userId: true,
-          },
-      });
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const presentUsers = await prisma.attendance.findMany({
+      where: {
+        date: {
+          gte: today,
+          lte: new Date(),
+        },
+        isPresent: true,
+        isOnLeave: false,
+      },
+      select: {
+        userId: true,
+      },
+    });
 
-      const presentUserIds = presentUsers.map((user) => user.userId);
-      console.log(presentUserIds);
-      const absentUsers = await prisma.user.findMany({
-          where: {
-              NOT: {
-                  id: {
-                      in: presentUserIds,
-                  },
-              },
+    const presentUserIds = presentUsers.map((user) => user.userId);
+    console.log(presentUserIds);
+    const absentUsers = await prisma.user.findMany({
+      where: {
+        NOT: {
+          id: {
+            in: presentUserIds,
           },
-          select: {
-              id: true,
-              name: true,
-              email: true,
-              department: true,
-          },
-      });
-      console.log(absentUsers);
-      res.json(absentUsers);
+        },
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        department: true,
+      },
+    });
+    console.log(absentUsers);
+    res.json(absentUsers);
 
   } catch (error) {
-      console.error("Error fetching absent users:", error);
-      res.status(500).json({ message: "Internal server error", status: 500 });
+    console.error("Error fetching absent users:", error);
+    res.status(500).json({ message: "Internal server error", status: 500 });
   }
 });
 const getTopEmployeesByAttendance = async (month: number, year: number, topN: number = 3) => {

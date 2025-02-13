@@ -32,13 +32,9 @@ export function VersionSwitcher({
           className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
         >
           <Link to={"/"} className="flex gap-2 items-center justify-center">
-            <div className="flex aspect-square size-16 items-center justify-center rounded-lg text-sidebar-primary-foreground">
-
-              <img src={logo} alt="logo" className="w-16 h-8 object-contain" />
-            </div>
+            
             <div className="flex flex-col gap-0.5 leading-none">
-              {/* <span className="">v{selectedVersion}</span> */}
-              <span className="font-semibold text-xl ">designtech360</span>
+              <span className="font-semibold text-xl ">dashboard*</span>
             </div>
           </Link>
           {/* <ChevronsUpDown className="ml-auto" /> */}

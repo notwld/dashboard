@@ -99,14 +99,21 @@ export default function Attendance() {
         }).then((res) => res.json())
             .then((data) => {
                 setAttendance(data);
+                const todays = data.find((entry) => entry.date.split("T")[0] === today);
+                if (todays) {
+                    setCheckInTime(new Date(todays.date));
+                }
+                
                 console.log(data);
             })
             .catch((err) => console.log(err));
     }
     useEffect(() => {
-        fetchAttendance();
-    }
-        , []);
+        const fetchData = async () => {
+            await fetchAttendance();
+        };
+        fetchData();
+    }, []);
     const handleLeaveRequest = async () => {
         await fetch(baseurl + "/attendance/apply-leave", {
             method: 'POST',
@@ -149,41 +156,45 @@ export default function Attendance() {
             setIsOnBreak(false);
         }
     };
-    useEffect(()=>{
-        // auto fetch check in time of today and set it to checkInTime
-        attendance.map((entry) => {
-            if (entry.date.split("T")[0] === today && entry.checkIn) {
-                setCheckInTime(new Date(entry.checkIn));
-            }
-        }
-        )
-
-    },[])
     useEffect(() => {
-       
-        const interval = setInterval(() => {
-         const userId = localStorage.getItem('userId');
-         const token = localStorage.getItem('token');
-         const checkInTime = attendance.find(
-              (entry) => entry.date.split("T")[0] === today && entry.checkIn
+        if (!attendance.length) return; // Ensure attendance is available
+    
+        const interval = setInterval(async () => {
+            const userId = localStorage.getItem("userId");
+            const token = localStorage.getItem("token");
+            const checkInEntry = attendance.find(
+                (entry) => entry.date.split("T")[0] === today && entry.checkIn
             );
-            console.log(checkInTime);
-            const response = fetch(baseurl + "/attendance/periodic-update", {
-                method: 'POST',
-                headers: {
-                    "x-access-token": `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    userId,
-                    workedHours,
-                    attendanceId: checkInTime.id,
-                }),
-            });
-            fetchAttendance();
-        }, 5000); 
+    
+            if (!checkInEntry) {
+                console.warn("No check-in data found, skipping periodic update.");
+                return;
+            }
+    
+            try {
+                const response = await fetch(baseurl + "/attendance/periodic-update", {
+                    method: "POST",
+                    headers: {
+                        "x-access-token": `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        userId,
+                        attendanceId: checkInEntry.id,
+                        checkInTime: checkInEntry.checkIn,
+                    }),
+                });
+    
+                const data = await response.json();
+                console.log("Periodic update:", data);
+                fetchAttendance(); // Refresh after update
+            } catch (error) {
+                console.error("Error in periodic update:", error);
+            }
+        }, 5000);
+    
         return () => clearInterval(interval);
-      }, []); 
+    }, [attendance]); // <-- Ensure this runs when `attendance` updates 
 
     const formatTime = (hours) => {
         const h = Math.floor(hours);
@@ -191,18 +202,7 @@ export default function Attendance() {
         return `${h}h ${m}m`;
     };
 
-    const remainingHours = workingHoursPerDay - workedHours;
-    const todayAttendance = attendance.find(
-        (entry) => entry.date.split("T")[0] === today && entry.checkIn
-    );
-
-    useEffect(() => {
-        if (todayAttendance) {
-            setCheckInTime(new Date(todayAttendance.checkIn));
-        } else {
-            setCheckInTime(null);
-        }
-    }, [attendance]);
+    
 
     // Calculate worked hours
     useEffect(() => {
@@ -424,7 +424,6 @@ export default function Attendance() {
                                         checkInTime={checkInTime}
                                         isOnBreak={isOnBreak}
                                         breakHistory={breakHistory}
-                                        checked={!!todayAttendance}
                                         onCheckedChange={handleAttendanceToggle}
                                     />
                                 </div>
@@ -432,7 +431,7 @@ export default function Attendance() {
                         </CardContent>
                         <CardFooter className="flex-col gap-2 text-sm">
                             <Button className="w-full" variant="secondary" onClick={handleAttendanceToggle}>
-                                {todayAttendance ? "Check Out" : "Check In"}
+                                {checkInTime ? "Check Out" : "Check In"}
                             </Button>
                         </CardFooter>
                     </Card>

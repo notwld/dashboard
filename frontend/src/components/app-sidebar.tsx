@@ -14,7 +14,6 @@ import {
 } from "../components/ui/Sidebar/sidebar"
 import { Link } from "react-router-dom"
 
-// This is sample data.
 const data = {
   versions: [],
   navMain: [
@@ -30,7 +29,7 @@ const data = {
           title: "Attendance",
           url: "/attendance",
         },
-        
+
       ],
     },
     {
@@ -45,7 +44,7 @@ const data = {
           title: "HR Management",
           url: "/hr",
         },
-        
+
       ],
     },
     {
@@ -74,14 +73,14 @@ const data = {
           title: "Manage Leads",
           url: "/leads",
         },
-       
+
       ],
     },
     {
       title: "Payment Link",
       url: "#",
       items: [
-        
+
         {
           title: "Manage Payments",
           url: "/leads",
@@ -92,9 +91,9 @@ const data = {
         },
       ],
     },
-    
-    
-   
+
+
+
   ],
 }
 
@@ -119,7 +118,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <SidebarMenuItem key={item.title} className="text-xl">
                     <SidebarMenuButton asChild>
                       <Link to={item.url}><span className="text-lg">
-                      {item.title}</span></Link>
+                        {item.title}</span></Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}
