@@ -49,11 +49,38 @@ const formSchema = z.object({
 
 export default function CreatePaymentLink() {
     const [permissions, setPermissions] = useState({
-        create: true,
-        read: true,
-        update: true,
-        delete: true
+        create:false
     })
+    const checkPermissions = async () => {
+                        const res = await fetch(baseurl + `/user/get-user`, {
+                            method: 'GET',
+                            headers: {
+                                "x-access-token": `Bearer ${localStorage.getItem('token')}`,
+                                'Content-Type': 'application/json',
+                            }
+                            
+                        })
+                        let permissionObj = await res.json();
+                        permissionObj = permissionObj.role.permissions;
+                        console.log(permissionObj)
+                        if (permissionObj) {
+                            const permissionArray = ["Create Payment Link"];
+                            const updatedPermissions = { ...permissions }; // Create a copy of the initial permissions
+                
+                            permissionObj.forEach((permission) => {
+                                const permissionKey = permission.name.split(" ")[0].toLowerCase();
+                                if (permissionArray.includes(permission.name)) {
+                                    updatedPermissions[permissionKey] = true;
+                                }
+                            });
+                
+                            setPermissions(updatedPermissions); // Set the state once with the updated permissions
+                        }
+                        console.log(permissions)
+                    }
+                    React.useEffect(() => {
+                        checkPermissions()
+                    }, [])
     const [paymentLink, setPaymentLink] = useState("")
     const navigate = useNavigate()
     const form = useForm<z.infer<typeof formSchema>>({
@@ -189,7 +216,7 @@ export default function CreatePaymentLink() {
                 </Breadcrumb>
 
             </header>
-            <div className="flex items-center justify-center h-full text-lg">
+{permissions.create?            <div className="flex items-center justify-center h-full text-lg">
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                         <div className="grid grid-cols-2 gap-4">
@@ -392,7 +419,9 @@ export default function CreatePaymentLink() {
                             }
                     </form>
                 </Form>
-            </div>
+            </div> : <div className="flex items-center justify-center h-[80vh] text-lg">
+                <h1>You do not have permission to create a payment link.</h1>
+            </div>}
         </div>
     )
 }

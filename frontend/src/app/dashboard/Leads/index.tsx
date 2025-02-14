@@ -573,6 +573,7 @@ export default function ManageLeads() {
         read: false,
         edit: false,
         delete: false,
+        import: false,
         donwload: false
     });
     const checkPermissions = async () => {
@@ -588,7 +589,7 @@ export default function ManageLeads() {
         permissionObj = permissionObj.role.permissions;
         console.log(permissionObj)
         if (permissionObj) {
-            const permissionArray = ["Create Leads", "Read Leads", "Edit Leads", "Delete Leads", "Download Leads"];
+            const permissionArray = ["Create Leads", "Read Leads", "Edit Leads", "Delete Leads", "Download Leads", "Import Leads"];
             const updatedPermissions = { ...permissions }; // Create a copy of the initial permissions
 
             permissionObj.forEach((permission) => {
@@ -961,11 +962,11 @@ export default function ManageLeads() {
                                                     navigate('/create-lead')
                                                 }}
                                             >Create a Lead</Button>}
-                                            <Button className="ml-4 rounded-xl"
+                                            {permissions.import && <Button className="ml-4 rounded-xl"
                                                 onClick={() => {
                                                     setFileModal(true)
                                                 }}
-                                            >Import Leads</Button>
+                                            >Import Leads</Button>}
 
                                     </div>
                                 </BreadcrumbPage>
