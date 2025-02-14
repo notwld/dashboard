@@ -574,7 +574,8 @@ export default function ManageLeads() {
         edit: false,
         delete: false,
         import: false,
-        donwload: false
+        donwload: false,
+        view: false
     });
     const checkPermissions = async () => {
         const res = await fetch(baseurl + `/user/get-user`, {
@@ -589,7 +590,7 @@ export default function ManageLeads() {
         permissionObj = permissionObj.role.permissions;
         console.log(permissionObj)
         if (permissionObj) {
-            const permissionArray = ["Create Leads", "Read Leads", "Edit Leads", "Delete Leads", "Download Leads", "Import Leads"];
+            const permissionArray = ["Create Leads", "Read Leads", "Edit Leads","View Leads", "Delete Leads", "Download Leads", "Import Leads"];
             const updatedPermissions = { ...permissions }; // Create a copy of the initial permissions
 
             permissionObj.forEach((permission) => {
@@ -975,7 +976,7 @@ export default function ManageLeads() {
                     </BreadcrumbList>
                 </Breadcrumb>
             </header>
-            <div className="flex flex-1 flex-col gap-4 p-4">
+            {permissions.view ? <div className="flex flex-1 flex-col gap-4 p-4">
 
                 <div className="min-h-[100vh] flex-1 rounded-xl md:min-h-min" >
                     <div className="flex mb-4">
@@ -1109,7 +1110,11 @@ export default function ManageLeads() {
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> : <div className="flex flex-1 justify-center items-center h-full">
+                <div className="flex flex-col gap-4 items-center">
+                    <h1 className="text-2xl">You do not have permission to view this page.</h1>
+                </div>
+            </div>}
         </div>
     )
 }

@@ -54,6 +54,39 @@ export default function Home() {
     const [user, setUser] = useState(localStorage.getItem('user'))
     const [leads, setLeads] = useState([])
     const [loading, setLoading] = useState(false)
+    const [permissions, setPermissions] = useState({
+            view:false
+        })
+        const checkPermissions = async () => {
+                            const res = await fetch(baseurl + `/user/get-user`, {
+                                method: 'GET',
+                                headers: {
+                                    "x-access-token": `Bearer ${localStorage.getItem('token')}`,
+                                    'Content-Type': 'application/json',
+                                }
+                                
+                            })
+                            let permissionObj = await res.json();
+                            permissionObj = permissionObj.role.permissions;
+                            console.log(permissionObj)
+                            if (permissionObj) {
+                                const permissionArray = ["View Dashboard"];
+                                const updatedPermissions = { ...permissions }; // Create a copy of the initial permissions
+                    
+                                permissionObj.forEach((permission) => {
+                                    const permissionKey = permission.name.split(" ")[0].toLowerCase();
+                                    if (permissionArray.includes(permission.name)) {
+                                        updatedPermissions[permissionKey] = true;
+                                    }
+                                });
+                    
+                                setPermissions(updatedPermissions); // Set the state once with the updated permissions
+                            }
+                            console.log(permissions)
+                        }
+                        useEffect(() => {
+                            checkPermissions()
+                        }, [])
     const togggleDarkMode = () => {
         if (darkMode) {
             document.body.classList.remove("dark")
@@ -136,7 +169,7 @@ export default function Home() {
                     </BreadcrumbList>
                 </Breadcrumb>
             </header>
-            <div className="flex flex-col gap-4 p-4">
+            {permissions.view ? <div className="flex flex-col gap-4 p-4">
                 <div className="flex" >
                     <div className=" rounded-xl" >
                         <SalesChart leads={leads} />
@@ -210,7 +243,9 @@ export default function Home() {
             <div>
                 <Board leads={leads} />
             </div>
-            </div>
+            </div> : <div className='flex justify-center items-center h-[80vh]'>
+                <h1 className='text-3xl'>You do not have permission to view this page</h1>
+            </div>}
         </div>
     )
 }
