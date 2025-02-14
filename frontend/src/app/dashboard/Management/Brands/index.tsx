@@ -27,6 +27,39 @@ export default function Brands() {
         fetchBrands()
     }
         , []);
+        const [permissions, setPermissions] = React.useState({
+                    add: false,
+                });
+                const checkPermissions = async () => {
+                    const res = await fetch(baseurl + `/user/get-user`, {
+                        method: 'GET',
+                        headers: {
+                            "x-access-token": `Bearer ${localStorage.getItem('token')}`,
+                            'Content-Type': 'application/json',
+                        }
+                        
+                    })
+                    let permissionObj = await res.json();
+                    permissionObj = permissionObj.role.permissions;
+                    console.log(permissionObj)
+                    if (permissionObj) {
+                        const permissionArray = ["Add Brands"];
+                        const updatedPermissions = { ...permissions }; // Create a copy of the initial permissions
+            
+                        permissionObj.forEach((permission) => {
+                            const permissionKey = permission.name.split(" ")[0].toLowerCase();
+                            if (permissionArray.includes(permission.name)) {
+                                updatedPermissions[permissionKey] = true;
+                            }
+                        });
+            
+                        setPermissions(updatedPermissions); // Set the state once with the updated permissions
+                    }
+                    console.log(permissions)
+                }
+                React.useEffect(() => {
+                    checkPermissions()
+                }, [])
     return (
         <div>
             <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
@@ -44,11 +77,11 @@ export default function Brands() {
 
                                 </BreadcrumbPage>
                             </BreadcrumbItem>
-                            <div className='flex gap-4'>
+                            {permissions.add&& <div className='flex gap-4'>
                                 <Button onClick={() => navigate('/brands/add')}>
                                     Add Brand
                                 </Button>
-                            </div>
+                            </div>}
 
                         </div>
                     </BreadcrumbList>

@@ -43,7 +43,8 @@ router.post('/periodic-update', authorize, async (req: any, res: any) => {
         totalHours: workedHours || 0,
       },
     });
-    return res.status(200).send({ message: 'Periodic update successful' });
+    console.log(workedHours);
+    return res.status(200).send({ message: `worked: ${workedHours}` });
   }
   catch (err) {
     res.status(500).send({ message: 'Internal Server Error' });

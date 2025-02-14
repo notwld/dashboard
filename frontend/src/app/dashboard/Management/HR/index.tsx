@@ -146,6 +146,39 @@ export default function HR() {
     useEffect(() => {
         fetchPerformance();
     }, [])
+    const [permissions, setPermissions] = React.useState({
+            view: false,
+        });
+        const checkPermissions = async () => {
+            const res = await fetch(baseurl + `/user/get-user`, {
+                method: 'GET',
+                headers: {
+                    "x-access-token": `Bearer ${localStorage.getItem('token')}`,
+                    'Content-Type': 'application/json',
+                }
+                
+            })
+            let permissionObj = await res.json();
+            permissionObj = permissionObj.role.permissions;
+            console.log(permissionObj)
+            if (permissionObj) {
+                const permissionArray = ["View HR Dashboard"];
+                const updatedPermissions = { ...permissions }; // Create a copy of the initial permissions
+    
+                permissionObj.forEach((permission) => {
+                    const permissionKey = permission.name.split(" ")[0].toLowerCase();
+                    if (permissionArray.includes(permission.name)) {
+                        updatedPermissions[permissionKey] = true;
+                    }
+                });
+    
+                setPermissions(updatedPermissions); // Set the state once with the updated permissions
+            }
+            console.log(permissions)
+        }
+        React.useEffect(() => {
+            checkPermissions()
+        }, [])
     return (
         <div>
             <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
@@ -166,7 +199,7 @@ export default function HR() {
                     </BreadcrumbList>
                 </Breadcrumb>
             </header>
-            <div className="grid grid-cols-3 p-4 gap-5">
+           {permissions.view ? <div className="grid grid-cols-3 p-4 gap-5">
                 <Card className='col-span-3'>
                     <CardHeader>
                         <CardTitle>
@@ -347,7 +380,9 @@ export default function HR() {
                     </CardContent>
                 </Card>
 
-            </div>
+            </div> :<div className="flex justify-center items-center h-[80vh]">
+                <h1>You dont have permission to view this page</h1>
+            </div> }
         </div>
     )
 }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { SidebarTrigger } from '../../../components/ui/Sidebar/sidebar'
 import { Separator } from '../../../components/ui/Sidebar/separator'
 import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage } from '../../../components/ui/Sidebar/breadcrumb'
@@ -36,7 +36,11 @@ const formSchema = z.object({
     }),
     service: z.string().min(1, {
         message: "Service is required."
-    })
+    }),
+    brand: z.string().min(1, {
+        message: "Brand is required."
+    }),
+
 
 
 
@@ -88,6 +92,7 @@ export default function CreatePaymentLink() {
                     category: "success"
 
                 })
+                console.log(res)
                 setPaymentLink(res.payment_link)
                 // form.reset()
                 // navigate("/roles")
@@ -121,6 +126,40 @@ export default function CreatePaymentLink() {
         { value: 'hosting', label: 'Hosting' },
         { value: 'ppc', label: 'Pay Per Click' }
     ];
+    const [brand, setBrand] = useState([])
+    useEffect(()=>{
+        const fetchBrands = async()=>{
+            await fetch(baseurl + "/brand/all", {
+                method: "GET",
+                headers: {
+                    "x-access-token": `Bearer ${localStorage.getItem('token')}`,
+                    'Content-Type': 'application/json',
+                },
+            }).then((res) => res.json())
+                .then((res) => {
+                    if (res.status) {
+                        toast({
+                            title: "Brand Fetch Failed",
+                            description: `Brands could not be fetched. Reason: ${res.message}`,
+                            category: "error"
+    
+                        })
+                        return
+                    }
+                    console.log(res)
+                    setBrand(res)
+                }).catch((error) => {
+                    toast({
+                        title: "Brand Fetch Failed",
+                        description: `Brands could not be fetched.`,
+                        category: "error"
+    
+                    })
+                    console.error(error)
+                })
+        }
+        fetchBrands()
+    },[])
     return (
         <div>
             <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
@@ -186,6 +225,7 @@ export default function CreatePaymentLink() {
                                     </FormControl>
                                 )}
                             />
+
                             <FormField
                                 control={form.control}
                                 name="phoneNumber"
@@ -218,6 +258,41 @@ export default function CreatePaymentLink() {
                                     </FormControl>
                                 )}
                             />
+                            <div className='col-span-2'>
+                            <FormField
+                                control={form.control}
+                                name="brand"
+                                render={({ field }) => (
+                                    <FormControl>
+                                        <FormItem>
+                                            <FormLabel>Select Brand</FormLabel>
+                                            <Select
+                                                onValueChange={field.onChange}
+                                                defaultValue={field.value}
+                                            >
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Choose a brand" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {brand?.map((option) => (
+                                                        <SelectItem
+                                                            key={option.id}
+                                                            value={option.id}
+                                                        >
+                                                            {option.name}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                            <FormDescription>
+                                                Select the brand for this payment link.
+                                            </FormDescription>
+                                            <FormMessage />
+                                        </FormItem>
+                                    </FormControl>
+                                )}
+                                />
+                            </div>
                             <div className="col-span-2">
                             <FormField
                                 control={form.control}

@@ -82,10 +82,6 @@ const data = {
       items: [
 
         {
-          title: "Manage Payments",
-          url: "/leads",
-        },
-        {
           title: "Create Link",
           url: "/create-link",
         },

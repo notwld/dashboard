@@ -25,13 +25,16 @@ const items = [
   { name: "Delete Leads", label: "Delete Leads" },
   { name: "Create Permissions", label: "Create Permissions" },
   { name: "Download Leads", label: "Download Leads" },
-
+  { name: "Import Leads", label: "Import Leads" },
+  { name: "View Leads", label: "View Leads" },
+  { name: "View Dashboard", label: "View Dashboard" },
+  { name: "View HR Dashboard", label: "View HR Dashboard" },
+  { name: "Create Payment Link", label: "Create Payment Link" },
+  { name: "Add Brands", label: "Add Brands" },
 ] as const;
 
 const FormSchema = z.object({
-  items: z.array(z.string()).refine((value) => value.length > 0, {
-    message: "You have to select at least one item.",
-  }),
+  items: z.array(z.string())
 });
 
 type Role = {
@@ -207,7 +210,8 @@ const Permissions = () => {
                       <FormLabel className="text-2xl flex">Permissions {loading && <Spinner className="ml-2" />}</FormLabel>
                       <FormDescription>Select permissions for this role.</FormDescription>
 
-                      {items.map((item) => (
+                     <div className="grid grid-cols-4 gap-4">
+                     {items.map((item) => (
                         <FormField key={item.name} control={form.control} name="items" render={() => (
                           <FormItem className="flex items-center space-x-3">
                             <FormControl>
@@ -226,6 +230,7 @@ const Permissions = () => {
                           </FormItem>
                         )} />
                       ))}
+                     </div>
                       <FormMessage />
                     </FormItem>
                   )}
