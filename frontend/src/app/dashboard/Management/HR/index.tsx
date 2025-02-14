@@ -381,7 +381,7 @@ export default function HR() {
                 </Card>
 
             </div> :<div className="flex justify-center items-center h-[80vh]">
-                <h1>You dont have permission to view this page</h1>
+            <h1 className='text-3xl'>You do not have permission to view this page</h1>
             </div> }
         </div>
     )

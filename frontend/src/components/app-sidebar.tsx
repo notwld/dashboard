@@ -37,7 +37,7 @@ const data = {
       url: "#",
       items: [
         {
-          title: "Brands",
+          title: "Brands (WIP)",
           url: "/brands",
         },
         {
@@ -82,7 +82,7 @@ const data = {
       items: [
 
         {
-          title: "Create Link",
+          title: "Create Link  (WIP)",
           url: "/create-link",
         },
       ],

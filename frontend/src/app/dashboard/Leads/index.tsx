@@ -1110,9 +1110,9 @@ export default function ManageLeads() {
                         </div>
                     </div>
                 </div>
-            </div> : <div className="flex flex-1 justify-center items-center h-full">
+            </div> : <div className="flex justify-center items-center h-[80vh]">
                 <div className="flex flex-col gap-4 items-center">
-                    <h1 className="text-2xl">You do not have permission to view this page.</h1>
+                <h1 className='text-3xl'>You do not have permission to view this page</h1>
                 </div>
             </div>}
         </div>

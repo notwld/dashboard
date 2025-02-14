@@ -420,7 +420,7 @@ export default function CreatePaymentLink() {
                     </form>
                 </Form>
             </div> : <div className="flex items-center justify-center h-[80vh] text-lg">
-                <h1>You do not have permission to create a payment link.</h1>
+            <h1 className='text-3xl'>You do not have permission to view this page</h1>
             </div>}
         </div>
     )
