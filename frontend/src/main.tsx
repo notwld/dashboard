@@ -17,6 +17,8 @@ import CreatePaymentLink from './app/dashboard/PaymentLink/create.tsx'
 import Brands from './app/dashboard/Management/Brands/index.tsx'
 import HR from './app/dashboard/Management/HR/index.tsx'
 import AddBrand from './app/dashboard/Management/Brands/add.tsx'
+import { Mail } from './app/dashboard/Email/mail.tsx'
+import MailPage from './app/dashboard/Email/index.tsx'
 
  
 
@@ -84,6 +86,10 @@ const routes = createBrowserRouter([
       {
         path:'/login',
         element:<LoginPage />,
+      },
+      {
+        path:"/email",
+        element:<ProtectedRoute><MailPage /></ProtectedRoute>
       }
     ]
   }

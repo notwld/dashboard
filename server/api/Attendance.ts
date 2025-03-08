@@ -238,11 +238,9 @@ router.post("/user-summary", async (req: any, res: any) => {
       select: { checkIn: true, isLate: true, isOnLeave: true },
     });
 
-    // Define the cutoff time for on-time attendance (6:15 PM)
     const cutoffTime = new Date();
     cutoffTime.setHours(18, 15, 0, 0); // 6:15 PM
 
-    // Calculate on-time count
     let onTimeCount = 0;
     let lateCount = 0;
     let leaveCount = 0;

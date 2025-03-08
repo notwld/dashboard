@@ -29,6 +29,10 @@ const data = {
           title: "Attendance",
           url: "/attendance",
         },
+        {
+          title: "Inbox",
+          url: "/email",
+        },
 
       ],
     },
