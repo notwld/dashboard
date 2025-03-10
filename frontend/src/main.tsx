@@ -19,6 +19,7 @@ import HR from './app/dashboard/Management/HR/index.tsx'
 import AddBrand from './app/dashboard/Management/Brands/add.tsx'
 import { Mail } from './app/dashboard/Email/mail.tsx'
 import MailPage from './app/dashboard/Email/index.tsx'
+import Chat from './app/dashboard/Chat/index.tsx'
 
  
 
@@ -90,6 +91,10 @@ const routes = createBrowserRouter([
       {
         path:"/email",
         element:<ProtectedRoute><MailPage /></ProtectedRoute>
+      },
+      {
+        path:"/chat",
+        element:<ProtectedRoute><Chat /></ProtectedRoute>
       }
     ]
   }

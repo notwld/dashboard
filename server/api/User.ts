@@ -169,5 +169,35 @@ router.get('/get-user/', authorize, async (req: Request, res: Response) => {
 }
 );
 
+// Profile endpoint - returns the current user's profile
+router.get('/profile', authorize, async (req: Request, res: Response) => {
+    try {
+        const user_id = req.session.user_id;
+        const user = await prisma.user.findUnique({
+            where: {
+                id: user_id,
+            },
+            include: {
+                role: {
+                    include: {
+                        permissions: true,
+                    }
+                }
+            },
+        });
+        
+        if (!user) {
+            res.status(404).json({ message: 'User not found', status: 404 });
+            return;
+        }
+
+        // Remove sensitive information
+        const { password, ...userWithoutPassword } = user;
+        res.json(userWithoutPassword);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error', status: 500 });
+    }
+});
 
 export default router;
