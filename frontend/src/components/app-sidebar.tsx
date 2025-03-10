@@ -30,8 +30,12 @@ const data = {
           url: "/attendance",
         },
         {
-          title: "Inbox",
+          title: "Emails",
           url: "/email",
+        },
+        {
+          title: "Chat",
+          url: "/chat",
         },
 
       ],
