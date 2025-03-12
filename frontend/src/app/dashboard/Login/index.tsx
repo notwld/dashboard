@@ -53,6 +53,7 @@ export default function LoginPage() {
                 navigate('/dashboard')
                 window.location.reload()
             } else {
+                console.error(json)
                 toast({
                     title: 'Error',
                     description: json.message,

@@ -237,6 +237,7 @@ const Permissions = () => {
                   )}
                 />
                 {permissions.create && <Button type="submit" className="rounded-xl">Submit</Button>}
+                <Button type="submit" className="rounded-xl">Submit</Button>
               </form>
             </Form>
           </div>

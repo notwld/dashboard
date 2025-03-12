@@ -10,18 +10,34 @@ export interface User {
   avatar?: string;
 }
 
+export interface Attachment {
+  id: string;
+  message_id: string;
+  file_name: string;
+  file_size: number;
+  file_type: string;
+  url: string;
+  created_at: string;
+}
+
 export interface Message {
   id: string;
-  senderId: number;
-  receiverId: number;
+  sender_id: number;
+  receiver_id: number;
+  conversation_id: string;
   content: string;
-  timestamp: Date;
+  created_at: string;
   read: boolean;
+  reply_to?: string;
+  edited: boolean;
+  has_attachment?: boolean;
+  attachments?: Attachment[];
 }
 
 export interface Conversation {
   id: string;
   participants: number[];
-  lastMessage?: Message;
-  updatedAt: Date;
+  created_at: string;
+  updated_at: string;
+  last_message?: Message;
 } 

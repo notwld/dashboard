@@ -9,12 +9,23 @@ import { User, Message, Conversation } from './types';
 import { 
   getOrCreateConversation, 
   sendMessage, 
-  listenToMessages, 
-  listenToConversations, 
-  markMessagesAsRead 
+  subscribeToMessages, 
+  subscribeToConversations, 
+  markMessagesAsRead,
+  editMessage,
+  deleteMessage,
+  sendMessageWithAttachments
 } from './chatService';
-
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '../../../components/ui/Dropdown/dropdown';
+import { MoreHorizontal, Reply, Edit, Trash2, Paperclip, X, Download, FileIcon } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../../components/ui/Modal/dialog';
 import { baseurl } from '../../../config/baseurl';
+import { formatBytes } from '../../../lib/utils';
 
 export default function Chat() {
   const [users, setUsers] = useState<User[]>([]);
@@ -27,6 +38,12 @@ export default function Chat() {
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  const [editingMessage, setEditingMessage] = useState<Message | null>(null);
+  const [replyingTo, setReplyingTo] = useState<Message | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editContent, setEditContent] = useState('');
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Fetch current user and all users
   useEffect(() => {
@@ -95,22 +112,26 @@ export default function Chat() {
   useEffect(() => {
     if (!currentUser) return;
 
-    const unsubscribe = listenToConversations(currentUser.id, (newConversations) => {
+    const channel = subscribeToConversations(currentUser.id, (newConversations) => {
       setConversations(newConversations);
     });
 
-    return () => unsubscribe();
+    return () => {
+      channel.unsubscribe();
+    };
   }, [currentUser]);
 
   // Listen to messages when current conversation is set
   useEffect(() => {
     if (!currentConversation) return;
 
-    const unsubscribe = listenToMessages(currentConversation.id, (newMessages) => {
+    const channel = subscribeToMessages(currentConversation.id, (newMessages) => {
       setMessages(newMessages);
     });
 
-    return () => unsubscribe();
+    return () => {
+      channel.unsubscribe();
+    };
   }, [currentConversation]);
 
   // Mark messages as read when conversation changes
@@ -163,19 +184,79 @@ export default function Chat() {
     }
   };
 
-  // Handle sending a message
-  const handleSendMessage = async () => {
-    if (!newMessage.trim() || !currentUser || !selectedUser || !currentConversation) return;
+  // Handle editing a message
+  const handleEditMessage = async () => {
+    if (!editingMessage || !editContent.trim()) return;
     
     try {
-      await sendMessage(currentConversation.id, {
-        senderId: currentUser.id,
-        receiverId: selectedUser.id,
-        content: newMessage,
-        read: false,
+      await editMessage(editingMessage.id, editContent);
+      setEditingMessage(null);
+      setEditContent('');
+      setEditDialogOpen(false);
+    } catch (error) {
+      console.error('Error editing message:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to edit message',
+        variant: 'destructive',
       });
+    }
+  };
+
+  // Handle deleting a message
+  const handleDeleteMessage = async (message: Message) => {
+    try {
+      await deleteMessage(message.id);
+      toast({
+        title: 'Success',
+        description: 'Message deleted',
+        variant: 'default',
+      });
+    } catch (error) {
+      console.error('Error deleting message:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to delete message',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  // Handle file selection
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    setSelectedFiles(prev => [...prev, ...files]);
+  };
+
+  // Handle file removal
+  const handleFileRemove = (index: number) => {
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  // Handle sending a message
+  const handleSendMessage = async () => {
+    if ((!newMessage.trim() && selectedFiles.length === 0) || !currentUser || !selectedUser || !currentConversation) return;
+    
+    try {
+      if (selectedFiles.length > 0) {
+        await sendMessageWithAttachments(currentConversation.id, {
+          sender_id: currentUser.id,
+          receiver_id: selectedUser.id,
+          content: newMessage,
+          reply_to: replyingTo?.id,
+        }, selectedFiles);
+      } else {
+        await sendMessage(currentConversation.id, {
+          sender_id: currentUser.id,
+          receiver_id: selectedUser.id,
+          content: newMessage,
+          reply_to: replyingTo?.id,
+        });
+      }
       
       setNewMessage('');
+      setReplyingTo(null);
+      setSelectedFiles([]);
     } catch (error) {
       console.error('Error sending message:', error);
       toast({
@@ -236,9 +317,9 @@ export default function Chat() {
                 if (!otherUser) return null;
                 
                 const isSelected = currentConversation?.id === conversation.id;
-                const hasUnread = conversation.lastMessage && 
-                  !conversation.lastMessage.read && 
-                  conversation.lastMessage.receiverId === currentUser?.id;
+                const hasUnread = conversation.last_message && 
+                  !conversation.last_message.read && 
+                  conversation.last_message.receiver_id === currentUser?.id;
                 
                 return (
                   <div
@@ -256,16 +337,16 @@ export default function Chat() {
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-center">
                         <p className="font-medium truncate">{otherUser.name}</p>
-                        {conversation.lastMessage && (
+                        {conversation.last_message && (
                           <span className="text-xs text-muted-foreground">
-                            {formatDate(conversation.updatedAt)}
+                            {formatDate(new Date(conversation.updated_at))}
                           </span>
                         )}
                       </div>
-                      {conversation.lastMessage && (
+                      {conversation.last_message && (
                         <p className={`text-sm truncate ${hasUnread ? 'font-semibold' : 'text-muted-foreground'}`}>
-                          {conversation.lastMessage.senderId === currentUser?.id ? 'You: ' : ''}
-                          {conversation.lastMessage.content}
+                          {conversation.last_message.sender_id === currentUser?.id ? 'You: ' : ''}
+                          {conversation.last_message.content}
                         </p>
                       )}
                     </div>
@@ -306,19 +387,20 @@ export default function Chat() {
               <div className="space-y-4">
                 {messages.length > 0 ? (
                   messages.map((message, index) => {
-                    const isCurrentUser = currentUser && message.senderId === currentUser.id;
-                    const sender = getUserById(message.senderId);
+                    const isCurrentUser = currentUser && message.sender_id === currentUser.id;
+                    const sender = getUserById(message.sender_id);
+                    const replyToMessage = message.reply_to ? messages.find(m => m.id === message.reply_to) : null;
                     
                     const showDateSeparator = index === 0 || 
-                      new Date(messages[index - 1].timestamp).toDateString() !== 
-                      new Date(message.timestamp).toDateString();
+                      new Date(messages[index - 1].created_at).toDateString() !== 
+                      new Date(message.created_at).toDateString();
                     
                     return (
                       <React.Fragment key={message.id}>
                         {showDateSeparator && (
                           <div className="flex justify-center my-4">
                             <div className="bg-muted px-3 py-1 rounded-full text-xs text-muted-foreground">
-                              {formatDate(message.timestamp)}
+                              {formatDate(new Date(message.created_at))}
                             </div>
                           </div>
                         )}
@@ -334,17 +416,101 @@ export default function Chat() {
                             )}
                             
                             <div>
-                              <Card className={`p-3 ${
-                                isCurrentUser 
-                                  ? 'bg-primary text-primary-foreground' 
-                                  : 'bg-muted'
-                              }`}>
-                                <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
-                              </Card>
+                              {replyToMessage && (
+                                <div className="mb-1 text-sm text-muted-foreground">
+                                  <div className="flex items-center gap-1">
+                                    <Reply className="h-3 w-3" />
+                                    <span>Replying to {getUserById(replyToMessage.sender_id)?.name}</span>
+                                  </div>
+                                  <div className="pl-4 border-l-2 border-muted-foreground/30">
+                                    {replyToMessage.content}
+                                  </div>
+                                </div>
+                              )}
+                              
+                              <div className="group relative">
+                                <Card className={`p-3 ${
+                                  isCurrentUser 
+                                    ? 'bg-primary text-primary-foreground' 
+                                    : 'bg-muted'
+                                }`}>
+                                  <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
+                                  {message.edited && (
+                                    <span className="text-xs opacity-70">(edited)</span>
+                                  )}
+                                  
+                                  {/* Attachments */}
+                                  {message.has_attachment && message.attachments && message.attachments.length > 0 && (
+                                    <div className="mt-2 space-y-2">
+                                      {message.attachments.map((attachment) => (
+                                        <div
+                                          key={attachment.id}
+                                          className="flex items-center gap-2 p-2 rounded-md bg-background/10"
+                                        >
+                                          <FileIcon className="h-4 w-4" />
+                                          <div className="flex-1 min-w-0">
+                                            <p className="text-sm font-medium truncate">
+                                              {attachment.file_name}
+                                            </p>
+                                            <p className="text-xs opacity-70">
+                                              {formatBytes(attachment.file_size)}
+                                            </p>
+                                          </div>
+                                          <a
+                                            href={attachment.url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="p-1 hover:bg-background/20 rounded"
+                                            onClick={(e) => e.stopPropagation()}
+                                          >
+                                            <Download className="h-4 w-4" />
+                                          </a>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+                                </Card>
+                                
+                                <div className={`absolute top-0 ${isCurrentUser ? 'left-0 -translate-x-full' : 'right-0 translate-x-full'} opacity-0 group-hover:opacity-100 transition-opacity`}>
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                                        <MoreHorizontal className="h-4 w-4" />
+                                      </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align={isCurrentUser ? "end" : "start"}>
+                                      <DropdownMenuItem onClick={() => setReplyingTo(message)}>
+                                        <Reply className="h-4 w-4 mr-2" />
+                                        Reply
+                                      </DropdownMenuItem>
+                                      {isCurrentUser && (
+                                        <>
+                                          <DropdownMenuItem onClick={() => {
+                                            setEditingMessage(message);
+                                            setEditContent(message.content);
+                                            setEditDialogOpen(true);
+                                          }}>
+                                            <Edit className="h-4 w-4 mr-2" />
+                                            Edit
+                                          </DropdownMenuItem>
+                                          <DropdownMenuItem 
+                                            onClick={() => handleDeleteMessage(message)}
+                                            className="text-destructive"
+                                          >
+                                            <Trash2 className="h-4 w-4 mr-2" />
+                                            Delete
+                                          </DropdownMenuItem>
+                                        </>
+                                      )}
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
+                                </div>
+                              </div>
+                              
                               <div className={`text-xs mt-1 text-muted-foreground ${
                                 isCurrentUser ? 'text-right' : ''
                               }`}>
-                                {formatTime(message.timestamp)}
+                                {formatTime(new Date(message.created_at))}
                                 {isCurrentUser && (
                                   <span className="ml-1">
                                     {message.read ? '• Read' : ''}
@@ -368,22 +534,85 @@ export default function Chat() {
             
             {/* Message input */}
             <div className="p-4 border-t">
+              {replyingTo && (
+                <div className="mb-2 p-2 bg-muted rounded-lg flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Reply className="h-4 w-4" />
+                    <span className="text-sm">
+                      Replying to {getUserById(replyingTo.sender_id)?.name}
+                    </span>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setReplyingTo(null)}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              )}
+              {/* Selected files */}
+              {selectedFiles.length > 0 && (
+                <div className="mb-2 space-y-2">
+                  {selectedFiles.map((file, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center gap-2 p-2 rounded-md bg-muted"
+                    >
+                      <FileIcon className="h-4 w-4" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">{file.name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {formatBytes(file.size)}
+                        </p>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => handleFileRemove(index)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
               <div className="flex space-x-2">
-                <Textarea
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  placeholder="Type a message..."
-                  className="flex-1 min-h-[80px] max-h-[160px]"
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                      e.preventDefault();
-                      handleSendMessage();
-                    }
-                  }}
-                />
+                <div className="flex-1 flex flex-col space-y-2">
+                  <Textarea
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    placeholder="Type a message..."
+                    className="flex-1 min-h-[80px] max-h-[160px]"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        handleSendMessage();
+                      }
+                    }}
+                  />
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      className="hidden"
+                      multiple
+                      onChange={handleFileSelect}
+                    />
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      <Paperclip className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
                 <Button 
                   onClick={handleSendMessage}
-                  disabled={!newMessage.trim()}
+                  disabled={!newMessage.trim() && selectedFiles.length === 0}
                   className="self-end"
                 >
                   Send
@@ -430,6 +659,35 @@ export default function Chat() {
           </div>
         </ScrollArea>
       </div>
+
+      {/* Edit Message Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Message</DialogTitle>
+          </DialogHeader>
+          <Textarea
+            value={editContent}
+            onChange={(e) => setEditContent(e.target.value)}
+            className="min-h-[100px]"
+          />
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setEditDialogOpen(false);
+                setEditingMessage(null);
+                setEditContent('');
+              }}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleEditMessage}>
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

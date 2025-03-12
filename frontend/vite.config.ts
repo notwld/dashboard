@@ -3,7 +3,7 @@ import react from "@vitejs/plugin-react"
 import { defineConfig } from "vite"
 
 export default defineConfig({
-  base: "./",
+  base: "/",
   plugins: [react()],
   resolve: {
     alias: {
@@ -11,8 +11,26 @@ export default defineConfig({
     },
   },
   css: {
+    postcss: './postcss.config.js',
     modules: {
-      localsConvention: 'camelCase'
+      localsConvention: 'camelCase',
+      generateScopedName: '[name]__[local]___[hash:base64:5]'
+    }
+  },
+  server: {
+    port: 3034
+  },
+  optimizeDeps: {
+    include: ['react', 'react-dom']
+  },
+  build: {
+    cssCodeSplit: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor': ['react', 'react-dom']
+        }
+      }
     }
   }
 })
