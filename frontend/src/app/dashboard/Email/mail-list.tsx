@@ -15,10 +15,35 @@ interface MailListProps {
 export function MailList({ items }: MailListProps) {
   const [mail, setMail] = useMail()
 
+  if (mail.loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+      </div>
+    )
+  }
+
+  if (mail.error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen text-red-500 p-4">
+        <p>Error loading emails:</p>
+        <p>{mail.error}</p>
+      </div>
+    )
+  }
+
+  if (!mail.emails.length) {
+    return (
+      <div className="flex items-center justify-center h-screen text-gray-500">
+        No emails found
+      </div>
+    )
+  }
+
   return (
     <ScrollArea className="h-screen">
       <div className="flex flex-col gap-2 p-4 pt-0">
-        {items.map((item) => (
+        {mail.emails.map((item) => (
           <button
             key={item.id}
             className={cn(

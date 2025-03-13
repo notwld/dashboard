@@ -13,7 +13,7 @@ import Payment from './api/Payment';
 import  Attendance  from './api/Attendance';
 import path from 'node:path';
 import Brand from './api/Brand';
-
+import Email from './api/Email';
 declare module 'express-session' {
     export interface SessionData {
         user_id: number,
@@ -57,6 +57,7 @@ app.use('/lead', Lead);
 app.use('/payment', Payment);
 app.use('/attendance', Attendance);
 app.use("/brand", Brand);
+app.use('/email', Email);
 
 
 
