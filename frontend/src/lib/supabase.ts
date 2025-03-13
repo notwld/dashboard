@@ -5,7 +5,6 @@ const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYm
             
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// Types for the messages table
 export type Attachment = {
   id: string;
   message_id: string;
@@ -30,7 +29,6 @@ export type Message = {
   attachments?: Attachment[];
 };
 
-// Types for the conversations table
 export type Conversation = {
   id: string;
   participants: number[];
