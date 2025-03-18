@@ -1,10 +1,7 @@
 import { ComponentProps } from "react"
 import { formatDistanceToNow } from "date-fns"
-
 import { cn } from "../../../lib/utils"
-import { Badge } from "lucide-react"
 import { ScrollArea } from "../../../components/ui/scroll-area"
-import { Separator } from "../../../components/ui/Sidebar/separator"
 import { Mail } from "./data"
 import { useMail } from "./use-mail"
 
@@ -32,7 +29,7 @@ export function MailList({ items }: MailListProps) {
     )
   }
 
-  if (!mail.emails.length) {
+  if (!items.length) {
     return (
       <div className="flex items-center justify-center h-screen text-gray-500">
         No emails found
@@ -43,19 +40,19 @@ export function MailList({ items }: MailListProps) {
   return (
     <ScrollArea className="h-screen">
       <div className="flex flex-col gap-2 p-4 pt-0">
-        {mail.emails.map((item) => (
+        {items.map((item) => (
           <button
             key={item.id}
             className={cn(
               "flex flex-col items-start gap-2 rounded-lg border p-3 text-left text-sm transition-all hover:bg-accent",
               mail.selected === item.id && "bg-muted"
             )}
-            onClick={() =>
+            onClick={() => {
               setMail({
                 ...mail,
                 selected: item.id,
               })
-            }
+            }}
           >
             <div className="flex w-full flex-col gap-1">
               <div className="flex items-center">
@@ -86,9 +83,9 @@ export function MailList({ items }: MailListProps) {
             {item.labels.length ? (
               <div className="flex items-center gap-2">
                 {item.labels.map((label) => (
-                  <Badge key={label} variant={getBadgeVariantFromLabel(label)}>
+                  <div key={label} className="text-xs bg-secondary px-2 py-1 rounded">
                     {label}
-                  </Badge>
+                  </div>
                 ))}
               </div>
             ) : null}
@@ -97,18 +94,4 @@ export function MailList({ items }: MailListProps) {
       </div>
     </ScrollArea>
   )
-}
-
-function getBadgeVariantFromLabel(
-  label: string
-): ComponentProps<typeof Badge>["variant"] {
-  if (["work"].includes(label.toLowerCase())) {
-    return "default"
-  }
-
-  if (["personal"].includes(label.toLowerCase())) {
-    return "outline"
-  }
-
-  return "secondary"
 }

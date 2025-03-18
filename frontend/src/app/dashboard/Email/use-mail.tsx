@@ -31,7 +31,7 @@ export function useMail() {
   const fetchEmails = async () => {
     setConfig(prev => ({ ...prev, loading: true, error: null }))
     try {
-      const response = await fetch(`${baseurl}/api/email/messages`, {
+      const response = await fetch(`${baseurl}/email/messages/${localStorage.getItem('userId')}`, {
         headers: {
           "x-access-token": `Bearer ${localStorage.getItem('token')}`,
         }

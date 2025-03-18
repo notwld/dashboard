@@ -5,8 +5,14 @@ import { Label } from "../../../components/ui/Sidebar/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../components/ui/Select/select"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../../components/ui/card"
 import { baseurl } from "../../../config/baseurl"
+import { useToast } from "../../../hooks/use-toaster"
+import { useNavigate } from "react-router-dom"
+import { Loader2 } from "lucide-react"
 
 export default function Settings() {
+  const { toast } = useToast()
+  const navigate = useNavigate()
+  const [loading, setLoading] = React.useState(false)
   const [config, setConfig] = React.useState({
     emailAddress: '',
     password: '',
@@ -22,13 +28,19 @@ export default function Settings() {
     // Fetch existing configuration
     const fetchConfig = async () => {
       try {
+        setLoading(true)
         const token = localStorage.getItem('token');
         if (!token) {
-          console.error('No authentication token found');
+          toast({
+            title: "Authentication Error",
+            description: "Please log in to configure email settings",
+            category: "error"
+          })
+          navigate('/login')
           return;
         }
 
-        const response = await fetch(`${baseurl}/email/config`, {
+        const response = await fetch(`${baseurl}/email/config/${localStorage.getItem('userId')}`, {
           headers: {
             "x-access-token": `Bearer ${token}`,
             'Content-Type': 'application/json',
@@ -46,22 +58,35 @@ export default function Settings() {
         }
       } catch (error) {
         console.error('Error fetching email config:', error);
+        toast({
+          title: "Error",
+          description: error instanceof Error ? error.message : "Failed to fetch email configuration",
+          category: "error"
+        })
+      } finally {
+        setLoading(false)
       }
     };
 
     fetchConfig();
-  }, []);
+  }, [navigate, toast]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     const token = localStorage.getItem('token');
     if (!token) {
-      alert('Please log in to save email configuration');
+      toast({
+        title: "Authentication Error",
+        description: "Please log in to save email configuration",
+        category: "error"
+      })
+      navigate('/login')
       return;
     }
 
     try {
+      setLoading(true)
       const response = await fetch(`${baseurl}/email/config`, {
         method: 'POST',
         headers: {
@@ -80,10 +105,21 @@ export default function Settings() {
         throw new Error(data.error || 'Failed to save configuration');
       }
 
-      alert('Email configuration saved successfully');
+      toast({
+        title: "Success",
+        description: "Email configuration saved successfully",
+        category: "success"
+      })
+      navigate('/email')
     } catch (error) {
       console.error('Error saving email configuration:', error);
-      alert(error instanceof Error ? error.message : 'Failed to save email configuration');
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to save email configuration",
+        category: "error"
+      })
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -92,6 +128,14 @@ export default function Settings() {
       ...prev,
       [field]: value
     }))
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
   }
 
   return (
@@ -111,6 +155,7 @@ export default function Settings() {
                   value={config.emailAddress}
                   onChange={(e) => handleChange('emailAddress', e.target.value)}
                   placeholder="your@email.com"
+                  required
                 />
               </div>
               
@@ -122,6 +167,7 @@ export default function Settings() {
                   value={config.password}
                   onChange={(e) => handleChange('password', e.target.value)}
                   placeholder="••••••••"
+                  required
                 />
               </div>
 
@@ -148,6 +194,7 @@ export default function Settings() {
                   value={config.incomingServer}
                   onChange={(e) => handleChange('incomingServer', e.target.value)}
                   placeholder="imap.example.com"
+                  required
                 />
               </div>
 
@@ -158,6 +205,7 @@ export default function Settings() {
                   value={config.incomingPort}
                   onChange={(e) => handleChange('incomingPort', e.target.value)}
                   placeholder="993"
+                  required
                 />
               </div>
 
@@ -168,6 +216,7 @@ export default function Settings() {
                   value={config.outgoingServer}
                   onChange={(e) => handleChange('outgoingServer', e.target.value)}
                   placeholder="smtp.example.com"
+                  required
                 />
               </div>
 
@@ -178,11 +227,26 @@ export default function Settings() {
                   value={config.outgoingPort}
                   onChange={(e) => handleChange('outgoingPort', e.target.value)}
                   placeholder="587"
+                  required
                 />
               </div>
             </div>
 
-            <Button type="submit" className="mt-4">Save Configuration</Button>
+            <div className="flex gap-4">
+              <Button type="submit" disabled={loading}>
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  'Save Configuration'
+                )}
+              </Button>
+              <Button type="button" variant="outline" onClick={() => navigate('/email')}>
+                Cancel
+              </Button>
+            </div>
           </form>
         </CardContent>
       </Card>

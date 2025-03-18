@@ -182,7 +182,11 @@ export const mails = [
     
   ]
   
-  export type Account = (typeof accounts)[number]
+  export type Account = {
+    label: string
+    email: string
+    icon: React.ReactNode
+  }
   
   export const contacts = [
     {

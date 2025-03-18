@@ -106,11 +106,9 @@ TooltipContent.displayName = TooltipPrimitive.Content.displayName
 export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider }
 
 interface MailProps {
-  accounts: {
-    label: string
-    email: string
-    icon: React.ReactNode
-  }[]
+  emailConfig: {
+    emailAddress: string
+  } | null
   mails: Mail[]
   defaultLayout: number[] | undefined
   defaultCollapsed?: boolean
@@ -118,7 +116,7 @@ interface MailProps {
 }
 
 export function Mail({
-  accounts,
+  emailConfig,
   mails,
   defaultLayout = [20, 32, 48],
   defaultCollapsed = false,
@@ -167,7 +165,7 @@ export function Mail({
               isCollapsed ? "h-[52px]" : "px-2"
             )}
           >
-            <AccountSwitcher isCollapsed={isCollapsed} accounts={accounts} />
+            <AccountSwitcher isCollapsed={isCollapsed} emailConfig={emailConfig} />
           </div>
           <Separator />
           <Nav

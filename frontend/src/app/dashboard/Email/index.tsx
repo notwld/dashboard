@@ -1,26 +1,62 @@
 import { Mail } from "./mail"
-import { accounts } from "./data"
 import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
 import { Button } from "../../../components/ui/button"
+import { baseurl } from "../../../config/baseurl"
 
 export default function MailPage() {
     const layout = localStorage.getItem("react-resizable-panels:layout:mail")
     const collapsed = localStorage.getItem("react-resizable-panels:collapsed")
     const [emailConfig, setEmailConfig] = useState(null)
+    const [emails, setEmails] = useState([])
 
     const defaultLayout = layout ? JSON.parse(layout) : undefined
     const defaultCollapsed = collapsed ? JSON.parse(collapsed) : undefined
 
     useEffect(() => {
         // Fetch email configuration
-        fetch('/api/email/config')
+        fetch(`${baseurl}/email/config/${localStorage.getItem('userId')}`, {
+            headers: {
+                "x-access-token": `Bearer ${localStorage.getItem('token')}`,
+                'Content-Type': 'application/json',
+            }
+        })
             .then(res => res.json())
             .then(config => {
                 setEmailConfig(config)
+                // Fetch emails after getting config
+                if (config) {
+                    return fetch(`${baseurl}/email/messages/${localStorage.getItem('userId')}`, {
+                        headers: {
+                            "x-access-token": `Bearer ${localStorage.getItem('token')}`,
+                            'Content-Type': 'application/json',
+                        }
+                    })
+                }
+            })
+            .then(res => {
+                if (res) {
+                    return res.json()
+                }
+            })
+            .then(data => {
+                if (data) {
+                    // Transform the email data to match our Mail type
+                    const transformedEmails = data.map((email: any) => ({
+                        id: email.messageId || Math.random().toString(),
+                        name: email.from?.text || 'Unknown',
+                        email: email.from?.value?.[0]?.address || 'unknown@email.com',
+                        subject: email.subject || 'No Subject',
+                        text: email.text || email.html || '',
+                        date: email.date || new Date().toISOString(),
+                        read: false,
+                        labels: []
+                    }))
+                    setEmails(transformedEmails)
+                }
             })
             .catch(error => {
-                console.error('Error fetching email config:', error)
+                console.error('Error fetching data:', error)
             })
     }, [])
 
@@ -56,8 +92,8 @@ export default function MailPage() {
                     </div>
                 ) : (
                     <Mail
-                        accounts={accounts}
-                        mails={[]}
+                        emailConfig={emailConfig}
+                        mails={emails}
                         defaultLayout={defaultLayout}
                         defaultCollapsed={defaultCollapsed}
                         navCollapsedSize={4}

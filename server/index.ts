@@ -40,10 +40,7 @@ app.use(express.urlencoded({
     limit: '50mb', 
     extended: true 
 }));
-app.use(cors({
-    origin: true, // Allows all origins
-    credentials: true
-}));
+app.use(cors());
 app.use("/auth", Auth);
 const authorize = require('./middleware/auth');
 app.get('/get-session', authorize, (req: Request, res: Response) => {

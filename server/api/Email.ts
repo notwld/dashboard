@@ -3,6 +3,7 @@ import { PrismaClient } from "@prisma/client";
 import * as nodemailer from 'nodemailer';
 import Imap = require('imap');
 import { simpleParser, ParsedMail } from 'mailparser';
+import * as tls from 'tls';
 
 const authorize = require('../middleware/auth.ts');
 
@@ -16,7 +17,7 @@ interface AuthRequest extends Request {
 }
 
 // Save email configuration
-router.post('/config', authorize, async (req: AuthRequest, res: Response): Promise<void> => {
+router.post('/config',  async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const {
       emailAddress,
@@ -26,18 +27,16 @@ router.post('/config', authorize, async (req: AuthRequest, res: Response): Promi
       incomingPort,
       outgoingServer,
       outgoingPort,
-      useSSL
+      useSSL,
+      userId
     } = req.body;
 
-    if (!req.user?.id) {
-      res.status(401).json({ error: 'Unauthorized' });
-      return;
-    }
+    
 
     // Save to database (encrypted)
     await prisma.emailConfig.upsert({
       where: {
-        userId: req.user.id
+        userId: parseInt(userId)
       },
       update: {
         emailAddress,
@@ -50,7 +49,7 @@ router.post('/config', authorize, async (req: AuthRequest, res: Response): Promi
         useSSL
       },
       create: {
-        userId: req.user.id,
+        userId: parseInt(userId),
         emailAddress,
         password: Buffer.from(password).toString('base64'),
         serverType,
@@ -70,16 +69,13 @@ router.post('/config', authorize, async (req: AuthRequest, res: Response): Promi
 });
 
 // Get email configuration
-router.get('/config', authorize, async (req: AuthRequest, res: Response): Promise<void> => {
+router.get('/config/:userId',  async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    if (!req.user?.id) {
-      res.status(401).json({ error: 'Unauthorized' });
-      return;
-    }
+    const userId = req.params.userId;
 
     const config = await prisma.emailConfig.findUnique({
       where: {
-        userId: req.user.id
+        userId: parseInt(userId)
       }
     });
 
@@ -96,16 +92,13 @@ router.get('/config', authorize, async (req: AuthRequest, res: Response): Promis
 });
 
 // Fetch emails
-router.get('/messages', authorize, async (req: AuthRequest, res: Response): Promise<void> => {
+router.get('/messages/:userId',  async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    if (!req.user?.id) {
-      res.status(401).json({ error: 'Unauthorized' });
-      return;
-    }
+    const userId = req.params.userId;
 
     const config = await prisma.emailConfig.findUnique({
       where: {
-        userId: req.user.id
+        userId: parseInt(userId)
       }
     });
 
@@ -122,7 +115,11 @@ router.get('/messages', authorize, async (req: AuthRequest, res: Response): Prom
         password: password,
         host: config.incomingServer,
         port: parseInt(config.incomingPort),
-        tls: config.useSSL
+        tls: config.useSSL,
+        tlsOptions: {
+          rejectUnauthorized: false, // This allows self-signed certificates and mismatched hostnames
+          checkServerIdentity: () => undefined // Skip certificate hostname validation
+        }
       });
 
       const messages: ParsedMail[] = [];
@@ -178,17 +175,14 @@ router.get('/messages', authorize, async (req: AuthRequest, res: Response): Prom
 });
 
 // Send email
-router.post('/send', authorize, async (req: AuthRequest, res: Response): Promise<void> => {
+router.post('/send/:userId',  async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    if (!req.user?.id) {
-      res.status(401).json({ error: 'Unauthorized' });
-      return;
-    }
+    const userId = req.params.userId;
 
     const { to, subject, text } = req.body;
     const config = await prisma.emailConfig.findUnique({
       where: {
-        userId: req.user.id
+          userId: parseInt(userId)
       }
     });
 
@@ -206,6 +200,10 @@ router.post('/send', authorize, async (req: AuthRequest, res: Response): Promise
       auth: {
         user: config.emailAddress,
         pass: password
+      },
+      tls: {
+        rejectUnauthorized: false, // This allows self-signed certificates and mismatched hostnames
+        checkServerIdentity: () => undefined // Skip certificate hostname validation
       }
     });
 
