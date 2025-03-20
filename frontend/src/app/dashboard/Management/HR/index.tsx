@@ -52,26 +52,27 @@ export default function HR() {
   }, []);
 
   const handleUpdateLeave = async (id, status) => {
-    console.log(id, status);
-    await fetch(baseurl + "/attendance/update-leave", {
-      method: "POST",
-      headers: {
-        "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        id,
-        status,
-      }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
+    try {
+      const response = await fetch(baseurl + "/attendance/update-leave", {
+        method: "POST",
+        headers: {
+          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id,
+          status,
+          userId: parseInt(localStorage.getItem("userId"))
+        }),
+      });
+      const data = await response.json();
+      if (data.message) {
         fetchAttendance();
         fetchUserLeaves();
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+      }
+    } catch (err) {
+      console.error("Error updating leave:", err);
+    }
   };
   const [leaveBalance, setLeaveBalance] = useState([]);
   const fetchUserLeaves = async () => {

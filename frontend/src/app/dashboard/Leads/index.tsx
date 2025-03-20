@@ -115,8 +115,9 @@ const formSchema = z.object({
 });
 
 type User = {
-    id: string
-    name: string
+    id: string;
+    firstName: string;
+    lastName: string;
 }
 
 
@@ -258,7 +259,7 @@ export default function ManageLeads() {
         const findName = (id: string) => {
             const user = users.find((user: User) => user.id === id)
             if (user) {
-                setName(user?.name)
+                setName(user?.firstName + " " + user?.lastName)
             }
         }
         return (
@@ -359,7 +360,7 @@ export default function ManageLeads() {
                                             <SelectGroup>
                                                 {users.map((user: User) => (
                                                     <SelectItem key={user.id} value={user.id}>
-                                                        {user.name}
+                                                        {`${user.firstName} ${user.lastName}`}
                                                     </SelectItem>
                                                 ))}
                                             </SelectGroup>

@@ -25,6 +25,7 @@ dotenv.config();
 
 const app = express();
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 app.use(ExpressSession({
     secret: process.env.SESSION_SECRET || 'secret',
     resave: false,

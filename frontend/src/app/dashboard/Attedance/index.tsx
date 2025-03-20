@@ -13,6 +13,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "../../../components/ui/
 import { CalendarIcon } from "lucide-react";
 import { baseurl } from "../../../config/baseurl";
 import { CheckInOutHistory } from "./recentChecks";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../components/ui/Select/select";
+import { Textarea } from "../../../components/ui/textarea";
 
 const Attendance = () => {
   const [attendance, setAttendance] = useState([]);
@@ -363,11 +365,20 @@ const Attendance = () => {
                         <DialogTitle>Apply For Leave</DialogTitle>
                       </DialogHeader>
                       <Input placeholder="Your Name" disabled defaultValue={localStorage.getItem("user") || "Enter your name"} />
-                      <Input onChange={(e) => setLeaveType(e.target.value)} placeholder="Leave Type" />
+                      <Select onValueChange={setLeaveType}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select Leave Type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="CASUAL">Casual Leave</SelectItem>
+                          <SelectItem value="SICK">Sick Leave</SelectItem>
+                          <SelectItem value="ANNUAL">Annual Leave</SelectItem>
+                        </SelectContent>
+                      </Select>
                       <Popover>
                         <PopoverTrigger asChild>
-                          <Button variant="outline" className="w-[240px] justify-start text-left font-normal">
-                            <CalendarIcon />
+                          <Button variant="outline" className="w-full justify-start text-left font-normal">
+                            <CalendarIcon className="mr-2 h-4 w-4" />
                             {selectedDate ? selectedDate.toLocaleDateString() : "Select Date"}
                           </Button>
                         </PopoverTrigger>
@@ -375,8 +386,8 @@ const Attendance = () => {
                           <Calendar mode="single" selected={selectedDate} onSelect={setSelectedDate} initialFocus />
                         </PopoverContent>
                       </Popover>
-                      <Input placeholder="Reason" onChange={(e) => setReason(e.target.value)} />
-                      <Button onClick={() => handleLeaveRequest()} disabled={!selectedDate} className="w-full">
+                      <Textarea placeholder="Reason for leave" onChange={(e) => setReason(e.target.value)} />
+                      <Button onClick={() => handleLeaveRequest()} disabled={!selectedDate || !leaveType || !reason} className="w-full">
                         Confirm Leave
                       </Button>
                     </DialogContent>

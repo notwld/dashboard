@@ -1,7 +1,7 @@
-import { Request, Response, Router } from "express";
+import express, { Request, Response, Router } from 'express';
 import { PrismaClient } from "@prisma/client";
 
-const router = Router();
+const router: Router = express.Router();
 const prisma = new PrismaClient();
 const authorize = require('../middleware/auth');
 
@@ -265,8 +265,15 @@ router.post('/import-leads', authorize, upload.single('file'), async (req: any, 
             // Find assignee by name if provided
             let assigneeId: number | undefined;
             if (row['Assigned']) {
+                // Split the assigned name into first and last name
+                const [firstName, lastName] = row['Assigned'].split(' ');
                 const assignee = await prisma.user.findFirst({
-                    where: { name: row['Assigned'] }
+                    where: {
+                        AND: [
+                            { firstName },
+                            { lastName: lastName || '' } // Handle cases where only first name is provided
+                        ]
+                    }
                 });
                 assigneeId = assignee?.id;
             }
@@ -290,7 +297,13 @@ router.post('/import-leads', authorize, upload.single('file'), async (req: any, 
                     userId: Number(req.session.user_id)
                 },
                 include: {
-                    assignee: true,
+                    assignee: {
+                        select: {
+                            id: true,
+                            firstName: true,
+                            lastName: true
+                        }
+                    }
                 }
             });
         }));
@@ -313,6 +326,55 @@ router.post('/import-leads', authorize, upload.single('file'), async (req: any, 
             status: 500 
         });
     }
+});
+
+// Search leads
+router.get('/search', (req: Request, res: Response) => {
+    const searchLeads = async () => {
+        try {
+            const { query } = req.query;
+            if (!query) {
+                return res.status(400).json({ error: 'Search query is required' });
+            }
+
+            const searchString = String(query).toLowerCase();
+            const leads = await prisma.lead.findMany({
+                where: {
+                    OR: [
+                        { name: { contains: searchString } },
+                        { email: { contains: searchString } },
+                        { number: { contains: searchString } },
+                        { platform: { contains: searchString } },
+                        { service: { contains: searchString } },
+                        { status: { contains: searchString } },
+                        {
+                            assignee: {
+                                OR: [
+                                    { firstName: { contains: searchString } },
+                                    { lastName: { contains: searchString } }
+                                ]
+                            }
+                        }
+                    ]
+                },
+                include: {
+                    assignee: {
+                        select: {
+                            id: true,
+                            firstName: true,
+                            lastName: true
+                        }
+                    }
+                }
+            });
+
+            res.json(leads);
+        } catch (error) {
+            console.error('Error searching leads:', error);
+            res.status(500).json({ error: 'Failed to search leads' });
+        }
+    };
+    searchLeads();
 });
 
 export default router;

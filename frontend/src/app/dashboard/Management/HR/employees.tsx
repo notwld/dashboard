@@ -1,4 +1,3 @@
-
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../../../../components/ui/Alert/alert'
 import { useState, useEffect } from "react"
 import * as React from "react"
@@ -66,7 +65,8 @@ type Role = {
 
 type User = {
     id: number;
-    name: string;
+    firstName: string;
+    lastName: string;
     email: string;
     department: string;
     role: {
@@ -153,7 +153,11 @@ export default function EmployeesTable() {
                     </Button>
                 )
             },
-            cell: ({ row }) => <div className="lowercase text-lg">{row.getValue("name")}</div>,
+            cell: ({ row }) => {
+                const firstName = row.getValue("firstName") as string;
+                const lastName = row.getValue("lastName") as string;
+                return <div className="lowercase text-lg">{`${firstName} ${lastName}`}</div>;
+            },
         },
         {
             accessorKey: "email",
@@ -348,7 +352,7 @@ export default function EmployeesTable() {
         const form = useForm<z.infer<typeof formSchema>>({
             resolver: zodResolver(formSchema),
             defaultValues: {
-                username: user?.name,
+                username: user?.firstName,
                 email: user?.email,
                 password: "",
                 department: user?.department,

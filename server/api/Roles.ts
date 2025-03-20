@@ -5,7 +5,7 @@ const router = Router();
 const prisma = new PrismaClient();
 const authorize = require('../middleware/auth');
 
-router.get('/get-roles', authorize, async (req: Request, res: Response) => {
+router.get('/get-roles', async (req: Request, res: Response) => {
     try {
         const roles = await prisma.role.findMany({
             include: {
@@ -21,7 +21,7 @@ router.get('/get-roles', authorize, async (req: Request, res: Response) => {
 }
 );
 
-router.post('/create-role', authorize, async (req: Request, res: Response) => {
+router.post('/create-role', async (req: Request, res: Response) => {
     try {
         const role = await prisma.role.findFirst({
             where: {

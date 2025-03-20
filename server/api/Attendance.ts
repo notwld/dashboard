@@ -121,13 +121,20 @@ router.get("/all/hr", authorize, async (req: any, res: any) => {
         date: 'desc',
       },
       include: {
-        user: true,
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true
+          }
+        }
       },
     });
 
     const formattedData = attendanceRecords.map((record) => ({
       id: record.id,
-      username: record.user.name,
+      username: `${record.user.firstName} ${record.user.lastName}`,
       checkInTime: record.checkIn,
       checkOutTime: record.checkOut,
       date: record.date,
@@ -169,34 +176,63 @@ router.post("/apply-leave", authorize, async (req: any, res: any) => {
 });
 
 router.post("/update-leave", authorize, async (req: any, res: any) => {
-  const { id, status } = req.body;
+  const { id, status, userId } = req.body;
   try {
-    const updated = await prisma.attendance.update({
-      where: {
-        id: parseInt(id)
-      },
-      data: {
-        leaveStatus: status
-      }
+    const user = await prisma.user.findUnique({
+      where: { id: parseInt(userId) },
+      select: { role: true }
     });
-    if (status === 'APPROVED') {
-      await prisma.user.update({
-        where: {
-          id: updated?.userId
-        },
-        data: {
-          leaveBalance: {
-            decrement: 1
-          }
-        }
-      });
+
+    const leaveRequest = await prisma.attendance.findUnique({
+      where: { id: parseInt(id) }
+    });
+
+    if (!leaveRequest) {
+      return res.status(404).send({ message: 'Leave request not found' });
     }
-    return res.status(200).send({ message: 'Leave updated successfully' });
-  }
-  catch (err) {
+
+    let newStatus = status;
+    let updateData: any = {};
+
+    if (user?.role?.name === 'MANAGER') {
+      if (status === 'APPROVED') {
+        newStatus = 'MANAGER_APPROVED';
+        updateData.managerId = parseInt(userId);
+      } else if (status === 'REJECTED') {
+        newStatus = 'MANAGER_REJECTED';
+        updateData.managerId = parseInt(userId);
+      }
+    } else if (user?.role?.name === 'HR') {
+      if (status === 'APPROVED' && leaveRequest.leaveStatus === 'MANAGER_APPROVED') {
+        newStatus = 'APPROVED';
+        updateData.hrId = parseInt(userId);
+        // Update leave balance only when HR approves
+        await prisma.user.update({
+          where: { id: leaveRequest.userId },
+          data: {
+            leaveBalance: {
+              decrement: 1
+            }
+          }
+        });
+      } else if (status === 'REJECTED') {
+        newStatus = 'HR_REJECTED';
+        updateData.hrId = parseInt(userId);
+      }
+    }
+
+    updateData.leaveStatus = newStatus;
+    const updated = await prisma.attendance.update({
+      where: { id: parseInt(id) },
+      data: updateData
+    });
+
+    return res.status(200).send({ message: 'Leave updated successfully', status: newStatus });
+  } catch (err) {
+    console.error('Error updating leave:', err);
     res.status(500).send({ message: 'Internal Server Error' });
   }
-})
+});
 
 router.get("/get-users", authorize, async (req: any, res: any) => {
   try {
@@ -204,18 +240,23 @@ router.get("/get-users", authorize, async (req: any, res: any) => {
       {
         select: {
           id: true,
-          name: true,
+          firstName: true,
+          lastName: true,
           leaveBalance: true,
         }
       }
     );
-    return res.status(200).send(users);
+    const formattedUsers = users.map(user => ({
+      id: user.id,
+      name: `${user.firstName} ${user.lastName}`,
+      leaveBalance: user.leaveBalance
+    }));
+    return res.status(200).send(formattedUsers);
   }
   catch (err) {
     res.status(500).send({ message: 'Internal Server Error' });
   }
-}
-)
+})
 const getToday = () => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -366,13 +407,21 @@ router.get("/all-absent-users", authorize, async (req: Request, res: Response) =
       },
       select: {
         id: true,
-        name: true,
+        firstName: true,
+        lastName: true,
         email: true,
         department: true,
       },
     });
-    console.log(absentUsers);
-    res.json(absentUsers);
+    
+    const formattedAbsentUsers = absentUsers.map(user => ({
+      id: user.id,
+      name: `${user.firstName} ${user.lastName}`,
+      email: user.email,
+      department: user.department
+    }));
+    
+    res.json(formattedAbsentUsers);
 
   } catch (error) {
     console.error("Error fetching absent users:", error);
@@ -385,7 +434,10 @@ const getTopEmployeesByAttendance = async (month: number, year: number, topN: nu
   const endDate = new Date(year, month, 0);
 
   const users = await prisma.user.findMany({
-    include: {
+    select: {
+      id: true,
+      firstName: true,
+      lastName: true,
       attendance: {
         where: {
           date: { gte: startDate, lte: endDate }, // Filter only this month's data
@@ -409,7 +461,7 @@ const getTopEmployeesByAttendance = async (month: number, year: number, topN: nu
 
     return {
       id: user.id,
-      name: user.name,
+      name: `${user.firstName} ${user.lastName}`,
       totalDaysPresent,
       totalHoursWorked,
       lateDays,

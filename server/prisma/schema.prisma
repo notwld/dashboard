@@ -11,10 +11,23 @@ datasource db {
 
 model User {
   id            Int             @id @default(autoincrement())
-  name          String
+  employeeCode  String?        @unique
+  firstName     String
+  lastName      String
   email         String          @unique
   password      String
+  phoneNumber   String?
+  profilePic    String?
+  cnicFront     String?
+  cnicBack      String?
+  city          String?
+  country       String?
+  address       String?
+  education     Json?           // Will store education history as JSON
+  experience    Json?           // Will store past experience as JSON
   department    String?
+  status        UserStatus      @default(ACTIVE)
+  salary        Float?
   role          Role?           @relation(fields: [roleId], references: [id])
   roleId        Int?
   lead          Lead[]
@@ -82,6 +95,8 @@ model Attendance {
   leaveReason String?
   leaveType   String?
   leaveStatus LeaveStatus? @default(PENDING)
+  managerId   Int?      // ID of the manager who approved/rejected
+  hrId        Int?      // ID of the HR who approved/rejected
   breaks      Break[]
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -113,6 +128,10 @@ model LeaveRequest {
 
 enum LeaveStatus {
   PENDING
+  MANAGER_APPROVED
+  MANAGER_REJECTED
+  HR_APPROVED
+  HR_REJECTED
   APPROVED
   REJECTED
 }
@@ -141,4 +160,11 @@ model EmailConfig {
   userId         Int      @unique
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  ON_LEAVE
+  TERMINATED
 }

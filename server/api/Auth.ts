@@ -21,7 +21,8 @@ router.post('/login', async (req: Request, res: Response) => {
             select: {
                 id: true,
                 email: true,
-                name: true,
+                firstName: true,
+                lastName: true,
                 password: true,
                 role: {
                     select: {
@@ -47,8 +48,18 @@ router.post('/login', async (req: Request, res: Response) => {
         }
         const token = jwt.sign({ user_id: user.id }, process.env.JWT_SECRET || "JWT_SECRET");
         req.session.token = token;
+        req.session.user_id = user.id;
        
-        res.status(200).json({ token , user });
+        // Create a sanitized user object without password
+        const sanitizedUser = {
+            id: user.id,
+            email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            role: user.role
+        };
+
+        res.status(200).json({ token, user: sanitizedUser });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Internal server error', status: 500 });
